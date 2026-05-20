@@ -14,6 +14,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
   - Compact sidebar.
   - Flexible editor-first center column.
   - Compact preview/info panel.
+- The MVP uses the native Windows/Avalonia window controls. The app top bar must not draw its own minimize, maximize, or close buttons.
+- Custom window chrome can be evaluated in a future design round, but it is intentionally out of scope for now.
 
 ## Current Density Targets
 
@@ -49,5 +51,6 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Prefer dense, legible controls over showcase-sized controls.
 - Keep preview useful but visually secondary; it should not compete with the writing surface.
 - Prefer compact toolbar groups with subtle dividers over large standalone buttons.
+- Keep top bar actions limited to application controls such as repository selection, search, theme, and settings.
 - Centralize reusable colors and control styling in `RepoNotes.App/Styles/AppTheme.axaml`.
 - Keep visual-only mock elements clearly separated from business logic.
