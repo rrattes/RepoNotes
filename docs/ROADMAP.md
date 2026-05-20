@@ -23,8 +23,8 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 2. Repository navigation
    - Load real folders and Markdown files from the configured local repository.
    - Let the user open or switch to a local repository folder and persist the last opened repository in local settings.
-   - Basic file operations started with automatic creation of Markdown notes and folders in the selected repository location.
-   - Add refresh and rename/delete file operations.
+   - Basic file operations started with automatic creation, rename, and trash-based delete for Markdown notes and folders.
+   - Add refresh, restore from trash, and permanent delete flows.
    - Keep mock data available for design/dev mode if useful.
 
 3. Lightweight Technical Entities

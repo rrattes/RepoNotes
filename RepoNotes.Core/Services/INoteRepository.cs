@@ -17,4 +17,8 @@ public interface INoteRepository
     NoteItem CreateNote(string? folderPath, string noteName = "Nova nota");
 
     string CreateFolder(string? parentFolderPath, string folderName = "Nova pasta");
+
+    string RenameItem(string itemPath, string newName);
+
+    string MoveItemToTrash(string itemPath);
 }

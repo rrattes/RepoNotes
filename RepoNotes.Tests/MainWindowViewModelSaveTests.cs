@@ -279,6 +279,28 @@ public sealed class MainWindowViewModelSaveTests
 
             return path;
         }
+
+        public string RenameItem(string itemPath, string newName)
+        {
+            if (string.IsNullOrWhiteSpace(itemPath))
+            {
+                throw new InvalidOperationException("Repository root cannot be renamed.");
+            }
+
+            return itemPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
+                ? $"{newName}.md"
+                : newName;
+        }
+
+        public string MoveItemToTrash(string itemPath)
+        {
+            if (string.IsNullOrWhiteSpace(itemPath))
+            {
+                throw new InvalidOperationException("Repository root cannot be deleted.");
+            }
+
+            return @$".reponotes-trash\{Path.GetFileName(itemPath)}";
+        }
     }
 
     private sealed class TestFolderPickerService(string? selectedPath) : IFolderPickerService

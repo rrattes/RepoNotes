@@ -127,6 +127,28 @@ public sealed class MockNoteRepository : INoteRepository
         return path;
     }
 
+    public string RenameItem(string itemPath, string newName)
+    {
+        if (string.IsNullOrWhiteSpace(itemPath))
+        {
+            throw new InvalidOperationException("Repository root cannot be renamed.");
+        }
+
+        var newPath = Path.Combine(Path.GetDirectoryName(itemPath) ?? string.Empty, newName).TrimStart('\\');
+        return newPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? newPath : $"{newPath}.md";
+    }
+
+    public string MoveItemToTrash(string itemPath)
+    {
+        if (string.IsNullOrWhiteSpace(itemPath))
+        {
+            throw new InvalidOperationException("Repository root cannot be deleted.");
+        }
+
+        _notes.RemoveAll(note => note.Path == itemPath || note.Path.StartsWith(itemPath + "\\", StringComparison.OrdinalIgnoreCase));
+        return @$".reponotes-trash\{Path.GetFileName(itemPath)}";
+    }
+
     private static RepositoryNode Folder(string name, string path, params RepositoryNode[] children) =>
         new()
         {

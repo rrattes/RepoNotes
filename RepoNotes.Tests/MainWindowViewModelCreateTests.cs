@@ -38,6 +38,45 @@ public sealed class MainWindowViewModelCreateTests : IDisposable
         Assert.Contains(viewModel.Nodes, node => node.Path == "Nova pasta");
     }
 
+    [Fact]
+    public void RenameSelectedItemCommandRenamesOpenNoteUsingTitle()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        viewModel.NewNoteCommand.Execute(null);
+        viewModel.Title = "Nota Renomeada";
+
+        viewModel.RenameSelectedItemCommand.Execute(null);
+
+        Assert.Equal("Nota Renomeada.md", viewModel.NotePath);
+        Assert.Equal("Item renomeado: Nota Renomeada.md", viewModel.Status);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nota Renomeada.md")));
+        Assert.False(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota.md")));
+    }
+
+    [Fact]
+    public void DeleteSelectedItemCommandMovesOpenNoteToTrashAndKeepsEditorUsable()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        viewModel.NewNoteCommand.Execute(null);
+
+        viewModel.DeleteSelectedItemCommand.Execute(null);
+
+        Assert.StartsWith("Item movido para a lixeira:", viewModel.Status);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, ".reponotes-trash", "Nova nota.md")));
+        Assert.NotEqual("Nova nota.md", viewModel.NotePath);
+    }
+
+    [Fact]
+    public void DeleteSelectedItemCommandDoesNotDeleteRepositoryRoot()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+
+        viewModel.DeleteSelectedItemCommand.Execute(null);
+
+        Assert.Equal("Raiz do repositorio nao pode ser excluida", viewModel.Status);
+        Assert.False(Directory.Exists(Path.Combine(_tempRepositoryPath, ".reponotes-trash")));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempRepositoryPath))

@@ -76,6 +76,42 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
         Assert.Contains(repository.GetTree(), node => node.Path == "Ops-Runbooks");
     }
 
+    [Fact]
+    public void RenamesMarkdownFileOnDisk()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNotes().First();
+
+        var newPath = repository.RenameItem(note.Path, "Nota:Renomeada");
+
+        Assert.EndsWith("Nota-Renomeada.md", newPath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, newPath)));
+        Assert.DoesNotContain(repository.GetNotes(), candidate => candidate.Path == note.Path);
+        Assert.Contains(repository.GetNotes(), candidate => candidate.Path == newPath);
+    }
+
+    [Fact]
+    public void MovesDeletedNoteToRepositoryTrash()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNotes().First();
+
+        var trashPath = repository.MoveItemToTrash(note.Path);
+
+        Assert.StartsWith(@".reponotes-trash\", trashPath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, trashPath)));
+        Assert.DoesNotContain(repository.GetNotes(), candidate => candidate.Path == note.Path);
+        Assert.DoesNotContain(repository.GetTree(), node => node.Path == ".reponotes-trash");
+    }
+
+    [Fact]
+    public void DoesNotAllowDeletingRepositoryRoot()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+
+        Assert.Throws<InvalidOperationException>(() => repository.MoveItemToTrash(string.Empty));
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempRepositoryPath))

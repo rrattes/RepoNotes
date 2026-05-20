@@ -5,6 +5,8 @@ namespace RepoNotes.Storage;
 
 public sealed class LocalMarkdownNoteRepository : INoteRepository
 {
+    private const string TrashDirectoryName = ".reponotes-trash";
+
     private readonly string _rootPath;
     private readonly List<NoteItem> _notes = [];
     private readonly List<RepositoryNode> _tree = [];
@@ -86,12 +88,96 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         return NormalizePath(Path.GetRelativePath(_rootPath, fullPath));
     }
 
+    public string RenameItem(string itemPath, string newName)
+    {
+        if (string.IsNullOrWhiteSpace(itemPath))
+        {
+            throw new InvalidOperationException("Repository root cannot be renamed.");
+        }
+
+        var fullPath = GetSafeFullPath(itemPath);
+        if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
+        {
+            throw new InvalidOperationException("Selected item does not exist.");
+        }
+
+        if (IsTrashPath(fullPath))
+        {
+            throw new InvalidOperationException("Trash items cannot be renamed from the main tree.");
+        }
+
+        var parentDirectory = Path.GetDirectoryName(fullPath)!;
+        string targetPath;
+
+        if (File.Exists(fullPath))
+        {
+            var safeName = SanitizeFileName(Path.GetFileNameWithoutExtension(newName), "Nota");
+            var fileName = GetUniqueFileName(parentDirectory, safeName, Path.GetExtension(fullPath));
+            targetPath = Path.Combine(parentDirectory, fileName);
+            File.Move(fullPath, targetPath);
+        }
+        else
+        {
+            var safeName = SanitizeFileName(newName, "Pasta");
+            var directoryName = GetUniqueDirectoryName(parentDirectory, safeName);
+            targetPath = Path.Combine(parentDirectory, directoryName);
+            Directory.Move(fullPath, targetPath);
+        }
+
+        Reload();
+        return NormalizePath(Path.GetRelativePath(_rootPath, targetPath));
+    }
+
+    public string MoveItemToTrash(string itemPath)
+    {
+        if (string.IsNullOrWhiteSpace(itemPath))
+        {
+            throw new InvalidOperationException("Repository root cannot be deleted.");
+        }
+
+        var fullPath = GetSafeFullPath(itemPath);
+        if (!File.Exists(fullPath) && !Directory.Exists(fullPath))
+        {
+            throw new InvalidOperationException("Selected item does not exist.");
+        }
+
+        if (IsTrashPath(fullPath))
+        {
+            throw new InvalidOperationException("Trash items cannot be deleted again from the main tree.");
+        }
+
+        var trashDirectory = Path.Combine(_rootPath, TrashDirectoryName);
+        Directory.CreateDirectory(trashDirectory);
+
+        var baseName = Path.GetFileNameWithoutExtension(fullPath);
+        var extension = File.Exists(fullPath) ? Path.GetExtension(fullPath) : string.Empty;
+        var trashedName = extension.Length == 0
+            ? GetUniqueDirectoryName(trashDirectory, Path.GetFileName(fullPath))
+            : GetUniqueFileName(trashDirectory, baseName, extension);
+        var trashPath = Path.Combine(trashDirectory, trashedName);
+
+        if (File.Exists(fullPath))
+        {
+            File.Move(fullPath, trashPath);
+        }
+        else
+        {
+            Directory.Move(fullPath, trashPath);
+        }
+
+        Reload();
+        return NormalizePath(Path.GetRelativePath(_rootPath, trashPath));
+    }
+
     private void Reload()
     {
         _notes.Clear();
         _tree.Clear();
 
-        foreach (var filePath in Directory.EnumerateFiles(_rootPath, "*.md", SearchOption.AllDirectories).OrderBy(path => path))
+        foreach (var filePath in Directory
+            .EnumerateFiles(_rootPath, "*.md", SearchOption.AllDirectories)
+            .Where(path => !IsTrashPath(path))
+            .OrderBy(path => path))
         {
             _notes.Add(CreateNote(filePath));
         }
@@ -125,6 +211,11 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
 
         foreach (var childDirectory in Directory.EnumerateDirectories(directoryPath).OrderBy(path => path))
         {
+            if (IsTrashPath(childDirectory))
+            {
+                continue;
+            }
+
             var nestedChildren = BuildTree(childDirectory);
             children.Add(new RepositoryNode
             {
@@ -161,6 +252,15 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         }
 
         return fullPath;
+    }
+
+    private bool IsTrashPath(string fullPath)
+    {
+        var normalizedPath = Path.GetFullPath(fullPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var trashPath = Path.GetFullPath(Path.Combine(_rootPath, TrashDirectoryName));
+
+        return normalizedPath.Equals(trashPath, StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.StartsWith(trashPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
     }
 
     private string GetSafeDirectoryPath(string? relativePath)

@@ -41,6 +41,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
+        RenameSelectedItemCommand = new RelayCommand(RenameSelectedItem);
+        DeleteSelectedItemCommand = new RelayCommand(DeleteSelectedItem);
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
 
         ReloadRepository(noteRepository, initialStatus);
@@ -71,6 +73,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand OpenRepositoryCommand { get; }
 
     public ICommand OpenSettingsCommand { get; }
+
+    public ICommand RenameSelectedItemCommand { get; }
+
+    public ICommand DeleteSelectedItemCommand { get; }
 
     public ICommand SaveNoteCommand { get; }
 
@@ -251,6 +257,79 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    private void RenameSelectedItem()
+    {
+        if (SelectedNode is null)
+        {
+            Status = "Selecione uma nota ou pasta para renomear";
+            return;
+        }
+
+        if (!TrySaveSelectedNote())
+        {
+            return;
+        }
+
+        try
+        {
+            var wasNote = SelectedNode.IsNote;
+            var newPath = _noteRepository.RenameItem(SelectedNode.Path, GetRenameTargetName(SelectedNode));
+            RefreshTree();
+
+            if (wasNote)
+            {
+                SelectNodeByNoteId(newPath);
+            }
+            else
+            {
+                SelectNodeByPath(newPath);
+            }
+
+            Status = $"Item renomeado: {newPath}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao renomear item";
+        }
+    }
+
+    private void DeleteSelectedItem()
+    {
+        if (SelectedNode is null)
+        {
+            Status = "Raiz do repositorio nao pode ser excluida";
+            return;
+        }
+
+        if (!TrySaveSelectedNote())
+        {
+            return;
+        }
+
+        var deletedPath = SelectedNode.Path;
+
+        try
+        {
+            _noteRepository.MoveItemToTrash(deletedPath);
+            RefreshTree();
+            _selectedNode = null;
+            OnPropertyChanged(nameof(SelectedNode));
+
+            if (SelectedNote is null || IsPathInside(SelectedNote.Path, deletedPath))
+            {
+                SelectedNote = _noteRepository.GetNotes().FirstOrDefault();
+            }
+
+            Status = $"Item movido para a lixeira: {deletedPath}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao excluir item";
+        }
+    }
+
     private async Task OpenRepositoryAsync()
     {
         var selectedPath = await _folderPickerService.PickRepositoryPathAsync();
@@ -342,6 +421,26 @@ public sealed class MainWindowViewModel : ViewModelBase
         var directoryName = Path.GetDirectoryName(SelectedNode.Path);
         return string.IsNullOrWhiteSpace(directoryName) ? null : directoryName;
     }
+
+    private string GetRenameTargetName(RepositoryNodeViewModel node)
+    {
+        var currentName = node.IsNote ? Path.GetFileNameWithoutExtension(node.Name) : node.Name;
+
+        if (node.IsNote
+            && SelectedNote is not null
+            && node.NoteId == SelectedNote.Id
+            && !string.IsNullOrWhiteSpace(Title)
+            && !string.Equals(currentName, Title, StringComparison.OrdinalIgnoreCase))
+        {
+            return Title;
+        }
+
+        return $"{currentName} renomeado";
+    }
+
+    private static bool IsPathInside(string path, string candidateParentPath) =>
+        path.Equals(candidateParentPath, StringComparison.OrdinalIgnoreCase)
+        || path.StartsWith(candidateParentPath + "\\", StringComparison.OrdinalIgnoreCase);
 
     private void SelectNodeByNoteId(string noteId)
     {

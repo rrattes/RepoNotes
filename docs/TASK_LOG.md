@@ -326,3 +326,33 @@
 **Riscos tecnicos:** Medio-baixo; nomes e caminhos sao sanitizados e protegidos contra sobrescrita, mas conflitos externos e permissoes de filesystem ainda podem exigir mensagens de erro mais detalhadas.
 
 **Proximo passo sugerido:** Testar manualmente criar nota/pasta em raiz, dentro de pasta e a partir de uma nota selecionada; depois priorizar renomear/excluir ou um dialogo simples de nome.
+
+## 2026-05-20 20:51:39 -03:00
+
+**Objetivo da rodada:** Implementar renomear e excluir notas/pastas com seguranca, movendo exclusoes para uma lixeira local do repositorio.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Core/Services/INoteRepository.cs`
+- `RepoNotes.Storage/LocalMarkdownNoteRepository.cs`
+- `RepoNotes.Storage/MockNoteRepository.cs`
+- `RepoNotes.Tests/LocalMarkdownNoteRepositoryTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelCreateTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foram adicionados `RenameSelectedItemCommand` e `DeleteSelectedItemCommand`. O storage renomeia arquivos/pastas no disco com nomes sanitizados e sem sobrescrever itens existentes. A exclusao move itens para `.reponotes-trash` dentro do repositorio e a lixeira fica fora da arvore e da lista de notas. O ViewModel salva alteracoes pendentes antes de renomear/excluir, atualiza a arvore e, se a nota aberta for excluida, abre a proxima nota disponivel. A UI ganhou botoes compactos `Ren` e `Del` na toolbar inferior da sidebar com tooltips claros.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-20 20:51 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-20 20:51 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 25 testes aprovados, 0 falhas.
+
+**Pendencias:** Ainda nao ha dialogo de nome para renomear; a acao usa o titulo da nota quando ele foi editado ou um nome automatico com sufixo `renomeado`. Tambem nao ha restaurar da lixeira nem exclusao permanente.
+
+**Riscos tecnicos:** Medio; mover pastas grandes para a lixeira ainda e sincronico, e conflitos externos/permissoes podem exigir feedback mais detalhado. A pasta `.reponotes-trash` precisa continuar excluida de navegacao, busca e preview futuros.
+
+**Proximo passo sugerido:** Implementar um dialogo simples de nome para criacao/renomeacao e, depois, uma visao de lixeira para restaurar itens movidos.
