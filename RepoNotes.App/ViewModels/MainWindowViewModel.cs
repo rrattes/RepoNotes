@@ -12,6 +12,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     private RepositoryNodeViewModel? _selectedNode;
     private string _searchText = string.Empty;
     private string _status = "Salvo";
+    private string _lastErrorMessage = string.Empty;
+    private bool _hasUnsavedChanges;
 
     public MainWindowViewModel(INoteRepository noteRepository)
     {
@@ -82,6 +84,8 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(WordCountText));
             OnPropertyChanged(nameof(UpdatedAtText));
             OnPropertyChanged(nameof(TagsText));
+            _hasUnsavedChanges = false;
+            LastErrorMessage = string.Empty;
             Status = "Salvo";
         }
     }
@@ -143,6 +147,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set => SetProperty(ref _status, value);
     }
 
+    public string LastErrorMessage
+    {
+        get => _lastErrorMessage;
+        private set => SetProperty(ref _lastErrorMessage, value);
+    }
+
     private void MarkNoteChanged()
     {
         if (SelectedNote is not null)
@@ -151,18 +161,33 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
 
         Status = "Alterado";
+        LastErrorMessage = string.Empty;
+        _hasUnsavedChanges = true;
         OnPropertyChanged(nameof(UpdatedAtText));
     }
 
     private void SaveSelectedNote()
     {
-        if (SelectedNote is null)
+        if (SelectedNote is null || !_hasUnsavedChanges)
         {
+            Status = "Salvo";
+            LastErrorMessage = string.Empty;
             return;
         }
 
-        _noteRepository.SaveNote(SelectedNote);
-        Status = "Salvo";
-        OnPropertyChanged(nameof(UpdatedAtText));
+        try
+        {
+            Status = "Salvando...";
+            LastErrorMessage = string.Empty;
+            _noteRepository.SaveNote(SelectedNote);
+            _hasUnsavedChanges = false;
+            Status = "Salvo";
+            OnPropertyChanged(nameof(UpdatedAtText));
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao salvar";
+        }
     }
 }

@@ -15,6 +15,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 
 1. File-backed notes
    - Basic read/write Markdown files from a local sample repository is started.
+   - Save feedback now distinguishes saved, changed, saving, and save error states.
    - Preserve folder structure in the loaded tree.
    - Keep changes explicit and recoverable.
 

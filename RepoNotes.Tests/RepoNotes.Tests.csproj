@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\RepoNotes.App\RepoNotes.App.csproj" />
     <ProjectReference Include="..\RepoNotes.Core\RepoNotes.Core.csproj" />
     <ProjectReference Include="..\RepoNotes.Storage\RepoNotes.Storage.csproj" />
   </ItemGroup>

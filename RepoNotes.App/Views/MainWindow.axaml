@@ -296,6 +296,13 @@
               <Button Classes="icon" Content="Img" FontSize="10" Width="32" Height="26" />
               <Button Classes="icon" Content="Tbl" FontSize="10" Width="32" Height="26" />
               <Button Classes="icon" Content="..." FontSize="14" Width="28" Height="26" />
+              <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,6" />
+              <Button Content="Salvar"
+                      Command="{Binding SaveNoteCommand}"
+                      Height="26"
+                      Padding="10,0"
+                      FontSize="11"
+                      ToolTip.Tip="Salvar nota (Ctrl+S)" />
             </StackPanel>
           </Border>
         </Border>
@@ -425,7 +432,7 @@
     <Border Grid.Row="2"
             Classes="status-bar"
             Padding="10,0">
-      <Grid ColumnDefinitions="16,64,1,*,1,118,1,96" VerticalAlignment="Center">
+      <Grid ColumnDefinitions="16,84,1,*,1,118,1,96" VerticalAlignment="Center">
         <Border Width="9"
                 Height="9"
                 CornerRadius="5"
@@ -439,6 +446,7 @@
         <Border Grid.Column="2" Width="1" Background="{StaticResource Brush.Divider}" Margin="0,8" />
         <TextBlock Grid.Column="3"
                    Text="{Binding NotePath}"
+                   ToolTip.Tip="{Binding LastErrorMessage}"
                    Foreground="{StaticResource Brush.TextMuted}"
                    Margin="10,0"
                    FontSize="12"
