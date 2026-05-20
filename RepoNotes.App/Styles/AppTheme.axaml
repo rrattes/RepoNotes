@@ -33,6 +33,14 @@
     <Setter Property="CornerRadius" Value="9" />
   </Style>
 
+  <Style Selector="Border.repository-card">
+    <Setter Property="Background" Value="#101823" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="8,4" />
+  </Style>
+
   <Style Selector="Button">
     <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
     <Setter Property="Background" Value="#151F2C" />
@@ -80,6 +88,22 @@
     <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="CornerRadius" Value="7" />
+  </Style>
+
+  <Style Selector="Button.sidebar-action">
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Padding" Value="5,0" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="Background" Value="#111B28" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}" />
+  </Style>
+
+  <Style Selector="Button.sidebar-action:pointerover">
+    <Setter Property="Background" Value="#1B2736" />
+    <Setter Property="BorderBrush" Value="#34445A" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
   </Style>
 
   <Style Selector="TextBox">

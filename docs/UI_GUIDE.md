@@ -20,7 +20,9 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 
 - The app no longer has an internal global top bar.
 - Repository selection and search live in the top of the left sidebar, close to note navigation.
+- The repository area in the sidebar should present the current repository context. Until real repository switching exists, it must not look like an active repository picker or be wired to settings.
 - Global actions such as settings live in the lower-left sidebar toolbar.
+- Lower-left global actions should use clear compact labels and tooltips. Avoid cryptic placeholder labels such as `N`, `*`, or `Cfg`.
 - The only persistent top area inside the main content is the document context bar above the editor.
 - The document context bar should show the active document tab, breadcrumb, and note-scoped actions.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.

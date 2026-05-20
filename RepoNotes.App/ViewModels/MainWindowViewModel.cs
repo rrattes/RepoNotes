@@ -25,6 +25,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         NewNoteCommand = new RelayCommand(() => Status = "Nova nota pronta para implementacao");
         NewFolderCommand = new RelayCommand(() => Status = "Nova pasta pronta para implementacao");
+        OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
 
@@ -42,6 +43,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand NewNoteCommand { get; }
 
     public ICommand NewFolderCommand { get; }
+
+    public ICommand OpenFavoritesCommand { get; }
 
     public ICommand OpenSettingsCommand { get; }
 

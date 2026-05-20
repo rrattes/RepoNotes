@@ -48,28 +48,29 @@
               BorderThickness="0,0,1,0"
               Padding="10">
         <Grid RowDefinitions="Auto,8,Auto,8,Auto,10,*,40">
-          <Button Grid.Row="0"
-                  Classes="secondary"
-                  Height="32"
-                  HorizontalContentAlignment="Stretch"
-                  Command="{Binding OpenSettingsCommand}">
-            <Grid ColumnDefinitions="22,*,16">
-              <TextBlock Text="[]"
+          <Border Grid.Row="0"
+                  Classes="repository-card"
+                  Height="34"
+                  ToolTip.Tip="Repositorio atual">
+            <Grid ColumnDefinitions="22,*">
+              <TextBlock Text="R"
                          Foreground="#FBBF24"
                          FontSize="12"
+                         FontWeight="SemiBold"
+                         HorizontalAlignment="Center"
                          VerticalAlignment="Center" />
-              <TextBlock Grid.Column="1"
-                         Text="{Binding RepositoryName}"
-                         FontSize="13"
-                         TextTrimming="CharacterEllipsis"
-                         VerticalAlignment="Center" />
-              <TextBlock Grid.Column="2"
-                         Text="v"
-                         Foreground="{StaticResource Brush.TextWeak}"
-                         HorizontalAlignment="Right"
-                         VerticalAlignment="Center" />
+              <StackPanel Grid.Column="1" Spacing="0">
+                <TextBlock Text="Repositorio atual"
+                           Foreground="{StaticResource Brush.TextWeak}"
+                           FontSize="9"
+                           LineHeight="10" />
+                <TextBlock Text="{Binding RepositoryName}"
+                           FontSize="12"
+                           LineHeight="14"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
             </Grid>
-          </Button>
+          </Border>
 
           <Grid Grid.Row="2">
             <TextBox Classes="search"
@@ -170,13 +171,20 @@
                   BorderBrush="{StaticResource Brush.Divider}"
                   BorderThickness="0,1,0,0"
                   Padding="0,6,0,0">
-            <Grid ColumnDefinitions="*,*,*">
-              <Button Grid.Column="0" Classes="icon" Content="N" ToolTip.Tip="Arquivo" />
-              <Button Grid.Column="1" Classes="icon" Content="*" ToolTip.Tip="Favoritos" />
+            <Grid ColumnDefinitions="*,6,*,6,*">
+              <Button Grid.Column="0"
+                      Classes="sidebar-action"
+                      Content="Novo"
+                      Command="{Binding NewNoteCommand}"
+                      ToolTip.Tip="Nova nota" />
               <Button Grid.Column="2"
-                      Classes="icon"
-                      Content="Cfg"
-                      FontSize="11"
+                      Classes="sidebar-action"
+                      Content="Fav"
+                      Command="{Binding OpenFavoritesCommand}"
+                      ToolTip.Tip="Favoritos" />
+              <Button Grid.Column="4"
+                      Classes="sidebar-action"
+                      Content="Config"
                       Command="{Binding OpenSettingsCommand}"
                       ToolTip.Tip="Configuracoes" />
             </Grid>
