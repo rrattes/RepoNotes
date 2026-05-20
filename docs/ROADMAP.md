@@ -31,11 +31,21 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Keep scope lightweight; do not turn RepoNotes into a full NetBox replacement.
    - Consider future NetBox import/integration after MVP, not during MVP.
 
-4. Search
+4. User-Managed Encryption
+   - Add optional password-based encryption controlled by the user, independent of Windows login, PC password, domain account, or administrator permissions.
+   - Support future encryption scopes for folder, subfolder, or entire repository.
+   - Define storage format before UI implementation.
+   - Define unlock behavior and locked-state handling before advanced UI.
+   - Define how search, preview, indexing, and export behave for locked content.
+   - Define UX for lost password, making clear that encrypted content is unrecoverable if the password is lost.
+   - Evaluate backup and portability impact so encrypted content can remain local-first and repository-portable when possible.
+   - Do not use DPAPI or Windows Credential Manager as the primary model for encrypted notes/repositories.
+
+5. Search
    - Local text search over Markdown notes.
    - Fast filtering in the sidebar and search box.
 
-5. Markdown preview
+6. Markdown preview
    - Render headings, lists, links, code, blockquotes, and tables.
    - Keep preview visually consistent with the dark UI guide.
 
