@@ -219,22 +219,23 @@
       </Border>
 
       <Grid Grid.Column="1"
-            RowDefinitions="32,50,40,*"
+            RowDefinitions="38,46,34,*"
             Background="{StaticResource Brush.AppBackground}">
         <Border Grid.Row="0"
                 Background="#0D141E"
                 BorderBrush="{StaticResource Brush.Divider}"
                 BorderThickness="0,0,1,1">
-          <Grid ColumnDefinitions="184,32,*">
+          <Grid ColumnDefinitions="212,*,176" Margin="8,0">
             <Border Grid.Column="0"
                     Background="{StaticResource Brush.Panel}"
                     BorderBrush="{StaticResource Brush.Border}"
-                    BorderThickness="0,0,1,0"
+                    BorderThickness="1,0,1,0"
+                    CornerRadius="7,7,0,0"
                     Padding="8,0">
               <Grid ColumnDefinitions="20,*,18" VerticalAlignment="Center">
                 <TextBlock Text="MD" FontSize="10" FontWeight="Bold" Foreground="#93C5FD" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1"
-                           Text="Bem-vindo ao RepoNotes.md"
+                           Text="{Binding NotePath}"
                            FontSize="11"
                            TextTrimming="CharacterEllipsis"
                            VerticalAlignment="Center" />
@@ -245,7 +246,43 @@
                            VerticalAlignment="Center" />
               </Grid>
             </Border>
-            <Button Grid.Column="1" Classes="icon" Content="+" Width="32" Height="32" CornerRadius="0" />
+            <Grid Grid.Column="1"
+                  ColumnDefinitions="Auto,16,Auto,16,*"
+                  Margin="14,0"
+                  VerticalAlignment="Center">
+              <TextBlock Text="{Binding RepositoryName}"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="12"
+                         TextTrimming="CharacterEllipsis"
+                         VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1"
+                         Text="/"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="{Binding NotePath}"
+                         Foreground="{StaticResource Brush.TextMuted}"
+                         FontSize="12"
+                         TextTrimming="CharacterEllipsis"
+                         VerticalAlignment="Center" />
+            </Grid>
+            <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="6"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+              <Button Classes="context-action"
+                      Content="Salvar"
+                      Command="{Binding SaveNoteCommand}"
+                      ToolTip.Tip="Salvar nota (Ctrl+S)" />
+              <Button Classes="context-action"
+                      Content="Info"
+                      ToolTip.Tip="Informacoes da nota" />
+              <Button Classes="context-action"
+                      Content="Tags"
+                      ToolTip.Tip="Tags da nota" />
+            </StackPanel>
           </Grid>
         </Border>
 
@@ -296,13 +333,6 @@
               <Button Classes="icon" Content="Img" FontSize="10" Width="32" Height="26" />
               <Button Classes="icon" Content="Tbl" FontSize="10" Width="32" Height="26" />
               <Button Classes="icon" Content="..." FontSize="14" Width="28" Height="26" />
-              <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,6" />
-              <Button Content="Salvar"
-                      Command="{Binding SaveNoteCommand}"
-                      Height="26"
-                      Padding="10,0"
-                      FontSize="11"
-                      ToolTip.Tip="Salvar nota (Ctrl+S)" />
             </StackPanel>
           </Border>
         </Border>
