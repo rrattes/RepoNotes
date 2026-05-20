@@ -61,6 +61,17 @@ public sealed class MainWindowViewModel : ViewModelBase
         get => _selectedNode;
         set
         {
+            if (ReferenceEquals(_selectedNode, value))
+            {
+                return;
+            }
+
+            if (value?.NoteId is not null && !TrySaveSelectedNote())
+            {
+                OnPropertyChanged();
+                return;
+            }
+
             if (!SetProperty(ref _selectedNode, value) || value?.NoteId is null)
             {
                 return;
@@ -171,11 +182,16 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void SaveSelectedNote()
     {
+        _ = TrySaveSelectedNote();
+    }
+
+    private bool TrySaveSelectedNote()
+    {
         if (SelectedNote is null || !_hasUnsavedChanges)
         {
             Status = "Salvo";
             LastErrorMessage = string.Empty;
-            return;
+            return true;
         }
 
         try
@@ -186,11 +202,13 @@ public sealed class MainWindowViewModel : ViewModelBase
             _hasUnsavedChanges = false;
             Status = "Salvo";
             OnPropertyChanged(nameof(UpdatedAtText));
+            return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             LastErrorMessage = ex.Message;
             Status = "Erro ao salvar";
+            return false;
         }
     }
 }
