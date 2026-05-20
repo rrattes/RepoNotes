@@ -24,11 +24,18 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Add refresh and basic file operations.
    - Keep mock data available for design/dev mode if useful.
 
-3. Search
+3. Lightweight Technical Entities
+   - Add an incremental local entity layer for Application, Server, Network Device, Site, Environment, IP / Endpoint, Owner / Team, and Vendor / Product.
+   - Relate notes, runbooks, scripts, handovers, incidents, and project docs to one or more entities.
+   - Add future navigation and export grouped by application, site, owner, or environment.
+   - Keep scope lightweight; do not turn RepoNotes into a full NetBox replacement.
+   - Consider future NetBox import/integration after MVP, not during MVP.
+
+4. Search
    - Local text search over Markdown notes.
    - Fast filtering in the sidebar and search box.
 
-4. Markdown preview
+5. Markdown preview
    - Render headings, lists, links, code, blockquotes, and tables.
    - Keep preview visually consistent with the dark UI guide.
 
