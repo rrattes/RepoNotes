@@ -48,10 +48,11 @@
               BorderThickness="0,0,1,0"
               Padding="10">
         <Grid RowDefinitions="Auto,8,Auto,8,Auto,10,*,40">
-          <Border Grid.Row="0"
+          <Button Grid.Row="0"
                   Classes="repository-card"
                   Height="34"
-                  ToolTip.Tip="Repositorio atual">
+                  Command="{Binding OpenRepositoryCommand}"
+                  ToolTip.Tip="Abrir ou trocar repositorio local">
             <Grid ColumnDefinitions="22,*">
               <TextBlock Text="R"
                          Foreground="#FBBF24"
@@ -70,7 +71,7 @@
                            TextTrimming="CharacterEllipsis" />
               </StackPanel>
             </Grid>
-          </Border>
+          </Button>
 
           <Grid Grid.Row="2">
             <TextBox Classes="search"

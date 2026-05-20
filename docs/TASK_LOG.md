@@ -264,3 +264,37 @@
 **Riscos tecnicos:** Baixo; rodada apenas de validacao e registro. Risco residual permanece no fluxo sincronico de salvamento antes da troca de notas, especialmente para conflitos externos de arquivo.
 
 **Proximo passo sugerido:** Testar manualmente o fluxo no app: editar uma nota, selecionar outra, confirmar salvamento automatico e validar o comportamento quando o arquivo estiver bloqueado ou sem permissao de escrita.
+
+## 2026-05-20 20:42:51 -03:00
+
+**Objetivo da rodada:** Implementar selecao de repositorio local pelo usuario, com persistencia do ultimo repositorio aberto e fallback para `sample-repository`.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/App.axaml.cs`
+- `RepoNotes.App/Services/AvaloniaFolderPickerService.cs`
+- `RepoNotes.App/Services/IFolderPickerService.cs`
+- `RepoNotes.App/Services/NullFolderPickerService.cs`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/AsyncRelayCommand.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Core/Services/IRepositorySettingsStore.cs`
+- `RepoNotes.Storage/JsonRepositorySettingsStore.cs`
+- `RepoNotes.Tests/JsonRepositorySettingsStoreTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O card de `Repositorio atual` virou um botao real conectado a `OpenRepositoryCommand`, abrindo o seletor de pasta do Avalonia. O ViewModel agora recarrega a arvore e a nota atual a partir da pasta escolhida, atualiza `RepositoryName`, salva o ultimo caminho em `%LOCALAPPDATA%/RepoNotes/settings.json` e usa `sample-repository` como fallback quando nao ha repositorio salvo ou quando o caminho salvo/escolhido nao existe. Foram adicionados servicos pequenos para picker de pasta e settings JSON, alem de testes para troca de repositorio, fallback e persistencia local.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-20 20:42 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado final: 0 avisos, 0 erros. Observacao: a primeira tentativa falhou porque uma instancia aberta de `RepoNotes.App.exe` bloqueava DLLs de saida; a instancia foi encerrada e o build final passou.
+
+**Resultado dos testes:** Sucesso em `2026-05-20 20:42 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 14 testes aprovados, 0 falhas.
+
+**Pendencias:** Ainda nao ha lista de repositorios recentes, refresh manual, criacao/renomeacao/exclusao de arquivos, nem tratamento avancado de repositorio vazio alem do status amigavel.
+
+**Riscos tecnicos:** Medio-baixo; o fluxo ainda e sincronico ao trocar repositos e depende de acesso local ao filesystem. Repositorios muito grandes podem precisar de carregamento assicrono/cancelavel e tratamento melhor de erros de permissao.
+
+**Proximo passo sugerido:** Testar manualmente abrir uma pasta com arquivos `.md`, fechar e reabrir o app para confirmar a persistencia, e depois implementar refresh/file operations quando a navegacao local estiver validada.

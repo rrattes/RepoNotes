@@ -1,4 +1,5 @@
 using RepoNotes.App.ViewModels;
+using RepoNotes.App.Services;
 using RepoNotes.Core.Models;
 using RepoNotes.Core.Services;
 
@@ -110,6 +111,46 @@ public sealed class MainWindowViewModelSaveTests
         Assert.Equal("# Conteudo ainda aberto", viewModel.Markdown);
     }
 
+    [Fact]
+    public void OpenRepositoryCommandLoadsSelectedFolderAndPersistsIt()
+    {
+        var selectedPath = Path.Combine(Path.GetTempPath(), "RepoNotes.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(selectedPath);
+        var settingsStore = new TestRepositorySettingsStore();
+        var viewModel = new MainWindowViewModel(
+            new TestNoteRepository("Repositorio inicial", "inicial"),
+            new TestFolderPickerService(selectedPath),
+            settingsStore,
+            path => new TestNoteRepository(Path.GetFileName(path!), path!));
+
+        viewModel.OpenRepositoryCommand.Execute(null);
+
+        Assert.Equal(Path.GetFileName(selectedPath), viewModel.RepositoryName);
+        Assert.Equal(Path.GetFullPath(selectedPath), settingsStore.LastRepositoryPath);
+        Assert.Equal("Repositorio aberto: " + Path.GetFileName(selectedPath), viewModel.Status);
+        Assert.Equal("# Nota", viewModel.Markdown);
+
+        Directory.Delete(selectedPath, recursive: true);
+    }
+
+    [Fact]
+    public void OpenRepositoryCommandFallsBackWhenSelectedFolderDoesNotExist()
+    {
+        var missingPath = Path.Combine(Path.GetTempPath(), "RepoNotes.Tests", Guid.NewGuid().ToString("N"));
+        var settingsStore = new TestRepositorySettingsStore();
+        var viewModel = new MainWindowViewModel(
+            new TestNoteRepository("Repositorio inicial", "inicial"),
+            new TestFolderPickerService(missingPath),
+            settingsStore,
+            path => new TestNoteRepository(path is null ? "sample-repository" : Path.GetFileName(path), path ?? "sample-repository"));
+
+        viewModel.OpenRepositoryCommand.Execute(null);
+
+        Assert.Equal("sample-repository", viewModel.RepositoryName);
+        Assert.Null(settingsStore.LastRepositoryPath);
+        Assert.Equal("Repositorio nao encontrado. Usando sample-repository.", viewModel.Status);
+    }
+
     private sealed class TestNoteRepository : INoteRepository
     {
         private readonly NoteItem _firstNote = new()
@@ -132,12 +173,17 @@ public sealed class MainWindowViewModelSaveTests
             UpdatedAt = DateTime.Now
         };
 
-        public RepositoryItem CurrentRepository { get; } = new()
+        public TestNoteRepository(string repositoryName = "Test Repository", string rootPath = "test")
         {
-            Id = "test",
-            Name = "Test Repository",
-            RootPath = "test"
-        };
+            CurrentRepository = new RepositoryItem
+            {
+                Id = "test",
+                Name = repositoryName,
+                RootPath = Path.GetFullPath(rootPath)
+            };
+        }
+
+        public RepositoryItem CurrentRepository { get; }
 
         public int SaveCount { get; private set; }
 
@@ -179,6 +225,24 @@ public sealed class MainWindowViewModelSaveTests
             {
                 throw SaveException;
             }
+        }
+    }
+
+    private sealed class TestFolderPickerService(string? selectedPath) : IFolderPickerService
+    {
+        public Task<string?> PickRepositoryPathAsync() =>
+            Task.FromResult(selectedPath);
+    }
+
+    private sealed class TestRepositorySettingsStore : IRepositorySettingsStore
+    {
+        public string? LastRepositoryPath { get; private set; }
+
+        public string? GetLastRepositoryPath() => LastRepositoryPath;
+
+        public void SaveLastRepositoryPath(string repositoryPath)
+        {
+            LastRepositoryPath = repositoryPath;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using RepoNotes.App.Services;
 using RepoNotes.Core.Models;
 using RepoNotes.Core.Services;
 
@@ -7,36 +8,57 @@ namespace RepoNotes.App.ViewModels;
 
 public sealed class MainWindowViewModel : ViewModelBase
 {
-    private readonly INoteRepository _noteRepository;
+    private INoteRepository _noteRepository;
+    private readonly IFolderPickerService _folderPickerService;
+    private readonly IRepositorySettingsStore _settingsStore;
+    private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
     private NoteItem? _selectedNote;
     private RepositoryNodeViewModel? _selectedNode;
+    private string _repositoryName;
+    private string _repositoryPath;
     private string _searchText = string.Empty;
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
 
-    public MainWindowViewModel(INoteRepository noteRepository)
+    public MainWindowViewModel(
+        INoteRepository noteRepository,
+        IFolderPickerService? folderPickerService = null,
+        IRepositorySettingsStore? settingsStore = null,
+        Func<string?, INoteRepository>? noteRepositoryFactory = null,
+        string? initialStatus = null)
     {
         _noteRepository = noteRepository;
-        RepositoryName = noteRepository.CurrentRepository.Name;
-        RepositoryPath = noteRepository.CurrentRepository.RootPath;
-        Nodes = new ObservableCollection<RepositoryNodeViewModel>(
-            noteRepository.GetTree().Select(node => new RepositoryNodeViewModel(node)));
+        _folderPickerService = folderPickerService ?? new NullFolderPickerService();
+        _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
+        _noteRepositoryFactory = noteRepositoryFactory ?? (_ => noteRepository);
+        _repositoryName = noteRepository.CurrentRepository.Name;
+        _repositoryPath = noteRepository.CurrentRepository.RootPath;
+        Nodes = [];
 
         NewNoteCommand = new RelayCommand(() => Status = "Nova nota pronta para implementacao");
         NewFolderCommand = new RelayCommand(() => Status = "Nova pasta pronta para implementacao");
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
+        OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
 
-        SelectedNote = noteRepository.GetNotes().FirstOrDefault();
+        ReloadRepository(noteRepository, initialStatus);
     }
 
     public string AppName => "RepoNotes";
 
-    public string RepositoryName { get; }
+    public string RepositoryName
+    {
+        get => _repositoryName;
+        private set => SetProperty(ref _repositoryName, value);
+    }
 
-    public string RepositoryPath { get; }
+    public string RepositoryPath
+    {
+        get => _repositoryPath;
+        private set => SetProperty(ref _repositoryPath, value);
+    }
 
     public ObservableCollection<RepositoryNodeViewModel> Nodes { get; }
 
@@ -45,6 +67,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand NewFolderCommand { get; }
 
     public ICommand OpenFavoritesCommand { get; }
+
+    public ICommand OpenRepositoryCommand { get; }
 
     public ICommand OpenSettingsCommand { get; }
 
@@ -185,6 +209,77 @@ public sealed class MainWindowViewModel : ViewModelBase
         _ = TrySaveSelectedNote();
     }
 
+    private async Task OpenRepositoryAsync()
+    {
+        var selectedPath = await _folderPickerService.PickRepositoryPathAsync();
+        if (string.IsNullOrWhiteSpace(selectedPath))
+        {
+            return;
+        }
+
+        if (!TryOpenRepository(selectedPath, persistSelection: true))
+        {
+            Status = "Repositorio nao encontrado. Usando sample-repository.";
+            TryOpenRepository(null, persistSelection: false, preserveStatus: true);
+        }
+    }
+
+    public bool TryOpenRepository(string? repositoryPath, bool persistSelection = false, bool preserveStatus = false)
+    {
+        var statusToPreserve = preserveStatus ? Status : null;
+
+        if (!TrySaveSelectedNote())
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(repositoryPath) && !Directory.Exists(repositoryPath))
+        {
+            return false;
+        }
+
+        var nextRepository = _noteRepositoryFactory(repositoryPath);
+        ReloadRepository(nextRepository, statusToPreserve);
+
+        if (persistSelection && !string.IsNullOrWhiteSpace(repositoryPath))
+        {
+            _settingsStore.SaveLastRepositoryPath(Path.GetFullPath(repositoryPath));
+        }
+
+        if (!preserveStatus)
+        {
+            Status = $"Repositorio aberto: {RepositoryName}";
+        }
+
+        return true;
+    }
+
+    private void ReloadRepository(INoteRepository noteRepository, string? status = null)
+    {
+        _noteRepository = noteRepository;
+        RepositoryName = noteRepository.CurrentRepository.Name;
+        RepositoryPath = noteRepository.CurrentRepository.RootPath;
+        Nodes.Clear();
+
+        foreach (var node in noteRepository.GetTree())
+        {
+            Nodes.Add(new RepositoryNodeViewModel(node));
+        }
+
+        _selectedNode = null;
+        OnPropertyChanged(nameof(SelectedNode));
+        SelectedNote = noteRepository.GetNotes().FirstOrDefault();
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            Status = status;
+        }
+        else if (SelectedNote is null)
+        {
+            Status = "Repositorio aberto sem notas Markdown";
+        }
+    }
+
     private bool TrySaveSelectedNote()
     {
         if (SelectedNote is null || !_hasUnsavedChanges)
@@ -209,6 +304,15 @@ public sealed class MainWindowViewModel : ViewModelBase
             LastErrorMessage = ex.Message;
             Status = "Erro ao salvar";
             return false;
+        }
+    }
+
+    private sealed class NullRepositorySettingsStore : IRepositorySettingsStore
+    {
+        public string? GetLastRepositoryPath() => null;
+
+        public void SaveLastRepositoryPath(string repositoryPath)
+        {
         }
     }
 }
