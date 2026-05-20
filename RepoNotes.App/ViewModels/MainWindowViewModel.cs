@@ -10,6 +10,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 {
     private INoteRepository _noteRepository;
     private readonly IFolderPickerService _folderPickerService;
+    private readonly MarkdownPreviewService _markdownPreviewService;
     private readonly IRepositorySettingsStore _settingsStore;
     private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
     private NoteItem? _selectedNote;
@@ -26,15 +27,18 @@ public sealed class MainWindowViewModel : ViewModelBase
         IFolderPickerService? folderPickerService = null,
         IRepositorySettingsStore? settingsStore = null,
         Func<string?, INoteRepository>? noteRepositoryFactory = null,
-        string? initialStatus = null)
+        string? initialStatus = null,
+        MarkdownPreviewService? markdownPreviewService = null)
     {
         _noteRepository = noteRepository;
         _folderPickerService = folderPickerService ?? new NullFolderPickerService();
+        _markdownPreviewService = markdownPreviewService ?? new MarkdownPreviewService();
         _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
         _noteRepositoryFactory = noteRepositoryFactory ?? (_ => noteRepository);
         _repositoryName = noteRepository.CurrentRepository.Name;
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
         Nodes = [];
+        PreviewBlocks = [];
 
         NewNoteCommand = new RelayCommand(CreateNewNote);
         NewFolderCommand = new RelayCommand(CreateNewFolder);
@@ -63,6 +67,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public ObservableCollection<RepositoryNodeViewModel> Nodes { get; }
+
+    public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
 
     public ICommand NewNoteCommand { get; }
 
@@ -128,6 +134,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(WordCountText));
             OnPropertyChanged(nameof(UpdatedAtText));
             OnPropertyChanged(nameof(TagsText));
+            UpdatePreviewBlocks();
             _hasUnsavedChanges = false;
             LastErrorMessage = string.Empty;
             Status = "Salvo";
@@ -148,6 +155,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             MarkNoteChanged();
             OnPropertyChanged();
             OnPropertyChanged(nameof(PreviewText));
+            UpdatePreviewBlocks();
         }
     }
 
@@ -166,6 +174,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged();
             OnPropertyChanged(nameof(PreviewText));
             OnPropertyChanged(nameof(WordCountText));
+            UpdatePreviewBlocks();
         }
     }
 
@@ -213,6 +222,16 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void SaveSelectedNote()
     {
         _ = TrySaveSelectedNote();
+    }
+
+    private void UpdatePreviewBlocks()
+    {
+        PreviewBlocks.Clear();
+
+        foreach (var block in _markdownPreviewService.Render(PreviewText))
+        {
+            PreviewBlocks.Add(block);
+        }
     }
 
     private void CreateNewNote()

@@ -64,6 +64,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Keep the editor visually dominant.
 - Prefer dense, legible controls over showcase-sized controls.
 - Keep preview useful but visually secondary; it should not compete with the writing surface.
+- Preview should render the current note Markdown through native dark Avalonia blocks rather than static mock text; code and simple tables may use compact monospace panels.
 - Prefer compact toolbar groups with subtle dividers over large standalone buttons.
 - Keep global actions out of a top bar; repository selection/search belong in the sidebar and settings belongs in the lower-left sidebar toolbar.
 - Centralize reusable colors and control styling in `RepoNotes.App/Styles/AppTheme.axaml`.

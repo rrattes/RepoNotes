@@ -32,7 +32,8 @@ public sealed partial class App : Application
                 new AvaloniaFolderPickerService(mainWindow),
                 settingsStore,
                 path => new LocalMarkdownNoteRepository(path),
-                initialStatus);
+                initialStatus,
+                new MarkdownPreviewService());
 
             desktop.MainWindow = mainWindow;
         }

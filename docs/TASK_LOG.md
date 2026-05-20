@@ -356,3 +356,32 @@
 **Riscos tecnicos:** Medio; mover pastas grandes para a lixeira ainda e sincronico, e conflitos externos/permissoes podem exigir feedback mais detalhado. A pasta `.reponotes-trash` precisa continuar excluida de navegacao, busca e preview futuros.
 
 **Proximo passo sugerido:** Implementar um dialogo simples de nome para criacao/renomeacao e, depois, uma visao de lixeira para restaurar itens movidos.
+
+## 2026-05-20 20:56:52 -03:00
+
+**Objetivo da rodada:** Substituir o preview mockado por renderizacao real do Markdown da nota atual, mantendo visual dark consistente.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/App.axaml.cs`
+- `RepoNotes.App/RepoNotes.App.csproj`
+- `RepoNotes.App/Services/MarkdownPreviewService.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/ViewModels/MarkdownPreviewBlocks.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Tests/MarkdownPreviewServiceTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foi adicionado Markdig para parsear Markdown e um `MarkdownPreviewService` que converte a nota atual em blocos nativos de preview para Avalonia. O painel de preview agora renderiza titulos, paragrafos, listas, checklists simples, code blocks, blockquotes, links como texto com URL e tabelas simples em bloco monoespacado. O preview e atualizado quando `Markdown` ou `Title` mudam, sem mover logica pesada para o ViewModel.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-20 20:56 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-20 20:56 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 27 testes aprovados, 0 falhas.
+
+**Pendencias:** A renderizacao ainda e intencionalmente simples: links nao sao clicaveis, tabelas usam texto monoespacado, imagens nao sao renderizadas e nao ha suporte visual avancado para Markdown completo.
+
+**Riscos tecnicos:** Medio-baixo; o preview e nativo e leve, mas documentos grandes podem exigir debounce ou virtualizacao. A evolucao para links clicaveis/imagens deve preservar seguranca local e consistencia visual.
+
+**Proximo passo sugerido:** Testar manualmente notas reais com headings, listas, checklist, code block, blockquote e tabela; depois avaliar links clicaveis e imagens locais.

@@ -37,6 +37,91 @@
                    TextTrimming="CharacterEllipsis" />
       </Grid>
     </TreeDataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MarkdownHeadingBlock}">
+      <TextBlock Text="{Binding Text}"
+                 FontSize="{Binding FontSize}"
+                 FontWeight="Bold"
+                 LineHeight="28"
+                 TextWrapping="Wrap"
+                 Margin="0,4,0,2" />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MarkdownParagraphBlock}">
+      <TextBlock Text="{Binding Text}"
+                 Foreground="{StaticResource Brush.Text}"
+                 FontSize="14"
+                 LineHeight="22"
+                 TextWrapping="Wrap"
+                 Margin="0,2" />
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MarkdownListBlock}">
+      <ItemsControl ItemsSource="{Binding Items}" Margin="0,2,0,4">
+        <ItemsControl.DataTemplates>
+          <DataTemplate DataType="{x:Type vm:MarkdownListItem}">
+            <Grid ColumnDefinitions="26,*" Margin="0,2">
+              <TextBlock Text="{Binding Marker}"
+                         Foreground="{StaticResource Brush.Accent}"
+                         FontFamily="Cascadia Mono, Consolas"
+                         FontSize="12"
+                         VerticalAlignment="Top" />
+              <TextBlock Grid.Column="1"
+                         Text="{Binding Text}"
+                         FontSize="14"
+                         LineHeight="21"
+                         TextWrapping="Wrap" />
+            </Grid>
+          </DataTemplate>
+        </ItemsControl.DataTemplates>
+      </ItemsControl>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MarkdownCodeBlock}">
+      <Border Background="#0A0F17"
+              BorderBrush="{StaticResource Brush.Border}"
+              BorderThickness="1"
+              CornerRadius="7"
+              Padding="10"
+              Margin="0,4">
+        <TextBlock Text="{Binding Text}"
+                   FontFamily="Cascadia Mono, Consolas"
+                   FontSize="12"
+                   LineHeight="18"
+                   Foreground="#CBD5E1"
+                   TextWrapping="Wrap" />
+      </Border>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MarkdownQuoteBlock}">
+      <Border BorderBrush="{StaticResource Brush.Accent}"
+              BorderThickness="3,0,0,0"
+              Padding="10,2,0,2"
+              Margin="0,4">
+        <TextBlock Text="{Binding Text}"
+                   Foreground="{StaticResource Brush.TextMuted}"
+                   FontSize="14"
+                   FontStyle="Italic"
+                   LineHeight="22"
+                   TextWrapping="Wrap" />
+      </Border>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type vm:MarkdownTableBlock}">
+      <Border Background="#0A0F17"
+              BorderBrush="{StaticResource Brush.Border}"
+              BorderThickness="1"
+              CornerRadius="7"
+              Padding="10"
+              Margin="0,4">
+        <TextBlock Text="{Binding Text}"
+                   FontFamily="Cascadia Mono, Consolas"
+                   FontSize="12"
+                   LineHeight="18"
+                   Foreground="{StaticResource Brush.Text}"
+                   TextWrapping="NoWrap" />
+      </Border>
+    </DataTemplate>
   </Window.DataTemplates>
 
   <Grid RowDefinitions="*,38"
@@ -388,38 +473,7 @@
 
             <ScrollViewer Grid.Row="1" Padding="12">
               <StackPanel Spacing="10">
-                <TextBlock Text="{Binding Title}"
-                           FontSize="22"
-                           FontWeight="Bold"
-                           LineHeight="28"
-                           TextWrapping="Wrap" />
-                <TextBlock Text="Este e um editor local-first baseado em repositorios."
-                           Foreground="{StaticResource Brush.Text}"
-                           FontSize="14"
-                           LineHeight="22"
-                           TextWrapping="Wrap" />
-                <Border Height="1" Background="{StaticResource Brush.Divider}" />
-                <StackPanel Spacing="7">
-                  <Grid ColumnDefinitions="14,*">
-                    <TextBlock Text="-" Foreground="{StaticResource Brush.Accent}" FontSize="16" />
-                    <TextBlock Grid.Column="1" Text="Escreva notas em Markdown." FontSize="14" />
-                  </Grid>
-                  <Grid ColumnDefinitions="14,*">
-                    <TextBlock Text="-" Foreground="{StaticResource Brush.Accent}" FontSize="16" />
-                    <TextBlock Grid.Column="1" Text="Organize conhecimento em pastas." FontSize="14" />
-                  </Grid>
-                  <Grid ColumnDefinitions="14,*">
-                    <TextBlock Text="-" Foreground="{StaticResource Brush.Accent}" FontSize="16" />
-                    <TextBlock Grid.Column="1" Text="Mantenha tudo em arquivos locais." FontSize="14" />
-                  </Grid>
-                </StackPanel>
-                <Border Height="1" Background="{StaticResource Brush.Divider}" />
-                <TextBlock Text="O preview inicial ainda e simples, mas ja mostra o texto da nota selecionada."
-                           Foreground="{StaticResource Brush.TextMuted}"
-                           FontSize="14"
-                           LineHeight="22"
-                           TextWrapping="Wrap" />
-
+                <ItemsControl ItemsSource="{Binding PreviewBlocks}" />
                 <Border Classes="card" Padding="10" Margin="0,0,0,0">
                   <StackPanel Spacing="6">
                     <TextBlock Text="Info da nota" FontWeight="SemiBold" />

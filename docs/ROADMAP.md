@@ -49,7 +49,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Fast filtering in the sidebar and search box.
 
 6. Markdown preview
-   - Render headings, lists, links, code, blockquotes, and tables.
+   - Render headings, paragraphs, lists, simple checklists, links, code blocks, blockquotes, and simple pipe tables from the current note Markdown.
    - Keep preview visually consistent with the dark UI guide.
 
 ## Guardrails
