@@ -17,11 +17,13 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 
 ## Current Density Targets
 
-- Sidebar: around 250px to 270px.
-- Preview panel: around 320px to 360px.
-- Top bar: around 56px to 60px.
-- Status bar: compact, around 42px to 48px.
+- Sidebar: around 250px to 260px, currently `252px`.
+- Preview panel: around 320px to 340px, currently `326px`.
+- Top bar: around 54px to 58px, currently `54px`.
+- Status bar: compact, around 38px to 42px, currently `38px`.
 - Editor column gets priority for all extra horizontal space.
+- Editor chrome should stay compact: document tab around `32px`, title row around `50px`, and formatting toolbar around `34px` to `40px`.
+- Editor outer padding should stay tight, roughly `10px` to `12px`, so the writing area feels like the main workspace rather than a small card.
 
 ## Theme
 
@@ -45,5 +47,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Avoid default gray Windows-looking buttons.
 - Keep the editor visually dominant.
 - Prefer dense, legible controls over showcase-sized controls.
+- Keep preview useful but visually secondary; it should not compete with the writing surface.
+- Prefer compact toolbar groups with subtle dividers over large standalone buttons.
 - Centralize reusable colors and control styling in `RepoNotes.App/Styles/AppTheme.axaml`.
 - Keep visual-only mock elements clearly separated from business logic.
