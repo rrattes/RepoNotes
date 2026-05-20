@@ -298,3 +298,31 @@
 **Riscos tecnicos:** Medio-baixo; o fluxo ainda e sincronico ao trocar repositos e depende de acesso local ao filesystem. Repositorios muito grandes podem precisar de carregamento assicrono/cancelavel e tratamento melhor de erros de permissao.
 
 **Proximo passo sugerido:** Testar manualmente abrir uma pasta com arquivos `.md`, fechar e reabrir o app para confirmar a persistencia, e depois implementar refresh/file operations quando a navegacao local estiver validada.
+
+## 2026-05-20 20:47:39 -03:00
+
+**Objetivo da rodada:** Implementar criacao real de notas Markdown e pastas no repositorio local aberto, usando nomes automaticos seguros e atualizando a arvore imediatamente.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.Core/Services/INoteRepository.cs`
+- `RepoNotes.Storage/LocalMarkdownNoteRepository.cs`
+- `RepoNotes.Storage/MockNoteRepository.cs`
+- `RepoNotes.Tests/LocalMarkdownNoteRepositoryTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelCreateTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** `NewNoteCommand` e `NewFolderCommand` agora criam arquivos `.md` e diretorios reais no repositorio local. A criacao usa nomes automaticos como `Nova nota.md`, `Nova nota 2.md`, `Nova pasta` e `Nova pasta 2`, sanitiza caracteres invalidos para Windows e evita sobrescrever itens existentes. A nota criada e selecionada e aberta no editor; a arvore e atualizada imediatamente, incluindo pastas vazias recem-criadas.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-20 20:47 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-20 20:47 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 19 testes aprovados, 0 falhas.
+
+**Pendencias:** Ainda nao ha dialogo para escolher nome inicial, renomear, excluir, mover arquivos ou atualizar manualmente o repositorio. A criacao usa nomes automaticos nesta rodada.
+
+**Riscos tecnicos:** Medio-baixo; nomes e caminhos sao sanitizados e protegidos contra sobrescrita, mas conflitos externos e permissoes de filesystem ainda podem exigir mensagens de erro mais detalhadas.
+
+**Proximo passo sugerido:** Testar manualmente criar nota/pasta em raiz, dentro de pasta e a partir de uma nota selecionada; depois priorizar renomear/excluir ou um dialogo simples de nome.

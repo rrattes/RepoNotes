@@ -36,8 +36,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
         Nodes = [];
 
-        NewNoteCommand = new RelayCommand(() => Status = "Nova nota pronta para implementacao");
-        NewFolderCommand = new RelayCommand(() => Status = "Nova pasta pronta para implementacao");
+        NewNoteCommand = new RelayCommand(CreateNewNote);
+        NewFolderCommand = new RelayCommand(CreateNewFolder);
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
@@ -209,6 +209,48 @@ public sealed class MainWindowViewModel : ViewModelBase
         _ = TrySaveSelectedNote();
     }
 
+    private void CreateNewNote()
+    {
+        if (!TrySaveSelectedNote())
+        {
+            return;
+        }
+
+        try
+        {
+            var note = _noteRepository.CreateNote(GetTargetFolderPath());
+            RefreshTree();
+            SelectNodeByNoteId(note.Id);
+            Status = $"Nota criada: {note.Path}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao criar nota";
+        }
+    }
+
+    private void CreateNewFolder()
+    {
+        if (!TrySaveSelectedNote())
+        {
+            return;
+        }
+
+        try
+        {
+            var folderPath = _noteRepository.CreateFolder(GetTargetFolderPath());
+            RefreshTree();
+            SelectNodeByPath(folderPath);
+            Status = $"Pasta criada: {folderPath}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao criar pasta";
+        }
+    }
+
     private async Task OpenRepositoryAsync()
     {
         var selectedPath = await _folderPickerService.PickRepositoryPathAsync();
@@ -259,12 +301,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _noteRepository = noteRepository;
         RepositoryName = noteRepository.CurrentRepository.Name;
         RepositoryPath = noteRepository.CurrentRepository.RootPath;
-        Nodes.Clear();
-
-        foreach (var node in noteRepository.GetTree())
-        {
-            Nodes.Add(new RepositoryNodeViewModel(node));
-        }
+        RefreshTree();
 
         _selectedNode = null;
         OnPropertyChanged(nameof(SelectedNode));
@@ -278,6 +315,71 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             Status = "Repositorio aberto sem notas Markdown";
         }
+    }
+
+    private void RefreshTree()
+    {
+        Nodes.Clear();
+
+        foreach (var node in _noteRepository.GetTree())
+        {
+            Nodes.Add(new RepositoryNodeViewModel(node));
+        }
+    }
+
+    private string? GetTargetFolderPath()
+    {
+        if (SelectedNode is null)
+        {
+            return null;
+        }
+
+        if (SelectedNode.Type == RepositoryNodeType.Folder)
+        {
+            return SelectedNode.Path;
+        }
+
+        var directoryName = Path.GetDirectoryName(SelectedNode.Path);
+        return string.IsNullOrWhiteSpace(directoryName) ? null : directoryName;
+    }
+
+    private void SelectNodeByNoteId(string noteId)
+    {
+        var node = FindNode(Nodes, candidate => candidate.NoteId == noteId);
+        if (node is not null)
+        {
+            SelectedNode = node;
+        }
+    }
+
+    private void SelectNodeByPath(string path)
+    {
+        var node = FindNode(Nodes, candidate => candidate.Path == path);
+        if (node is not null)
+        {
+            SelectedNode = node;
+        }
+    }
+
+    private static RepositoryNodeViewModel? FindNode(
+        IEnumerable<RepositoryNodeViewModel> nodes,
+        Func<RepositoryNodeViewModel, bool> predicate)
+    {
+        foreach (var node in nodes)
+        {
+            if (predicate(node))
+            {
+                return node;
+            }
+
+            var nestedNode = FindNode(node.Children, predicate);
+            if (nestedNode is not null)
+            {
+                return nestedNode;
+            }
+        }
+
+        return null;
     }
 
     private bool TrySaveSelectedNote()

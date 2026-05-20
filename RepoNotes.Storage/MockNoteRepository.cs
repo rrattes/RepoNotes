@@ -99,6 +99,34 @@ public sealed class MockNoteRepository : INoteRepository
         note.UpdatedAt = DateTime.Now;
     }
 
+    public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota")
+    {
+        var now = DateTime.Now;
+        var safeName = string.IsNullOrWhiteSpace(noteName) ? "Nova nota" : noteName;
+        var fileName = safeName.EndsWith(".md", StringComparison.OrdinalIgnoreCase) ? safeName : $"{safeName}.md";
+        var path = string.IsNullOrWhiteSpace(folderPath) ? fileName : @$"{folderPath}\{fileName}";
+        var note = new NoteItem
+        {
+            Id = path,
+            Title = Path.GetFileNameWithoutExtension(fileName),
+            Path = path,
+            CreatedAt = now,
+            UpdatedAt = now,
+            Markdown = $"# {Path.GetFileNameWithoutExtension(fileName)}{Environment.NewLine}"
+        };
+
+        _notes.Add(note);
+        _tree.Add(Note(fileName, note.Id, note.Path));
+        return note;
+    }
+
+    public string CreateFolder(string? parentFolderPath, string folderName = "Nova pasta")
+    {
+        var path = string.IsNullOrWhiteSpace(parentFolderPath) ? folderName : @$"{parentFolderPath}\{folderName}";
+        _tree.Add(Folder(folderName, path));
+        return path;
+    }
+
     private static RepositoryNode Folder(string name, string path, params RepositoryNode[] children) =>
         new()
         {

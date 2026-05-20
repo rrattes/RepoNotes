@@ -52,6 +52,40 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         }
     }
 
+    public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota")
+    {
+        var safeFolderPath = NormalizeOptionalPath(folderPath);
+        var safeNoteName = SanitizeFileName(Path.GetFileNameWithoutExtension(noteName), "Nova nota");
+        var targetDirectory = GetSafeDirectoryPath(safeFolderPath);
+        Directory.CreateDirectory(targetDirectory);
+
+        var fileName = GetUniqueFileName(targetDirectory, safeNoteName, ".md");
+        var fullPath = Path.Combine(targetDirectory, fileName);
+        var title = Path.GetFileNameWithoutExtension(fileName);
+        var markdown = $"# {title}{Environment.NewLine}";
+
+        File.WriteAllText(fullPath, markdown);
+        var createdNote = CreateNote(fullPath);
+        Reload();
+
+        return GetNoteById(createdNote.Id) ?? createdNote;
+    }
+
+    public string CreateFolder(string? parentFolderPath, string folderName = "Nova pasta")
+    {
+        var safeParentPath = NormalizeOptionalPath(parentFolderPath);
+        var safeFolderName = SanitizeFileName(folderName, "Nova pasta");
+        var parentDirectory = GetSafeDirectoryPath(safeParentPath);
+        Directory.CreateDirectory(parentDirectory);
+
+        var directoryName = GetUniqueDirectoryName(parentDirectory, safeFolderName);
+        var fullPath = Path.Combine(parentDirectory, directoryName);
+        Directory.CreateDirectory(fullPath);
+        Reload();
+
+        return NormalizePath(Path.GetRelativePath(_rootPath, fullPath));
+    }
+
     private void Reload()
     {
         _notes.Clear();
@@ -92,11 +126,6 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         foreach (var childDirectory in Directory.EnumerateDirectories(directoryPath).OrderBy(path => path))
         {
             var nestedChildren = BuildTree(childDirectory);
-            if (nestedChildren.Count == 0)
-            {
-                continue;
-            }
-
             children.Add(new RepositoryNode
             {
                 Name = Path.GetFileName(childDirectory),
@@ -132,6 +161,65 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         }
 
         return fullPath;
+    }
+
+    private string GetSafeDirectoryPath(string? relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            return Path.GetFullPath(_rootPath);
+        }
+
+        var fullPath = GetSafeFullPath(relativePath);
+        if (File.Exists(fullPath))
+        {
+            fullPath = Path.GetDirectoryName(fullPath)!;
+        }
+
+        return fullPath;
+    }
+
+    private static string? NormalizeOptionalPath(string? path) =>
+        string.IsNullOrWhiteSpace(path) ? null : NormalizePath(path);
+
+    private static string SanitizeFileName(string value, string fallback)
+    {
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var sanitized = new string(value
+            .Trim()
+            .Select(character => invalidChars.Contains(character) ? '-' : character)
+            .ToArray())
+            .Trim(' ', '.');
+
+        return string.IsNullOrWhiteSpace(sanitized) ? fallback : sanitized;
+    }
+
+    private static string GetUniqueFileName(string directoryPath, string baseName, string extension)
+    {
+        var candidate = $"{baseName}{extension}";
+        var index = 2;
+
+        while (File.Exists(Path.Combine(directoryPath, candidate)))
+        {
+            candidate = $"{baseName} {index}{extension}";
+            index++;
+        }
+
+        return candidate;
+    }
+
+    private static string GetUniqueDirectoryName(string parentDirectoryPath, string baseName)
+    {
+        var candidate = baseName;
+        var index = 2;
+
+        while (Directory.Exists(Path.Combine(parentDirectoryPath, candidate)))
+        {
+            candidate = $"{baseName} {index}";
+            index++;
+        }
+
+        return candidate;
     }
 
     private void EnsureSampleRepository()

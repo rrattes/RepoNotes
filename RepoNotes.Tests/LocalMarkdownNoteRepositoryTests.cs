@@ -36,6 +36,46 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
         Assert.Equal(updatedMarkdown, File.ReadAllText(savedPath));
     }
 
+    [Fact]
+    public void CreatesNewNoteWithUniqueSafeName()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+
+        var firstNote = repository.CreateNote(null);
+        var secondNote = repository.CreateNote(null);
+
+        Assert.Equal("Nova nota.md", firstNote.Path);
+        Assert.Equal("Nova nota 2.md", secondNote.Path);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota.md")));
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota 2.md")));
+    }
+
+    [Fact]
+    public void CreatesNewNoteInsideSelectedFolder()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+
+        var note = repository.CreateNote("Inbox");
+
+        Assert.Equal(@"Inbox\Nova nota.md", note.Path);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Inbox", "Nova nota.md")));
+    }
+
+    [Fact]
+    public void CreatesNewFolderWithUniqueSafeNameAndShowsItInTree()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+
+        var firstFolderPath = repository.CreateFolder(null, "Ops:Runbooks");
+        var secondFolderPath = repository.CreateFolder(null, "Ops:Runbooks");
+
+        Assert.Equal("Ops-Runbooks", firstFolderPath);
+        Assert.Equal("Ops-Runbooks 2", secondFolderPath);
+        Assert.True(Directory.Exists(Path.Combine(_tempRepositoryPath, "Ops-Runbooks")));
+        Assert.True(Directory.Exists(Path.Combine(_tempRepositoryPath, "Ops-Runbooks 2")));
+        Assert.Contains(repository.GetTree(), node => node.Path == "Ops-Runbooks");
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_tempRepositoryPath))

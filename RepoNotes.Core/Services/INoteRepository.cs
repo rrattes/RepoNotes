@@ -13,4 +13,8 @@ public interface INoteRepository
     NoteItem? GetNoteById(string noteId);
 
     void SaveNote(NoteItem note);
+
+    NoteItem CreateNote(string? folderPath, string noteName = "Nova nota");
+
+    string CreateFolder(string? parentFolderPath, string folderName = "Nova pasta");
 }

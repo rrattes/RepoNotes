@@ -191,31 +191,45 @@ public sealed class MainWindowViewModelSaveTests
 
         public NoteItem FirstNote => _firstNote;
 
-        public IReadOnlyList<RepositoryNode> GetTree() =>
-        [
-            new RepositoryNode
-            {
-                Name = "Nota.md",
-                Type = RepositoryNodeType.Note,
-                NoteId = "note",
-                Path = "Nota.md"
-            },
-            new RepositoryNode
-            {
-                Name = "Segunda.md",
-                Type = RepositoryNodeType.Note,
-                NoteId = "note-2",
-                Path = "Segunda.md"
-            }
-        ];
+        private readonly List<NoteItem> _createdNotes = [];
 
-        public IReadOnlyList<NoteItem> GetNotes() => [_firstNote, _secondNote];
+        private readonly List<RepositoryNode> _createdNodes = [];
+
+        public IReadOnlyList<RepositoryNode> GetTree()
+        {
+            var nodes = new List<RepositoryNode>
+            {
+                new()
+                {
+                    Name = "Nota.md",
+                    Type = RepositoryNodeType.Note,
+                    NoteId = "note",
+                    Path = "Nota.md"
+                },
+                new()
+                {
+                    Name = "Segunda.md",
+                    Type = RepositoryNodeType.Note,
+                    NoteId = "note-2",
+                    Path = "Segunda.md"
+                }
+            };
+            nodes.AddRange(_createdNodes);
+            return nodes;
+        }
+
+        public IReadOnlyList<NoteItem> GetNotes()
+        {
+            var notes = new List<NoteItem> { _firstNote, _secondNote };
+            notes.AddRange(_createdNotes);
+            return notes;
+        }
 
         public NoteItem? GetNoteById(string noteId) => noteId switch
         {
             "note" => _firstNote,
             "note-2" => _secondNote,
-            _ => null
+            _ => _createdNotes.FirstOrDefault(note => note.Id == noteId)
         };
 
         public void SaveNote(NoteItem note)
@@ -225,6 +239,45 @@ public sealed class MainWindowViewModelSaveTests
             {
                 throw SaveException;
             }
+        }
+
+        public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota")
+        {
+            var fileName = $"{noteName}.md";
+            var path = string.IsNullOrWhiteSpace(folderPath) ? fileName : @$"{folderPath}\{fileName}";
+            var note = new NoteItem
+            {
+                Id = path,
+                Title = noteName,
+                Markdown = $"# {noteName}{Environment.NewLine}",
+                Path = path,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
+            };
+
+            _createdNotes.Add(note);
+            _createdNodes.Add(new RepositoryNode
+            {
+                Name = fileName,
+                Type = RepositoryNodeType.Note,
+                NoteId = note.Id,
+                Path = path
+            });
+
+            return note;
+        }
+
+        public string CreateFolder(string? parentFolderPath, string folderName = "Nova pasta")
+        {
+            var path = string.IsNullOrWhiteSpace(parentFolderPath) ? folderName : @$"{parentFolderPath}\{folderName}";
+            _createdNodes.Add(new RepositoryNode
+            {
+                Name = folderName,
+                Type = RepositoryNodeType.Folder,
+                Path = path
+            });
+
+            return path;
         }
     }
 
