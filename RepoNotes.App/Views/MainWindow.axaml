@@ -1,0 +1,459 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:RepoNotes.App.ViewModels"
+        x:Class="RepoNotes.App.Views.MainWindow"
+        Width="1600"
+        Height="900"
+        MinWidth="1366"
+        MinHeight="768"
+        Title="RepoNotes">
+  <Window.DataTemplates>
+    <TreeDataTemplate DataType="{x:Type vm:RepositoryNodeViewModel}" ItemsSource="{Binding Children}">
+      <Grid ColumnDefinitions="24,*" Height="25" VerticalAlignment="Center">
+        <Border Grid.Column="0"
+                Width="18"
+                Height="18"
+                CornerRadius="5"
+                Background="#182435"
+                BorderBrush="#2B3A4E"
+                BorderThickness="1"
+                VerticalAlignment="Center">
+          <TextBlock Text="MD"
+                     FontSize="9"
+                     FontWeight="Bold"
+                     Foreground="#93C5FD"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center" />
+        </Border>
+        <TextBlock Grid.Column="1"
+                   Text="{Binding Name}"
+                   Foreground="{StaticResource Brush.TextMuted}"
+                   FontSize="13"
+                   VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" />
+      </Grid>
+    </TreeDataTemplate>
+  </Window.DataTemplates>
+
+  <Grid RowDefinitions="58,*,42"
+        Background="{StaticResource Brush.AppBackground}">
+    <Border Grid.Row="0"
+            Background="{StaticResource Brush.TopBar}"
+            BorderBrush="{StaticResource Brush.Divider}"
+            BorderThickness="0,0,0,1"
+            Padding="14,0">
+      <Grid ColumnDefinitions="244,12,190,14,340,*,184" VerticalAlignment="Center">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+          <Button Classes="icon" Content="=" FontSize="18" Foreground="{StaticResource Brush.Accent}" />
+          <Border Width="30"
+                  Height="30"
+                  CornerRadius="8"
+                  Background="#111B28"
+                  BorderBrush="{StaticResource Brush.Border}"
+                  BorderThickness="1">
+            <TextBlock Text="R"
+                       FontWeight="Bold"
+                       FontSize="16"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Foreground="{StaticResource Brush.Text}" />
+          </Border>
+          <TextBlock Text="{Binding AppName}"
+                     FontSize="16"
+                     FontWeight="SemiBold"
+                     VerticalAlignment="Center" />
+        </StackPanel>
+
+        <Button Grid.Column="2"
+                Classes="secondary"
+                Height="34"
+                HorizontalContentAlignment="Stretch"
+                Command="{Binding OpenSettingsCommand}">
+          <Grid ColumnDefinitions="22,*,16">
+            <TextBlock Text="[]"
+                       Foreground="#FBBF24"
+                       FontSize="12"
+                       VerticalAlignment="Center" />
+            <TextBlock Grid.Column="1"
+                       Text="{Binding RepositoryName}"
+                       FontSize="13"
+                       TextTrimming="CharacterEllipsis"
+                       VerticalAlignment="Center" />
+            <TextBlock Grid.Column="2"
+                       Text="v"
+                       Foreground="{StaticResource Brush.TextWeak}"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center" />
+          </Grid>
+        </Button>
+
+        <Grid Grid.Column="4">
+          <TextBox Classes="search"
+                   PlaceholderText="Buscar notas..."
+                   Text="{Binding SearchText}" />
+          <TextBlock Text="/"
+                     Foreground="{StaticResource Brush.TextWeak}"
+                     FontSize="18"
+                     Margin="13,0,0,0"
+                     VerticalAlignment="Center"
+                     IsHitTestVisible="False" />
+          <Border HorizontalAlignment="Right"
+                  VerticalAlignment="Center"
+                  Margin="0,0,8,0"
+                  Background="#111827"
+                  BorderBrush="{StaticResource Brush.Border}"
+                  BorderThickness="1"
+                  CornerRadius="6"
+                  Padding="7,3"
+                  IsHitTestVisible="False">
+            <TextBlock Text="Ctrl+K"
+                       Foreground="{StaticResource Brush.TextMuted}"
+                       FontSize="11" />
+          </Border>
+        </Grid>
+
+        <StackPanel Grid.Column="6"
+                    Orientation="Horizontal"
+                    Spacing="5"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center">
+          <Button Classes="icon" Content="☼" ToolTip.Tip="Tema" />
+          <Button Classes="icon" Content="*" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Configuracoes" />
+          <Button Classes="icon" Content="-" ToolTip.Tip="Minimizar" />
+          <Button Classes="icon" Content="□" ToolTip.Tip="Maximizar" />
+          <Button Classes="icon" Content="X" ToolTip.Tip="Fechar" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="264,*,344">
+      <Border Grid.Column="0"
+              Background="{StaticResource Brush.Sidebar}"
+              BorderBrush="{StaticResource Brush.Divider}"
+              BorderThickness="0,0,1,0"
+              Padding="12">
+        <Grid RowDefinitions="Auto,12,*,44">
+          <Grid Row="0" ColumnDefinitions="*,8,*">
+            <Button Grid.Column="0"
+                    Classes="primary"
+                    Command="{Binding NewNoteCommand}"
+                    Content="+ Nova nota"
+                    Height="36" />
+            <Button Grid.Column="2"
+                    Classes="secondary"
+                    Command="{Binding NewFolderCommand}"
+                    Content="+ Nova pasta"
+                    Height="36" />
+          </Grid>
+
+          <StackPanel Grid.Row="2" Spacing="8">
+            <TextBlock Text="EXPLORADOR"
+                       Foreground="{StaticResource Brush.TextWeak}"
+                       FontSize="12"
+                       FontWeight="Bold"
+                       LetterSpacing="0" />
+
+            <Border Classes="card" Padding="5" CornerRadius="9">
+              <TreeView ItemsSource="{Binding Nodes}"
+                        SelectedItem="{Binding SelectedNode}"
+                        MinHeight="172" />
+            </Border>
+
+            <StackPanel Spacing="5">
+              <TextBlock Text="TAGS"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="12"
+                         FontWeight="Bold" />
+              <WrapPanel>
+                <Border Classes="tag-chip" Background="#24203E" Margin="0,0,5,5">
+                  <TextBlock Text="projeto 4" FontSize="11" Foreground="#C4B5FD" />
+                </Border>
+                <Border Classes="tag-chip" Background="#18352D" Margin="0,0,5,5">
+                  <TextBlock Text="infra 3" FontSize="11" Foreground="#A7F3D0" />
+                </Border>
+                <Border Classes="tag-chip" Background="#332A18" Margin="0,0,5,5">
+                  <TextBlock Text="estudo 2" FontSize="11" Foreground="#FDE68A" />
+                </Border>
+                <Border Classes="tag-chip" Background="#3A2227" Margin="0,0,5,5">
+                  <TextBlock Text="ideia 2" FontSize="11" Foreground="#FCA5A5" />
+                </Border>
+                <Border Classes="tag-chip" Background="#172B45" Margin="0,0,5,5">
+                  <TextBlock Text="pessoal 2" FontSize="11" Foreground="#BFDBFE" />
+                </Border>
+              </WrapPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="6">
+              <TextBlock Text="NOTAS RECENTES"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="12"
+                         FontWeight="Bold" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Configuracao Nginx" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" />
+                <TextBlock Grid.Column="1" Text="20/05/2026" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+              </Grid>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Ideias para o App" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" />
+                <TextBlock Grid.Column="1" Text="19/05/2026" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+              </Grid>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Arquitetura em Camadas" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" />
+                <TextBlock Grid.Column="1" Text="18/05/2026" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+              </Grid>
+            </StackPanel>
+          </StackPanel>
+
+          <Border Grid.Row="3"
+                  BorderBrush="{StaticResource Brush.Divider}"
+                  BorderThickness="0,1,0,0"
+                  Padding="0,8,0,0">
+            <Grid ColumnDefinitions="*,*,*,*">
+              <Button Grid.Column="0" Classes="icon" Content="N" ToolTip.Tip="Arquivo" />
+              <Button Grid.Column="1" Classes="icon" Content="*" ToolTip.Tip="Favoritos" />
+              <Button Grid.Column="2" Classes="icon" Content="Del" FontSize="12" ToolTip.Tip="Lixeira" />
+              <Button Grid.Column="3" Classes="icon" Content="Sync" FontSize="11" ToolTip.Tip="Sync" />
+            </Grid>
+          </Border>
+        </Grid>
+      </Border>
+
+      <Grid Grid.Column="1"
+            RowDefinitions="36,58,46,*"
+            Background="{StaticResource Brush.AppBackground}">
+        <Border Grid.Row="0"
+                Background="#0D141E"
+                BorderBrush="{StaticResource Brush.Divider}"
+                BorderThickness="0,0,1,1">
+          <Grid ColumnDefinitions="196,36,*">
+            <Border Grid.Column="0"
+                    Background="{StaticResource Brush.Panel}"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="0,0,1,0"
+                    Padding="10,0">
+              <Grid ColumnDefinitions="20,*,18" VerticalAlignment="Center">
+                <TextBlock Text="MD" FontSize="10" FontWeight="Bold" Foreground="#93C5FD" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="Bem-vindo ao RepoNotes.md"
+                           FontSize="12"
+                           TextTrimming="CharacterEllipsis"
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2"
+                           Text="X"
+                           Foreground="{StaticResource Brush.TextWeak}"
+                           HorizontalAlignment="Right"
+                           VerticalAlignment="Center" />
+              </Grid>
+            </Border>
+            <Button Grid.Column="1" Classes="icon" Content="+" Width="36" Height="36" CornerRadius="0" />
+          </Grid>
+        </Border>
+
+        <Border Grid.Row="1"
+                Background="{StaticResource Brush.AppBackground}"
+                Padding="16,10,16,4">
+          <Grid ColumnDefinitions="28,*">
+            <Border Width="24"
+                    Height="24"
+                    CornerRadius="7"
+                    Background="#151F2C"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    VerticalAlignment="Center">
+              <TextBlock Text="/"
+                         Foreground="{StaticResource Brush.Accent}"
+                         FontSize="15"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center" />
+            </Border>
+            <TextBox Grid.Column="1"
+                     Text="{Binding Title}"
+                     FontSize="24"
+                     FontWeight="SemiBold"
+                     PlaceholderText="Titulo da nota"
+                     BorderThickness="0"
+                     Background="Transparent"
+                     Foreground="{StaticResource Brush.Text}"
+                     VerticalAlignment="Center" />
+          </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Padding="16,0">
+          <Border Classes="card" Height="40" Padding="5,0">
+            <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+              <Button Classes="icon" Content="B" FontWeight="Bold" Width="30" Height="30" />
+              <Button Classes="icon" Content="I" FontStyle="Italic" Width="30" Height="30" />
+              <Button Classes="icon" Content="H1" FontSize="12" Width="32" Height="30" />
+              <Button Classes="icon" Content="H2" FontSize="12" Width="32" Height="30" />
+              <Button Classes="icon" Content="H3" FontSize="12" Width="32" Height="30" />
+              <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,7" />
+              <Button Classes="icon" Content="List" FontSize="11" Width="34" Height="30" />
+              <Button Classes="icon" Content="Chk" FontSize="11" Width="34" Height="30" />
+              <Button Classes="icon" Content="Link" FontSize="11" Width="34" Height="30" />
+              <Button Classes="icon" Content="Code" FontSize="10" Width="36" Height="30" />
+              <Button Classes="icon" Content="Qt" FontSize="11" Width="30" Height="30" />
+              <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,7" />
+              <Button Classes="icon" Content="Img" FontSize="11" Width="34" Height="30" />
+              <Button Classes="icon" Content="Tbl" FontSize="11" Width="34" Height="30" />
+              <Button Classes="icon" Content="..." FontSize="16" />
+            </StackPanel>
+          </Border>
+        </Border>
+
+        <Border Grid.Row="3" Padding="16,6,16,14">
+          <Border Classes="card"
+                  Background="{StaticResource Brush.Editor}"
+                  Padding="0"
+                  ClipToBounds="True">
+            <Grid ColumnDefinitions="42,*">
+              <Border Grid.Column="0"
+                      Background="#090E15"
+                      BorderBrush="{StaticResource Brush.Divider}"
+                      BorderThickness="0,0,1,0"
+                      Padding="0,12">
+                <TextBlock Text="1&#x0a;2&#x0a;3&#x0a;4&#x0a;5&#x0a;6&#x0a;7&#x0a;8&#x0a;9&#x0a;10&#x0a;11"
+                           FontFamily="Cascadia Mono, Consolas"
+                           FontSize="13"
+                           LineHeight="23"
+                           Foreground="{StaticResource Brush.TextWeak}"
+                           TextAlignment="Right"
+                           Margin="0,0,8,0" />
+              </Border>
+              <TextBox Grid.Column="1"
+                       Text="{Binding Markdown}"
+                       AcceptsReturn="True"
+                       TextWrapping="Wrap"
+                       FontFamily="Cascadia Mono, Consolas"
+                       FontSize="15"
+                       LineHeight="23"
+                       Background="{StaticResource Brush.Editor}"
+                       BorderThickness="0"
+                       Padding="12"
+                       Foreground="{StaticResource Brush.Text}"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </Grid>
+          </Border>
+        </Border>
+      </Grid>
+
+      <Border Grid.Column="2"
+              Background="{StaticResource Brush.Sidebar}"
+              BorderBrush="{StaticResource Brush.Divider}"
+              BorderThickness="1,0,0,0"
+              Padding="10">
+        <Border Classes="card" Padding="0">
+          <Grid RowDefinitions="44,*">
+            <Border BorderBrush="{StaticResource Brush.Divider}"
+                    BorderThickness="0,0,0,1">
+              <Grid ColumnDefinitions="88,70,*" Margin="8,0">
+                <Border Grid.Column="0"
+                        BorderBrush="{StaticResource Brush.Accent}"
+                        BorderThickness="0,0,0,2"
+                        VerticalAlignment="Stretch">
+                  <TextBlock Text="Preview"
+                             FontWeight="SemiBold"
+                             VerticalAlignment="Center"
+                             HorizontalAlignment="Center" />
+                </Border>
+                <TextBlock Grid.Column="1"
+                           Text="Info"
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center" />
+              </Grid>
+            </Border>
+
+            <ScrollViewer Grid.Row="1" Padding="16">
+              <StackPanel Spacing="12">
+                <TextBlock Text="{Binding Title}"
+                           FontSize="24"
+                           FontWeight="Bold"
+                           LineHeight="30"
+                           TextWrapping="Wrap" />
+                <TextBlock Text="Este e um editor local-first baseado em repositorios."
+                           Foreground="{StaticResource Brush.Text}"
+                           FontSize="14"
+                           LineHeight="22"
+                           TextWrapping="Wrap" />
+                <Border Height="1" Background="{StaticResource Brush.Divider}" />
+                <StackPanel Spacing="7">
+                  <Grid ColumnDefinitions="14,*">
+                    <TextBlock Text="-" Foreground="{StaticResource Brush.Accent}" FontSize="16" />
+                    <TextBlock Grid.Column="1" Text="Escreva notas em Markdown." FontSize="14" />
+                  </Grid>
+                  <Grid ColumnDefinitions="14,*">
+                    <TextBlock Text="-" Foreground="{StaticResource Brush.Accent}" FontSize="16" />
+                    <TextBlock Grid.Column="1" Text="Organize conhecimento em pastas." FontSize="14" />
+                  </Grid>
+                  <Grid ColumnDefinitions="14,*">
+                    <TextBlock Text="-" Foreground="{StaticResource Brush.Accent}" FontSize="16" />
+                    <TextBlock Grid.Column="1" Text="Mantenha tudo em arquivos locais." FontSize="14" />
+                  </Grid>
+                </StackPanel>
+                <Border Height="1" Background="{StaticResource Brush.Divider}" />
+                <TextBlock Text="O preview inicial ainda e simples, mas ja mostra o texto da nota selecionada."
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           FontSize="14"
+                           LineHeight="22"
+                           TextWrapping="Wrap" />
+
+                <Border Classes="card" Padding="12" Margin="0,2,0,0">
+                  <StackPanel Spacing="7">
+                    <TextBlock Text="Info da nota" FontWeight="SemiBold" />
+                    <Grid ColumnDefinitions="72,*">
+                      <TextBlock Text="Caminho" Foreground="{StaticResource Brush.TextWeak}" />
+                      <TextBlock Grid.Column="1" Text="{Binding NotePath}" Foreground="{StaticResource Brush.TextMuted}" TextWrapping="Wrap" />
+                    </Grid>
+                    <Grid ColumnDefinitions="72,*">
+                      <TextBlock Text="Atualizado" Foreground="{StaticResource Brush.TextWeak}" />
+                      <TextBlock Grid.Column="1" Text="{Binding UpdatedAtText}" Foreground="{StaticResource Brush.TextMuted}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="72,*">
+                      <TextBlock Text="Tags" Foreground="{StaticResource Brush.TextWeak}" />
+                      <TextBlock Grid.Column="1" Text="{Binding TagsText}" Foreground="{StaticResource Brush.TextMuted}" />
+                    </Grid>
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </ScrollViewer>
+          </Grid>
+        </Border>
+      </Border>
+    </Grid>
+
+    <Border Grid.Row="2"
+            Classes="status-bar"
+            Padding="14,0">
+      <Grid ColumnDefinitions="18,72,1,*,1,140,1,110" VerticalAlignment="Center">
+        <Border Width="9"
+                Height="9"
+                CornerRadius="5"
+                Background="{StaticResource Brush.StatusSaved}"
+                VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1"
+                   Text="{Binding Status}"
+                   Foreground="{StaticResource Brush.TextMuted}"
+                   VerticalAlignment="Center" />
+        <Border Grid.Column="2" Width="1" Background="{StaticResource Brush.Divider}" Margin="0,8" />
+        <TextBlock Grid.Column="3"
+                   Text="{Binding NotePath}"
+                   Foreground="{StaticResource Brush.TextMuted}"
+                   Margin="12,0"
+                   VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis" />
+        <Border Grid.Column="4" Width="1" Background="{StaticResource Brush.Divider}" Margin="0,8" />
+        <TextBlock Grid.Column="5"
+                   Text="Markdown"
+                   Foreground="{StaticResource Brush.TextMuted}"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
+        <Border Grid.Column="6" Width="1" Background="{StaticResource Brush.Divider}" Margin="0,8" />
+        <TextBlock Grid.Column="7"
+                   Text="Ln 11, Col 1"
+                   Foreground="{StaticResource Brush.TextMuted}"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Center" />
+      </Grid>
+    </Border>
+  </Grid>
+</Window>
