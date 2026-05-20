@@ -6,7 +6,7 @@
         Height="900"
         MinWidth="1366"
         MinHeight="768"
-        Title="RepoNotes">
+        Title="">
   <Window.KeyBindings>
     <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveNoteCommand}" />
   </Window.KeyBindings>
@@ -39,102 +39,64 @@
     </TreeDataTemplate>
   </Window.DataTemplates>
 
-  <Grid RowDefinitions="54,*,38"
+  <Grid RowDefinitions="*,38"
         Background="{StaticResource Brush.AppBackground}">
-    <Border Grid.Row="0"
-            Background="{StaticResource Brush.TopBar}"
-            BorderBrush="{StaticResource Brush.Divider}"
-            BorderThickness="0,0,0,1"
-            Padding="10,0">
-      <Grid ColumnDefinitions="226,10,176,12,320,*,68" VerticalAlignment="Center">
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-          <Button Classes="icon" Content="=" FontSize="18" Foreground="{StaticResource Brush.Accent}" />
-          <Border Width="28"
-                  Height="28"
-                  CornerRadius="7"
-                  Background="#111B28"
-                  BorderBrush="{StaticResource Brush.Border}"
-                  BorderThickness="1">
-            <TextBlock Text="R"
-                       FontWeight="Bold"
-                       FontSize="15"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Foreground="{StaticResource Brush.Text}" />
-          </Border>
-          <TextBlock Text="{Binding AppName}"
-                     FontSize="15"
-                     FontWeight="SemiBold"
-                     VerticalAlignment="Center" />
-        </StackPanel>
-
-        <Button Grid.Column="2"
-                Classes="secondary"
-                Height="32"
-                HorizontalContentAlignment="Stretch"
-                Command="{Binding OpenSettingsCommand}">
-          <Grid ColumnDefinitions="22,*,16">
-            <TextBlock Text="[]"
-                       Foreground="#FBBF24"
-                       FontSize="12"
-                       VerticalAlignment="Center" />
-            <TextBlock Grid.Column="1"
-                       Text="{Binding RepositoryName}"
-                       FontSize="13"
-                       TextTrimming="CharacterEllipsis"
-                       VerticalAlignment="Center" />
-            <TextBlock Grid.Column="2"
-                       Text="v"
-                       Foreground="{StaticResource Brush.TextWeak}"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center" />
-          </Grid>
-        </Button>
-
-        <Grid Grid.Column="4">
-          <TextBox Classes="search"
-                   PlaceholderText="Buscar notas..."
-                   Text="{Binding SearchText}" />
-          <TextBlock Text="/"
-                     Foreground="{StaticResource Brush.TextWeak}"
-                     FontSize="18"
-                     Margin="13,0,0,0"
-                     VerticalAlignment="Center"
-                     IsHitTestVisible="False" />
-          <Border HorizontalAlignment="Right"
-                  VerticalAlignment="Center"
-                  Margin="0,0,8,0"
-                  Background="#111827"
-                  BorderBrush="{StaticResource Brush.Border}"
-                  BorderThickness="1"
-                  CornerRadius="6"
-                  Padding="6,2"
-                  IsHitTestVisible="False">
-            <TextBlock Text="Ctrl+K"
-                       Foreground="{StaticResource Brush.TextMuted}"
-                       FontSize="11" />
-          </Border>
-        </Grid>
-
-        <StackPanel Grid.Column="6"
-                    Orientation="Horizontal"
-                    Spacing="4"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center">
-          <Button Classes="icon" Content="☼" ToolTip.Tip="Tema" />
-          <Button Classes="icon" Content="*" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Configuracoes" />
-        </StackPanel>
-      </Grid>
-    </Border>
-
-    <Grid Grid.Row="1" ColumnDefinitions="252,*,326">
+    <Grid Grid.Row="0" ColumnDefinitions="252,*,326">
       <Border Grid.Column="0"
               Background="{StaticResource Brush.Sidebar}"
               BorderBrush="{StaticResource Brush.Divider}"
               BorderThickness="0,0,1,0"
               Padding="10">
-        <Grid RowDefinitions="Auto,10,*,40">
-          <Grid Row="0" ColumnDefinitions="*,6,*">
+        <Grid RowDefinitions="Auto,8,Auto,8,Auto,10,*,40">
+          <Button Grid.Row="0"
+                  Classes="secondary"
+                  Height="32"
+                  HorizontalContentAlignment="Stretch"
+                  Command="{Binding OpenSettingsCommand}">
+            <Grid ColumnDefinitions="22,*,16">
+              <TextBlock Text="[]"
+                         Foreground="#FBBF24"
+                         FontSize="12"
+                         VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1"
+                         Text="{Binding RepositoryName}"
+                         FontSize="13"
+                         TextTrimming="CharacterEllipsis"
+                         VerticalAlignment="Center" />
+              <TextBlock Grid.Column="2"
+                         Text="v"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         HorizontalAlignment="Right"
+                         VerticalAlignment="Center" />
+            </Grid>
+          </Button>
+
+          <Grid Grid.Row="2">
+            <TextBox Classes="search"
+                     PlaceholderText="Buscar notas..."
+                     Text="{Binding SearchText}" />
+            <TextBlock Text="/"
+                       Foreground="{StaticResource Brush.TextWeak}"
+                       FontSize="18"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       IsHitTestVisible="False" />
+            <Border HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Margin="0,0,8,0"
+                    Background="#111827"
+                    BorderBrush="{StaticResource Brush.Border}"
+                    BorderThickness="1"
+                    CornerRadius="6"
+                    Padding="6,2"
+                    IsHitTestVisible="False">
+              <TextBlock Text="Ctrl+K"
+                         Foreground="{StaticResource Brush.TextMuted}"
+                         FontSize="11" />
+            </Border>
+          </Grid>
+
+          <Grid Grid.Row="4" ColumnDefinitions="*,6,*">
             <Button Grid.Column="0"
                     Classes="primary"
                     Command="{Binding NewNoteCommand}"
@@ -147,7 +109,7 @@
                     Height="34" />
           </Grid>
 
-          <StackPanel Grid.Row="2" Spacing="6">
+          <StackPanel Grid.Row="6" Spacing="6">
             <TextBlock Text="EXPLORADOR"
                        Foreground="{StaticResource Brush.TextWeak}"
                        FontSize="11"
@@ -204,15 +166,19 @@
             </StackPanel>
           </StackPanel>
 
-          <Border Grid.Row="3"
+          <Border Grid.Row="7"
                   BorderBrush="{StaticResource Brush.Divider}"
                   BorderThickness="0,1,0,0"
                   Padding="0,6,0,0">
-            <Grid ColumnDefinitions="*,*,*,*">
+            <Grid ColumnDefinitions="*,*,*">
               <Button Grid.Column="0" Classes="icon" Content="N" ToolTip.Tip="Arquivo" />
               <Button Grid.Column="1" Classes="icon" Content="*" ToolTip.Tip="Favoritos" />
-              <Button Grid.Column="2" Classes="icon" Content="Del" FontSize="12" ToolTip.Tip="Lixeira" />
-              <Button Grid.Column="3" Classes="icon" Content="Sync" FontSize="11" ToolTip.Tip="Sync" />
+              <Button Grid.Column="2"
+                      Classes="icon"
+                      Content="Cfg"
+                      FontSize="11"
+                      Command="{Binding OpenSettingsCommand}"
+                      ToolTip.Tip="Configuracoes" />
             </Grid>
           </Border>
         </Grid>
@@ -459,7 +425,7 @@
       </Border>
     </Grid>
 
-    <Border Grid.Row="2"
+    <Border Grid.Row="1"
             Classes="status-bar"
             Padding="10,0">
       <Grid ColumnDefinitions="16,84,1,*,1,118,1,96" VerticalAlignment="Center">
