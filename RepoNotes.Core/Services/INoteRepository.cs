@@ -11,4 +11,6 @@ public interface INoteRepository
     IReadOnlyList<NoteItem> GetNotes();
 
     NoteItem? GetNoteById(string noteId);
+
+    void SaveNote(NoteItem note);
 }

@@ -17,7 +17,7 @@ public sealed partial class App : Application
         {
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(new MockNoteRepository())
+                DataContext = new MainWindowViewModel(new LocalMarkdownNoteRepository())
             };
         }
 

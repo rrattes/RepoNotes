@@ -7,6 +7,10 @@
         MinWidth="1366"
         MinHeight="768"
         Title="RepoNotes">
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveNoteCommand}" />
+  </Window.KeyBindings>
+
   <Window.DataTemplates>
     <TreeDataTemplate DataType="{x:Type vm:RepositoryNodeViewModel}" ItemsSource="{Binding Children}">
       <Grid ColumnDefinitions="22,*" Height="23" VerticalAlignment="Center">

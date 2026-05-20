@@ -24,6 +24,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         NewNoteCommand = new RelayCommand(() => Status = "Nova nota pronta para implementacao");
         NewFolderCommand = new RelayCommand(() => Status = "Nova pasta pronta para implementacao");
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
+        SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
 
         SelectedNote = noteRepository.GetNotes().FirstOrDefault();
     }
@@ -41,6 +42,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand NewFolderCommand { get; }
 
     public ICommand OpenSettingsCommand { get; }
+
+    public ICommand SaveNoteCommand { get; }
 
     public string SearchText
     {
@@ -79,6 +82,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(WordCountText));
             OnPropertyChanged(nameof(UpdatedAtText));
             OnPropertyChanged(nameof(TagsText));
+            Status = "Salvo";
         }
     }
 
@@ -93,7 +97,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             }
 
             SelectedNote.Title = value;
-            TouchNote();
+            MarkNoteChanged();
             OnPropertyChanged();
             OnPropertyChanged(nameof(PreviewText));
         }
@@ -110,7 +114,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             }
 
             SelectedNote.Markdown = value;
-            TouchNote();
+            MarkNoteChanged();
             OnPropertyChanged();
             OnPropertyChanged(nameof(PreviewText));
             OnPropertyChanged(nameof(WordCountText));
@@ -139,13 +143,25 @@ public sealed class MainWindowViewModel : ViewModelBase
         private set => SetProperty(ref _status, value);
     }
 
-    private void TouchNote()
+    private void MarkNoteChanged()
     {
         if (SelectedNote is not null)
         {
             SelectedNote.UpdatedAt = DateTime.Now;
         }
 
+        Status = "Alterado";
+        OnPropertyChanged(nameof(UpdatedAtText));
+    }
+
+    private void SaveSelectedNote()
+    {
+        if (SelectedNote is null)
+        {
+            return;
+        }
+
+        _noteRepository.SaveNote(SelectedNote);
         Status = "Salvo";
         OnPropertyChanged(nameof(UpdatedAtText));
     }

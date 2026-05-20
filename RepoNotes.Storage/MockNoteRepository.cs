@@ -94,6 +94,11 @@ public sealed class MockNoteRepository : INoteRepository
     public NoteItem? GetNoteById(string noteId) =>
         _notes.FirstOrDefault(note => note.Id == noteId);
 
+    public void SaveNote(NoteItem note)
+    {
+        note.UpdatedAt = DateTime.Now;
+    }
+
     private static RepositoryNode Folder(string name, string path, params RepositoryNode[] children) =>
         new()
         {

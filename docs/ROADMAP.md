@@ -2,7 +2,7 @@
 
 ## Current State
 
-RepoNotes has a buildable Avalonia UI MVP with mocked local repository data, MVVM view models, a dark productivity-oriented interface, and a basic test project.
+RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark productivity-oriented interface, a basic test project, and initial local Markdown repository loading/saving.
 
 ## Near Term
 
@@ -14,12 +14,12 @@ RepoNotes has a buildable Avalonia UI MVP with mocked local repository data, MVV
 ## Next Product Milestones
 
 1. File-backed notes
-   - Read/write Markdown files from a chosen local repository.
-   - Preserve folder structure.
+   - Basic read/write Markdown files from a local sample repository is started.
+   - Preserve folder structure in the loaded tree.
    - Keep changes explicit and recoverable.
 
 2. Repository navigation
-   - Load real folders and Markdown files.
+   - Load real folders and Markdown files from the configured local repository.
    - Add refresh and basic file operations.
    - Keep mock data available for design/dev mode if useful.
 
