@@ -33,7 +33,89 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
         repository.SaveNote(note);
 
         var savedPath = Path.Combine(_tempRepositoryPath, note.Path);
-        Assert.Equal(updatedMarkdown, File.ReadAllText(savedPath));
+        var savedContent = File.ReadAllText(savedPath);
+        Assert.Contains("---", savedContent);
+        Assert.Contains("updated:", savedContent);
+        Assert.Contains(updatedMarkdown.ReplaceLineEndings(Environment.NewLine), savedContent);
+    }
+
+    [Fact]
+    public void ReadsYamlFrontmatterWhenPresent()
+    {
+        var filePath = Path.Combine(_tempRepositoryPath, "Frontmatter.md");
+        File.WriteAllText(filePath, """
+        ---
+        title: Titulo do Frontmatter
+        type: runbook
+        tags: [infra, windows]
+        status: published
+        created: 2026-05-19T10:00:00.0000000Z
+        updated: 2026-05-20T10:00:00.0000000Z
+        ---
+        # Titulo ignorado
+
+        Corpo da nota.
+        """);
+
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNoteById("Frontmatter.md");
+
+        Assert.NotNull(note);
+        Assert.Equal("Titulo do Frontmatter", note.Title);
+        Assert.Equal("runbook", note.Type);
+        Assert.Equal("published", note.Status);
+        Assert.Equal(["infra", "windows"], note.Tags);
+        Assert.StartsWith("# Titulo ignorado", note.Markdown);
+    }
+
+    [Fact]
+    public void KeepsWorkingWhenFrontmatterIsMissing()
+    {
+        var filePath = Path.Combine(_tempRepositoryPath, "SemFrontmatter.md");
+        File.WriteAllText(filePath, """
+        # Titulo pelo Markdown
+
+        Corpo da nota.
+        """);
+
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNoteById("SemFrontmatter.md");
+
+        Assert.NotNull(note);
+        Assert.Equal("Titulo pelo Markdown", note.Title);
+        Assert.Equal("note", note.Type);
+        Assert.Equal("draft", note.Status);
+        Assert.Empty(note.Tags);
+    }
+
+    [Fact]
+    public void SaveWritesFrontmatterAndUpdatesUpdatedField()
+    {
+        var filePath = Path.Combine(_tempRepositoryPath, "Salvar.md");
+        File.WriteAllText(filePath, """
+        ---
+        title: Nota antiga
+        type: note
+        tags: [teste]
+        status: draft
+        created: 2026-05-19T10:00:00.0000000Z
+        updated: 2026-05-19T10:00:00.0000000Z
+        ---
+        # Nota antiga
+        """);
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNoteById("Salvar.md")!;
+        var previousUpdated = note.UpdatedAt;
+
+        note.Title = "Nota nova";
+        note.Markdown = "# Nota nova";
+        repository.SaveNote(note);
+
+        var savedContent = File.ReadAllText(filePath);
+        Assert.Contains("title: Nota nova", savedContent);
+        Assert.Contains("tags: [teste]", savedContent);
+        Assert.Contains("# Nota nova", savedContent);
+        Assert.True(note.UpdatedAt >= previousUpdated);
     }
 
     [Fact]

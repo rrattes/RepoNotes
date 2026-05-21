@@ -10,11 +10,15 @@ public sealed class NoteItem
 
     public required string Path { get; init; }
 
+    public string Type { get; set; } = "note";
+
+    public string Status { get; set; } = "draft";
+
     public required DateTime CreatedAt { get; init; }
 
     public required DateTime UpdatedAt { get; set; }
 
-    public IReadOnlyList<string> Tags { get; init; } = [];
+    public IReadOnlyList<string> Tags { get; set; } = [];
 
     public int WordCount =>
         Markdown.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries).Length;

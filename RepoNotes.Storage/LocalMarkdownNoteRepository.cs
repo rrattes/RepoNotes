@@ -40,7 +40,8 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
     {
         var fullPath = GetSafeFullPath(note.Path);
         Directory.CreateDirectory(Path.GetDirectoryName(fullPath)!);
-        File.WriteAllText(fullPath, note.Markdown);
+        note.UpdatedAt = DateTime.Now;
+        File.WriteAllText(fullPath, ComposeMarkdownFile(note));
 
         var updatedAt = File.GetLastWriteTime(fullPath);
         note.UpdatedAt = updatedAt;
@@ -50,6 +51,9 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         {
             existing.Title = note.Title;
             existing.Markdown = note.Markdown;
+            existing.Type = note.Type;
+            existing.Status = note.Status;
+            existing.Tags = note.Tags;
             existing.UpdatedAt = updatedAt;
         }
     }
@@ -64,9 +68,17 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         var fileName = GetUniqueFileName(targetDirectory, safeNoteName, ".md");
         var fullPath = Path.Combine(targetDirectory, fileName);
         var title = Path.GetFileNameWithoutExtension(fileName);
-        var markdown = $"# {title}{Environment.NewLine}";
+        var note = new NoteItem
+        {
+            Id = NormalizePath(Path.GetRelativePath(_rootPath, fullPath)),
+            Title = title,
+            Markdown = $"# {title}{Environment.NewLine}",
+            Path = NormalizePath(Path.GetRelativePath(_rootPath, fullPath)),
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        };
 
-        File.WriteAllText(fullPath, markdown);
+        File.WriteAllText(fullPath, ComposeMarkdownFile(note));
         var createdNote = CreateNote(fullPath);
         Reload();
 
@@ -190,18 +202,24 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
 
     private NoteItem CreateNote(string filePath)
     {
-        var markdown = File.ReadAllText(filePath);
+        var fileContent = File.ReadAllText(filePath);
+        var frontmatter = ParseFrontmatter(fileContent);
         var relativePath = Path.GetRelativePath(_rootPath, filePath);
         var normalizedPath = NormalizePath(relativePath);
+        var createdAt = frontmatter.Created ?? File.GetCreationTime(filePath);
+        var updatedAt = frontmatter.Updated ?? File.GetLastWriteTime(filePath);
 
         return new NoteItem
         {
             Id = normalizedPath,
-            Title = GetTitle(markdown, filePath),
-            Markdown = markdown,
+            Title = GetTitle(frontmatter, filePath),
+            Markdown = frontmatter.Body,
             Path = normalizedPath,
-            CreatedAt = File.GetCreationTime(filePath),
-            UpdatedAt = File.GetLastWriteTime(filePath)
+            Type = frontmatter.Type,
+            Status = frontmatter.Status,
+            Tags = frontmatter.Tags,
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt
         };
     }
 
@@ -402,9 +420,14 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
     private static string NormalizePath(string path) =>
         path.Replace(Path.DirectorySeparatorChar, '\\').Replace(Path.AltDirectorySeparatorChar, '\\');
 
-    private static string GetTitle(string markdown, string filePath)
+    private static string GetTitle(ParsedFrontmatter frontmatter, string filePath)
     {
-        var heading = markdown
+        if (!string.IsNullOrWhiteSpace(frontmatter.Title))
+        {
+            return frontmatter.Title;
+        }
+
+        var heading = frontmatter.Body
             .Split(["\r\n", "\n"], StringSplitOptions.None)
             .Select(line => line.Trim())
             .FirstOrDefault(line => line.StartsWith("# ", StringComparison.Ordinal));
@@ -412,5 +435,158 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         return string.IsNullOrWhiteSpace(heading)
             ? Path.GetFileNameWithoutExtension(filePath)
             : heading[2..].Trim();
+    }
+
+    private static ParsedFrontmatter ParseFrontmatter(string content)
+    {
+        var normalizedContent = content.ReplaceLineEndings("\n");
+        if (!normalizedContent.StartsWith("---\n", StringComparison.Ordinal))
+        {
+            return new ParsedFrontmatter { Body = content };
+        }
+
+        var endIndex = normalizedContent.IndexOf("\n---\n", 4, StringComparison.Ordinal);
+        if (endIndex < 0)
+        {
+            return new ParsedFrontmatter { Body = content };
+        }
+
+        var frontmatterText = normalizedContent[4..endIndex];
+        var body = normalizedContent[(endIndex + 5)..];
+        var parsed = new ParsedFrontmatter { Body = body };
+
+        foreach (var rawLine in frontmatterText.Split('\n'))
+        {
+            var line = rawLine.Trim();
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            var separatorIndex = line.IndexOf(':', StringComparison.Ordinal);
+            if (separatorIndex <= 0)
+            {
+                continue;
+            }
+
+            var key = line[..separatorIndex].Trim();
+            var value = TrimYamlValue(line[(separatorIndex + 1)..].Trim());
+
+            switch (key.ToLowerInvariant())
+            {
+                case "title":
+                    parsed.Title = value;
+                    break;
+                case "type":
+                    parsed.Type = string.IsNullOrWhiteSpace(value) ? "note" : value;
+                    break;
+                case "tags":
+                    parsed.Tags = ParseTags(value);
+                    break;
+                case "status":
+                    parsed.Status = string.IsNullOrWhiteSpace(value) ? "draft" : value;
+                    break;
+                case "created":
+                    parsed.Created = ParseDate(value);
+                    break;
+                case "updated":
+                    parsed.Updated = ParseDate(value);
+                    break;
+            }
+        }
+
+        return parsed;
+    }
+
+    private static string ComposeMarkdownFile(NoteItem note)
+    {
+        var created = FormatDate(note.CreatedAt);
+        var updated = FormatDate(note.UpdatedAt);
+        var tags = note.Tags.Count == 0
+            ? "[]"
+            : $"[{string.Join(", ", note.Tags.Select(EscapeYamlListValue))}]";
+        var body = note.Markdown.ReplaceLineEndings(Environment.NewLine);
+
+        return string.Join(Environment.NewLine, [
+            "---",
+            $"title: {EscapeYamlValue(note.Title)}",
+            $"type: {EscapeYamlValue(note.Type)}",
+            $"tags: {tags}",
+            $"status: {EscapeYamlValue(note.Status)}",
+            $"created: {created}",
+            $"updated: {updated}",
+            "---",
+            body
+        ]);
+    }
+
+    private static IReadOnlyList<string> ParseTags(string value)
+    {
+        var trimmedValue = value.Trim();
+        if (trimmedValue is "[]" or "")
+        {
+            return [];
+        }
+
+        if (trimmedValue.StartsWith('[') && trimmedValue.EndsWith(']'))
+        {
+            trimmedValue = trimmedValue[1..^1];
+        }
+
+        return trimmedValue
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(TrimYamlValue)
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .ToArray();
+    }
+
+    private static DateTime? ParseDate(string value) =>
+        DateTime.TryParse(value, null, System.Globalization.DateTimeStyles.RoundtripKind, out var date)
+            ? date
+            : null;
+
+    private static string FormatDate(DateTime value) =>
+        value.ToUniversalTime().ToString("O");
+
+    private static string TrimYamlValue(string value)
+    {
+        var trimmedValue = value.Trim();
+        return trimmedValue.Length >= 2
+            && ((trimmedValue.StartsWith('"') && trimmedValue.EndsWith('"'))
+                || (trimmedValue.StartsWith('\'') && trimmedValue.EndsWith('\'')))
+            ? trimmedValue[1..^1]
+            : trimmedValue;
+    }
+
+    private static string EscapeYamlValue(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return "\"\"";
+        }
+
+        return value.Any(character => character is ':' or '#' or '[' or ']' or ',' or '"' or '\'')
+            ? $"\"{value.Replace("\"", "\\\"")}\""
+            : value;
+    }
+
+    private static string EscapeYamlListValue(string value) =>
+        EscapeYamlValue(value);
+
+    private sealed class ParsedFrontmatter
+    {
+        public string? Title { get; set; }
+
+        public string Type { get; set; } = "note";
+
+        public IReadOnlyList<string> Tags { get; set; } = [];
+
+        public string Status { get; set; } = "draft";
+
+        public DateTime? Created { get; set; }
+
+        public DateTime? Updated { get; set; }
+
+        public required string Body { get; init; }
     }
 }

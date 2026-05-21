@@ -408,3 +408,27 @@
 **Riscos tecnicos:** Medio-baixo; a busca em memoria e adequada para o MVP, mas repositorios grandes podem exigir indice incremental, cancelamento/debounce e estrategia especifica para conteudo bloqueado por criptografia.
 
 **Proximo passo sugerido:** Testar manualmente buscas por nome de arquivo, pasta e trecho do conteudo; depois avaliar destaque visual de resultados e atalhos de navegacao entre resultados.
+
+## 2026-05-20 21:03:13 -03:00
+
+**Objetivo da rodada:** Adicionar suporte basico a YAML frontmatter nas notas Markdown, preparando metadados sem transformar o app em banco.
+
+**Arquivos alterados:**
+
+- `RepoNotes.Core/Models/NoteItem.cs`
+- `RepoNotes.Storage/LocalMarkdownNoteRepository.cs`
+- `RepoNotes.Tests/LocalMarkdownNoteRepositoryTests.cs`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O storage agora le frontmatter delimitado por `---` e reconhece os campos `title`, `type`, `tags`, `status`, `created` e `updated`. Notas sem frontmatter continuam funcionando, usando heading Markdown ou nome do arquivo como titulo. Ao salvar, o arquivo e escrito com frontmatter e o campo `updated` e atualizado. `NoteItem` passou a expor metadados basicos para preparar futuras funcionalidades sem adicionar banco.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-20 21:03 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-20 21:03 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 33 testes aprovados, 0 falhas.
+
+**Pendencias:** O parser YAML e simples e cobre apenas o subconjunto necessario ao MVP; ainda nao ha UI dedicada para editar `type`, `tags` ou `status`, nem validacao avancada de formatos.
+
+**Riscos tecnicos:** Medio-baixo; o formato e portavel e local-first, mas evolucoes futuras de entidades tecnicas e criptografia precisam manter compatibilidade com frontmatter existente e evitar indexar metadados/conteudo bloqueado quando houver criptografia.
+
+**Proximo passo sugerido:** Testar manualmente notas com e sem frontmatter e, em rodada futura, criar uma UI compacta para editar tags/status sem expor YAML bruto ao usuario.
