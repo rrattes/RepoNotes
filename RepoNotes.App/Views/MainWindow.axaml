@@ -132,7 +132,7 @@
               BorderBrush="{StaticResource Brush.Divider}"
               BorderThickness="0,0,1,0"
               Padding="10">
-        <Grid RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,10,*,40">
+        <Grid RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,10,*,92">
           <Button Grid.Row="0"
                   Classes="repository-card"
                   Height="34"
@@ -291,33 +291,65 @@
                   BorderBrush="{StaticResource Brush.Divider}"
                   BorderThickness="0,1,0,0"
                   Padding="0,6,0,0">
-            <Grid ColumnDefinitions="*,4,*,4,*,4,*,4,*">
-              <Button Grid.Column="0"
-                      Classes="sidebar-action"
-                      Content="Novo"
-                      Command="{Binding NewNoteCommand}"
-                      ToolTip.Tip="Nova nota" />
-              <Button Grid.Column="2"
-                      Classes="sidebar-action"
-                      Content="Ren"
-                      Command="{Binding RenameSelectedItemCommand}"
-                      ToolTip.Tip="Renomear item selecionado" />
-              <Button Grid.Column="4"
-                      Classes="sidebar-action"
-                      Content="Del"
-                      Command="{Binding DeleteSelectedItemCommand}"
-                      ToolTip.Tip="Mover item selecionado para a lixeira" />
-              <Button Grid.Column="6"
-                      Classes="sidebar-action"
-                      Content="Fav"
-                      Command="{Binding OpenFavoritesCommand}"
-                      ToolTip.Tip="Favoritos" />
-              <Button Grid.Column="8"
-                      Classes="sidebar-action"
-                      Content="Config"
-                      Command="{Binding OpenSettingsCommand}"
-                      ToolTip.Tip="Configuracoes" />
-            </Grid>
+            <StackPanel Spacing="6">
+              <Grid ColumnDefinitions="*,4,*,4,*,4,*,4,*">
+                <Button Grid.Column="0"
+                        Classes="sidebar-action"
+                        Content="Novo"
+                        Command="{Binding NewNoteCommand}"
+                        ToolTip.Tip="Nova nota" />
+                <Button Grid.Column="2"
+                        Classes="sidebar-action"
+                        Content="Ren"
+                        Command="{Binding RenameSelectedItemCommand}"
+                        ToolTip.Tip="Renomear item selecionado" />
+                <Button Grid.Column="4"
+                        Classes="sidebar-action"
+                        Content="Del"
+                        Command="{Binding DeleteSelectedItemCommand}"
+                        ToolTip.Tip="Mover item selecionado para a lixeira" />
+                <Button Grid.Column="6"
+                        Classes="sidebar-action"
+                        Content="Fav"
+                        Command="{Binding OpenFavoritesCommand}"
+                        ToolTip.Tip="Favoritos" />
+                <Button Grid.Column="8"
+                        Classes="sidebar-action"
+                        Content="Config"
+                        Command="{Binding OpenSettingsCommand}"
+                        ToolTip.Tip="Configuracoes" />
+              </Grid>
+              <Grid ColumnDefinitions="*,4,54,4,54,4,42">
+                <ComboBox Grid.Column="0"
+                          Classes="trash-picker"
+                          ItemsSource="{Binding TrashItems}"
+                          SelectedItem="{Binding SelectedTrashItem}"
+                          ToolTip.Tip="Itens na lixeira">
+                  <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Name}"
+                                 FontSize="11"
+                                 TextTrimming="CharacterEllipsis" />
+                    </DataTemplate>
+                  </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Grid.Column="2"
+                        Classes="sidebar-action"
+                        Content="Rest"
+                        Command="{Binding RestoreFromTrashCommand}"
+                        ToolTip.Tip="Restaurar item da lixeira" />
+                <Button Grid.Column="4"
+                        Classes="sidebar-action"
+                        Content="Perm"
+                        Command="{Binding DeletePermanentlyCommand}"
+                        ToolTip.Tip="Excluir permanentemente item da lixeira" />
+                <Button Grid.Column="6"
+                        Classes="sidebar-action"
+                        Content="Lim"
+                        Command="{Binding EmptyTrashCommand}"
+                        ToolTip.Tip="Esvaziar lixeira" />
+              </Grid>
+            </StackPanel>
           </Border>
         </Grid>
       </Border>

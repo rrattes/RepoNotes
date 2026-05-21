@@ -1,11 +1,13 @@
 using RepoNotes.Core.Models;
 using RepoNotes.Core.Services;
+using System.Text.Json;
 
 namespace RepoNotes.Storage;
 
 public sealed class LocalMarkdownNoteRepository : INoteRepository
 {
     private const string TrashDirectoryName = ".reponotes-trash";
+    private const string TrashMetadataFileName = ".trash-metadata.json";
 
     private readonly string _rootPath;
     private readonly List<NoteItem> _notes = [];
@@ -181,8 +183,135 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
             Directory.Move(fullPath, trashPath);
         }
 
+        var normalizedTrashPath = NormalizePath(Path.GetRelativePath(_rootPath, trashPath));
+        SaveTrashMetadata(normalizedTrashPath, NormalizePath(itemPath));
         Reload();
-        return NormalizePath(Path.GetRelativePath(_rootPath, trashPath));
+        return normalizedTrashPath;
+    }
+
+    public IReadOnlyList<TrashItem> GetTrashItems()
+    {
+        var trashDirectory = Path.Combine(_rootPath, TrashDirectoryName);
+        if (!Directory.Exists(trashDirectory))
+        {
+            return [];
+        }
+
+        var metadata = LoadTrashMetadata();
+        var items = new List<TrashItem>();
+
+        foreach (var path in Directory.EnumerateFileSystemEntries(trashDirectory).OrderBy(path => path))
+        {
+            if (string.Equals(Path.GetFileName(path), TrashMetadataFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var trashPath = NormalizePath(Path.GetRelativePath(_rootPath, path));
+            items.Add(new TrashItem
+            {
+                Name = Path.GetFileName(path),
+                TrashPath = trashPath,
+                OriginalPath = metadata.TryGetValue(trashPath, out var originalPath) ? originalPath : Path.GetFileName(path),
+                IsNote = File.Exists(path) && string.Equals(Path.GetExtension(path), ".md", StringComparison.OrdinalIgnoreCase)
+            });
+        }
+
+        return items;
+    }
+
+    public string RestoreFromTrash(string trashPath)
+    {
+        var fullTrashPath = GetSafeFullPath(trashPath);
+        if (!IsTrashPath(fullTrashPath))
+        {
+            throw new InvalidOperationException("Only trash items can be restored.");
+        }
+
+        if (!File.Exists(fullTrashPath) && !Directory.Exists(fullTrashPath))
+        {
+            throw new InvalidOperationException("Trash item does not exist.");
+        }
+
+        var metadata = LoadTrashMetadata();
+        var normalizedTrashPath = NormalizePath(trashPath);
+        var originalPath = metadata.TryGetValue(normalizedTrashPath, out var metadataOriginalPath)
+            ? metadataOriginalPath
+            : Path.GetFileName(fullTrashPath);
+        var targetPath = GetRestoreTargetPath(fullTrashPath, originalPath);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+
+        if (File.Exists(fullTrashPath))
+        {
+            File.Move(fullTrashPath, targetPath);
+        }
+        else
+        {
+            Directory.Move(fullTrashPath, targetPath);
+        }
+
+        metadata.Remove(normalizedTrashPath);
+        WriteTrashMetadata(metadata);
+        Reload();
+
+        return NormalizePath(Path.GetRelativePath(_rootPath, targetPath));
+    }
+
+    public void DeletePermanently(string trashPath)
+    {
+        var fullTrashPath = GetSafeFullPath(trashPath);
+        if (!IsTrashPath(fullTrashPath) || IsTrashRoot(fullTrashPath))
+        {
+            throw new InvalidOperationException("Only items inside the trash can be permanently deleted.");
+        }
+
+        if (File.Exists(fullTrashPath))
+        {
+            File.Delete(fullTrashPath);
+        }
+        else if (Directory.Exists(fullTrashPath))
+        {
+            Directory.Delete(fullTrashPath, recursive: true);
+        }
+        else
+        {
+            throw new InvalidOperationException("Trash item does not exist.");
+        }
+
+        var metadata = LoadTrashMetadata();
+        metadata.Remove(NormalizePath(trashPath));
+        WriteTrashMetadata(metadata);
+        Reload();
+    }
+
+    public void EmptyTrash()
+    {
+        var trashDirectory = Path.Combine(_rootPath, TrashDirectoryName);
+        if (!Directory.Exists(trashDirectory))
+        {
+            return;
+        }
+
+        foreach (var path in Directory.EnumerateFileSystemEntries(trashDirectory))
+        {
+            if (string.Equals(Path.GetFileName(path), TrashMetadataFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            else
+            {
+                Directory.Delete(path, recursive: true);
+            }
+        }
+
+        WriteTrashMetadata([]);
+        Reload();
     }
 
     private void Reload()
@@ -283,6 +412,38 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
 
         return normalizedPath.Equals(trashPath, StringComparison.OrdinalIgnoreCase)
             || normalizedPath.StartsWith(trashPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private bool IsTrashRoot(string fullPath)
+    {
+        var normalizedPath = Path.GetFullPath(fullPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var trashPath = Path.GetFullPath(Path.Combine(_rootPath, TrashDirectoryName)).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        return normalizedPath.Equals(trashPath, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string GetRestoreTargetPath(string fullTrashPath, string originalPath)
+    {
+        var normalizedOriginalPath = NormalizeOptionalPath(originalPath) ?? Path.GetFileName(fullTrashPath);
+        var candidatePath = GetSafeFullPath(normalizedOriginalPath);
+
+        if (Directory.Exists(Path.GetDirectoryName(candidatePath)) && !File.Exists(candidatePath) && !Directory.Exists(candidatePath))
+        {
+            return candidatePath;
+        }
+
+        var fallbackDirectory = Directory.Exists(Path.GetDirectoryName(candidatePath))
+            ? Path.GetDirectoryName(candidatePath)!
+            : _rootPath;
+        var extension = File.Exists(fullTrashPath) ? Path.GetExtension(fullTrashPath) : string.Empty;
+        var baseName = extension.Length == 0
+            ? Path.GetFileName(fullTrashPath)
+            : Path.GetFileNameWithoutExtension(fullTrashPath);
+        var restoredBaseName = $"{baseName} restaurado";
+        var restoredName = extension.Length == 0
+            ? GetUniqueDirectoryName(fallbackDirectory, restoredBaseName)
+            : GetUniqueFileName(fallbackDirectory, restoredBaseName, extension);
+
+        return Path.Combine(fallbackDirectory, restoredName);
     }
 
     private string GetSafeDirectoryPath(string? relativePath)
@@ -576,6 +737,42 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
 
     private static string EscapeYamlListValue(string value) =>
         EscapeYamlValue(value);
+
+    private Dictionary<string, string> LoadTrashMetadata()
+    {
+        var metadataPath = GetTrashMetadataPath();
+        if (!File.Exists(metadataPath))
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+
+        try
+        {
+            var metadata = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(metadataPath));
+            return new Dictionary<string, string>(metadata ?? [], StringComparer.OrdinalIgnoreCase);
+        }
+        catch (JsonException)
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
+    private void SaveTrashMetadata(string trashPath, string originalPath)
+    {
+        var metadata = LoadTrashMetadata();
+        metadata[trashPath] = originalPath;
+        WriteTrashMetadata(metadata);
+    }
+
+    private void WriteTrashMetadata(Dictionary<string, string> metadata)
+    {
+        var trashDirectory = Path.Combine(_rootPath, TrashDirectoryName);
+        Directory.CreateDirectory(trashDirectory);
+        File.WriteAllText(GetTrashMetadataPath(), JsonSerializer.Serialize(metadata, new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    private string GetTrashMetadataPath() =>
+        Path.Combine(_rootPath, TrashDirectoryName, TrashMetadataFileName);
 
     private sealed class ParsedFrontmatter
     {

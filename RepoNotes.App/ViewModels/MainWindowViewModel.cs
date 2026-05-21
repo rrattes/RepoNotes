@@ -16,6 +16,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
     private NoteItem? _selectedNote;
     private RepositoryNodeViewModel? _selectedNode;
+    private TrashItem? _selectedTrashItem;
     private string _repositoryName;
     private string _repositoryPath;
     private string _searchText = string.Empty;
@@ -46,6 +47,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
         Nodes = [];
         PreviewBlocks = [];
+        TrashItems = [];
 
         NewNoteCommand = new RelayCommand(CreateNewNote);
         NewFromTemplateCommand = new RelayCommand(CreateNewNoteFromSelectedTemplate);
@@ -55,6 +57,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
         RenameSelectedItemCommand = new RelayCommand(RenameSelectedItem);
         DeleteSelectedItemCommand = new RelayCommand(DeleteSelectedItem);
+        RestoreFromTrashCommand = new RelayCommand(RestoreFromTrash);
+        DeletePermanentlyCommand = new RelayCommand(DeletePermanently);
+        EmptyTrashCommand = new RelayCommand(EmptyTrash);
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
 
         ReloadRepository(noteRepository, initialStatus);
@@ -77,6 +82,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<RepositoryNodeViewModel> Nodes { get; }
 
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
+
+    public ObservableCollection<TrashItem> TrashItems { get; }
 
     public IReadOnlyList<NoteTemplate> Templates { get; }
 
@@ -112,6 +119,12 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand RenameSelectedItemCommand { get; }
 
     public ICommand DeleteSelectedItemCommand { get; }
+
+    public ICommand RestoreFromTrashCommand { get; }
+
+    public ICommand DeletePermanentlyCommand { get; }
+
+    public ICommand EmptyTrashCommand { get; }
 
     public ICommand SaveNoteCommand { get; }
 
@@ -153,6 +166,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 
             SelectedNote = _noteRepository.GetNoteById(value.NoteId);
         }
+    }
+
+    public TrashItem? SelectedTrashItem
+    {
+        get => _selectedTrashItem;
+        set => SetProperty(ref _selectedTrashItem, value);
     }
 
     public NoteItem? SelectedNote
@@ -444,6 +463,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             _noteRepository.MoveItemToTrash(deletedPath);
             RefreshTree();
+            RefreshTrashItems();
             _selectedNode = null;
             OnPropertyChanged(nameof(SelectedNode));
 
@@ -458,6 +478,72 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             LastErrorMessage = ex.Message;
             Status = "Erro ao excluir item";
+        }
+    }
+
+    private void RestoreFromTrash()
+    {
+        if (SelectedTrashItem is null)
+        {
+            Status = "Selecione um item da lixeira";
+            return;
+        }
+
+        if (!TrySaveSelectedNote())
+        {
+            return;
+        }
+
+        try
+        {
+            var restoredPath = _noteRepository.RestoreFromTrash(SelectedTrashItem.TrashPath);
+            RefreshTree();
+            RefreshTrashItems();
+            SelectNodeByPath(restoredPath);
+            SelectNodeByNoteId(restoredPath);
+            Status = $"Item restaurado: {restoredPath}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao restaurar item";
+        }
+    }
+
+    private void DeletePermanently()
+    {
+        if (SelectedTrashItem is null)
+        {
+            Status = "Selecione um item da lixeira";
+            return;
+        }
+
+        try
+        {
+            var deletedPath = SelectedTrashItem.TrashPath;
+            _noteRepository.DeletePermanently(deletedPath);
+            RefreshTrashItems();
+            Status = $"Item excluido permanentemente: {deletedPath}";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao excluir permanentemente";
+        }
+    }
+
+    private void EmptyTrash()
+    {
+        try
+        {
+            _noteRepository.EmptyTrash();
+            RefreshTrashItems();
+            Status = "Lixeira esvaziada";
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            LastErrorMessage = ex.Message;
+            Status = "Erro ao esvaziar lixeira";
         }
     }
 
@@ -512,6 +598,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RepositoryName = noteRepository.CurrentRepository.Name;
         RepositoryPath = noteRepository.CurrentRepository.RootPath;
         RefreshTree();
+        RefreshTrashItems();
 
         _selectedNode = null;
         OnPropertyChanged(nameof(SelectedNode));
@@ -539,6 +626,18 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             Nodes.Add(new RepositoryNodeViewModel(node));
         }
+    }
+
+    private void RefreshTrashItems()
+    {
+        TrashItems.Clear();
+
+        foreach (var item in _noteRepository.GetTrashItems())
+        {
+            TrashItems.Add(item);
+        }
+
+        SelectedTrashItem = TrashItems.FirstOrDefault();
     }
 
     private IReadOnlyList<RepositoryNode> GetFilteredTree(string query)

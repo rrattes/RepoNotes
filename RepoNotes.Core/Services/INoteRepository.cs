@@ -21,4 +21,12 @@ public interface INoteRepository
     string RenameItem(string itemPath, string newName);
 
     string MoveItemToTrash(string itemPath);
+
+    IReadOnlyList<TrashItem> GetTrashItems();
+
+    string RestoreFromTrash(string trashPath);
+
+    void DeletePermanently(string trashPath);
+
+    void EmptyTrash();
 }

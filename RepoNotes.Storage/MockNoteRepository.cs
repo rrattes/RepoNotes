@@ -7,6 +7,7 @@ public sealed class MockNoteRepository : INoteRepository
 {
     private readonly List<NoteItem> _notes;
     private readonly List<RepositoryNode> _tree;
+    private readonly List<TrashItem> _trashItems = [];
 
     public MockNoteRepository()
     {
@@ -149,7 +150,37 @@ public sealed class MockNoteRepository : INoteRepository
         }
 
         _notes.RemoveAll(note => note.Path == itemPath || note.Path.StartsWith(itemPath + "\\", StringComparison.OrdinalIgnoreCase));
-        return @$".reponotes-trash\{Path.GetFileName(itemPath)}";
+        var trashPath = @$".reponotes-trash\{Path.GetFileName(itemPath)}";
+        _trashItems.Add(new TrashItem
+        {
+            Name = Path.GetFileName(itemPath),
+            TrashPath = trashPath,
+            OriginalPath = itemPath,
+            IsNote = itemPath.EndsWith(".md", StringComparison.OrdinalIgnoreCase)
+        });
+        return trashPath;
+    }
+
+    public IReadOnlyList<TrashItem> GetTrashItems() => _trashItems;
+
+    public string RestoreFromTrash(string trashPath)
+    {
+        var item = _trashItems.FirstOrDefault(candidate => candidate.TrashPath == trashPath)
+            ?? throw new InvalidOperationException("Trash item does not exist.");
+        _trashItems.Remove(item);
+        return item.OriginalPath;
+    }
+
+    public void DeletePermanently(string trashPath)
+    {
+        var item = _trashItems.FirstOrDefault(candidate => candidate.TrashPath == trashPath)
+            ?? throw new InvalidOperationException("Trash item does not exist.");
+        _trashItems.Remove(item);
+    }
+
+    public void EmptyTrash()
+    {
+        _trashItems.Clear();
     }
 
     private static RepositoryNode Folder(string name, string path, params RepositoryNode[] children) =>

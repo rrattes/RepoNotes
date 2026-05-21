@@ -390,6 +390,23 @@ public sealed class MainWindowViewModelSaveTests
 
             return @$".reponotes-trash\{Path.GetFileName(itemPath)}";
         }
+
+        public IReadOnlyList<TrashItem> GetTrashItems() => [];
+
+        public string RestoreFromTrash(string trashPath) =>
+            trashPath.Replace(@".reponotes-trash\", string.Empty, StringComparison.OrdinalIgnoreCase);
+
+        public void DeletePermanently(string trashPath)
+        {
+            if (!trashPath.StartsWith(@".reponotes-trash\", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Only trash items can be permanently deleted.");
+            }
+        }
+
+        public void EmptyTrash()
+        {
+        }
     }
 
     private sealed class TestFolderPickerService(string? selectedPath) : IFolderPickerService

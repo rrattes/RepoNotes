@@ -27,6 +27,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Global actions such as settings live in the lower-left sidebar toolbar.
 - Lower-left global actions should use clear compact labels and tooltips. Avoid cryptic placeholder labels such as `N`, `*`, or `Cfg`.
 - Sidebar item actions such as rename and delete may live in the lower-left toolbar as compact controls while the app has no context menu; labels and tooltips must remain explicit.
+- Trash actions live in the lower-left sidebar area as a compact picker plus small action buttons for restore, permanent delete, and empty trash.
+- Permanent delete controls must remain visually secondary and should gain explicit confirmation UX in a future round.
 - The only persistent top area inside the main content is the document context bar above the editor.
 - The document context bar should show the active document tab, breadcrumb, and note-scoped actions.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.

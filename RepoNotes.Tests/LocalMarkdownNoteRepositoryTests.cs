@@ -226,6 +226,81 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
     }
 
     [Fact]
+    public void RestoresDeletedNoteFromTrash()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNotes().First();
+        var originalPath = note.Path;
+        var trashPath = repository.MoveItemToTrash(originalPath);
+
+        var restoredPath = repository.RestoreFromTrash(trashPath);
+
+        Assert.Equal(originalPath, restoredPath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, restoredPath)));
+        Assert.Contains(repository.GetNotes(), candidate => candidate.Path == restoredPath);
+        Assert.DoesNotContain(repository.GetTrashItems(), item => item.TrashPath == trashPath);
+    }
+
+    [Fact]
+    public void RestoresDeletedFolderFromTrash()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var folderPath = repository.CreateFolder(null, "Pasta teste");
+        var trashPath = repository.MoveItemToTrash(folderPath);
+
+        var restoredPath = repository.RestoreFromTrash(trashPath);
+
+        Assert.Equal(folderPath, restoredPath);
+        Assert.True(Directory.Exists(Path.Combine(_tempRepositoryPath, restoredPath)));
+        Assert.Contains(repository.GetTree(), node => node.Path == restoredPath);
+    }
+
+    [Fact]
+    public void RestoreAvoidsOverwritingExistingItems()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.CreateNote(null, "Conflito");
+        var trashPath = repository.MoveItemToTrash(note.Path);
+        File.WriteAllText(Path.Combine(_tempRepositoryPath, "Conflito.md"), "# Nota nova");
+
+        var restoredPath = repository.RestoreFromTrash(trashPath);
+
+        Assert.Equal("Conflito restaurado.md", restoredPath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Conflito.md")));
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Conflito restaurado.md")));
+    }
+
+    [Fact]
+    public void DeletesPermanentlyOnlyInsideTrash()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.CreateNote(null, "Excluir permanente");
+        var trashPath = repository.MoveItemToTrash(note.Path);
+
+        repository.DeletePermanently(trashPath);
+
+        Assert.False(File.Exists(Path.Combine(_tempRepositoryPath, trashPath)));
+        Assert.DoesNotContain(repository.GetTrashItems(), item => item.TrashPath == trashPath);
+        Assert.Throws<InvalidOperationException>(() => repository.DeletePermanently("Inbox\\Bem-vindo.md"));
+    }
+
+    [Fact]
+    public void EmptyTrashRemovesAllTrashItems()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var firstNote = repository.CreateNote(null, "Lixo 1");
+        var secondNote = repository.CreateNote(null, "Lixo 2");
+        repository.MoveItemToTrash(firstNote.Path);
+        repository.MoveItemToTrash(secondNote.Path);
+
+        repository.EmptyTrash();
+
+        Assert.Empty(repository.GetTrashItems());
+        Assert.Empty(Directory.EnumerateFileSystemEntries(Path.Combine(_tempRepositoryPath, ".reponotes-trash"))
+            .Where(path => Path.GetFileName(path) != ".trash-metadata.json"));
+    }
+
+    [Fact]
     public void DoesNotAllowDeletingRepositoryRoot()
     {
         var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);

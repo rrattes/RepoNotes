@@ -537,3 +537,34 @@
 **Riscos tecnicos:** Baixo; o fluxo reutiliza o save existente e o frontmatter ja consolidado. O maior cuidado futuro e manter compatibilidade com notas antigas e evitar que metadados de conteudo criptografado futuro sejam indexados ou exibidos quando bloqueados.
 
 **Proximo passo sugerido:** Testar manualmente notas com e sem frontmatter e depois avaliar uma melhoria pequena para tags em chips editaveis ou filtro por tags.
+
+## 2026-05-21 08:47:01 -03:00
+
+**Objetivo da rodada:** Implementar fluxo basico de lixeira para restaurar itens e excluir permanentemente arquivos/pastas ja movidos para `.reponotes-trash`.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Core/Models/TrashItem.cs`
+- `RepoNotes.Core/Services/INoteRepository.cs`
+- `RepoNotes.Storage/LocalMarkdownNoteRepository.cs`
+- `RepoNotes.Storage/MockNoteRepository.cs`
+- `RepoNotes.Tests/LocalMarkdownNoteRepositoryTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A lixeira ganhou modelo `TrashItem`, metadado local `.trash-metadata.json` para lembrar a origem original e operacoes no repositorio para listar, restaurar, excluir permanentemente e esvaziar `.reponotes-trash`. A sidebar recebeu uma area compacta com seletor de itens da lixeira e botoes `Rest`, `Perm` e `Lim`. Restaurar tenta voltar para o caminho original e usa nome seguro com `restaurado` em caso de conflito. Exclusao permanente e esvaziamento sao limitados a itens dentro de `.reponotes-trash`, mantendo a lixeira fora da arvore principal, busca e preview.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:47 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:47 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 47 testes aprovados, 0 falhas.
+
+**Pendencias:** Ainda nao ha modal de confirmacao visual para exclusao permanente/esvaziar lixeira, nem tela dedicada de lixeira com detalhes. A UI atual e intencionalmente compacta e operacional.
+
+**Riscos tecnicos:** Medio-baixo; as operacoes destrutivas estao restringidas a `.reponotes-trash`, mas a falta de confirmacao visual aumenta risco de clique acidental ate a proxima rodada de UX. O metadado de lixeira e simples e pode precisar de migracao se houver historico mais rico no futuro.
+
+**Proximo passo sugerido:** Adicionar confirmacao discreta para `DeletePermanentlyCommand` e `EmptyTrashCommand`, ou uma pequena vista de lixeira com caminho original antes de ampliar outros fluxos de arquivo.
