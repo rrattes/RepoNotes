@@ -277,4 +277,20 @@
     <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
     <Setter Property="Foreground" Value="{StaticResource Brush.TextWeak}" />
   </Style>
+
+  <Style Selector="Button.internal-link">
+    <Setter Property="MinHeight" Value="28" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="Margin" Value="0,0,0,5" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="Background" Value="#111B28" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="Button.internal-link:pointerover">
+    <Setter Property="Background" Value="#17213A" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+  </Style>
 </Styles>

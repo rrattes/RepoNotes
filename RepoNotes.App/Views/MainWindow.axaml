@@ -584,6 +584,31 @@
             <ScrollViewer Grid.Row="1" Padding="12">
               <StackPanel Spacing="10">
                 <ItemsControl ItemsSource="{Binding PreviewBlocks}" />
+                <Border Classes="card" Padding="10" IsVisible="{Binding HasInternalLinks}">
+                  <StackPanel Spacing="7">
+                    <TextBlock Text="Links internos" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{Binding InternalLinks}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                          <Button Classes="internal-link"
+                                  Command="{Binding OpenCommand}"
+                                  ToolTip.Tip="{Binding TooltipText}">
+                            <Grid ColumnDefinitions="*,Auto">
+                              <TextBlock Text="{Binding DisplayText}"
+                                         FontSize="12"
+                                         TextTrimming="CharacterEllipsis" />
+                              <TextBlock Grid.Column="1"
+                                         Text="{Binding StatusText}"
+                                         FontSize="10"
+                                         Foreground="{StaticResource Brush.TextWeak}"
+                                         Margin="8,0,0,0" />
+                            </Grid>
+                          </Button>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
                 <Border Classes="card" Padding="10" Margin="0,0,0,0">
                   <StackPanel Spacing="8">
                     <TextBlock Text="Info da nota" FontWeight="SemiBold" />

@@ -28,6 +28,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Basic file operations started with automatic creation, rename, and trash-based delete for Markdown notes and folders.
    - Simple name prompts are started for creating and renaming notes/folders.
    - Trash restore, permanent delete, and empty-trash flows are started with `.reponotes-trash` kept out of the main tree/search.
+   - Initial wiki-style internal links are started with `[[Nome da Nota]]`, title/file-name resolution, broken-link detection, and click-to-open from the preview/info panel.
    - Add refresh and confirmation UX for destructive trash actions.
    - Keep mock data available for design/dev mode if useful.
 

@@ -33,9 +33,8 @@ public sealed partial class App : Application
                 settingsStore,
                 path => new LocalMarkdownNoteRepository(path),
                 initialStatus,
-                new MarkdownPreviewService(),
-                null,
-                new AvaloniaTextPromptService(mainWindow));
+                markdownPreviewService: new MarkdownPreviewService(),
+                textPromptService: new AvaloniaTextPromptService(mainWindow));
 
             desktop.MainWindow = mainWindow;
         }

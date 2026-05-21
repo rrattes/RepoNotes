@@ -63,6 +63,15 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Search result highlighting should remain subtle; matched note rows may use a small accent indicator rather than heavy inline markup.
 - Search and tag filters should combine without relisting `.reponotes-trash`.
 
+## Internal Links
+
+- Wiki-style links use `[[Nome da Nota]]`.
+- Internal links are resolved against note title first, then Markdown file name.
+- Resolved links should look actionable and use the accent system subtly.
+- Broken links should remain visible with a quiet `Quebrado` state and must not crash the preview.
+- The initial MVP may show detected links as a compact list in the preview/info panel instead of inline rich text inside paragraphs.
+- Clicking a resolved internal link should open the target note when possible; broken links must not auto-create notes in this round.
+
 ## Simple Name Dialog
 
 - File and folder creation/rename flows use a compact dark text prompt instead of relying only on automatic names.

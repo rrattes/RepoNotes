@@ -11,6 +11,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private INoteRepository _noteRepository;
     private readonly IFolderPickerService _folderPickerService;
     private readonly MarkdownPreviewService _markdownPreviewService;
+    private readonly InternalLinkService _internalLinkService;
     private readonly IRepositorySettingsStore _settingsStore;
     private readonly INoteTemplateService _noteTemplateService;
     private readonly ITextPromptService _textPromptService;
@@ -40,6 +41,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Func<string?, INoteRepository>? noteRepositoryFactory = null,
         string? initialStatus = null,
         MarkdownPreviewService? markdownPreviewService = null,
+        InternalLinkService? internalLinkService = null,
         INoteTemplateService? noteTemplateService = null,
         ITextPromptService? textPromptService = null,
         TimeSpan? searchDebounceDelay = null)
@@ -47,6 +49,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _noteRepository = noteRepository;
         _folderPickerService = folderPickerService ?? new NullFolderPickerService();
         _markdownPreviewService = markdownPreviewService ?? new MarkdownPreviewService();
+        _internalLinkService = internalLinkService ?? new InternalLinkService();
         _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
         _noteTemplateService = noteTemplateService ?? new TechnicalNoteTemplateService();
         _textPromptService = textPromptService ?? new NullTextPromptService();
@@ -58,6 +61,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
         Nodes = [];
         PreviewBlocks = [];
+        InternalLinks = [];
         TrashItems = [];
         TagFilters = [];
 
@@ -96,6 +100,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<RepositoryNodeViewModel> Nodes { get; }
 
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
+
+    public ObservableCollection<InternalLinkViewModel> InternalLinks { get; }
 
     public ObservableCollection<TrashItem> TrashItems { get; }
 
@@ -174,6 +180,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasNoSearchResults => IsSearchFiltering && _searchResultCount == 0;
 
     private bool IsSearchFiltering => !string.IsNullOrWhiteSpace(_appliedSearchText) || !string.IsNullOrWhiteSpace(SelectedTag);
+
+    public bool HasInternalLinks => InternalLinks.Count > 0;
 
     public string SelectedTag
     {
@@ -405,6 +413,40 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             PreviewBlocks.Add(block);
         }
+
+        RefreshInternalLinks();
+    }
+
+    private void RefreshInternalLinks()
+    {
+        InternalLinks.Clear();
+
+        if (SelectedNote is not null)
+        {
+            foreach (var link in _internalLinkService.ResolveLinks(SelectedNote.Markdown, _noteRepository.GetNotes()))
+            {
+                InternalLinks.Add(new InternalLinkViewModel(link, OpenInternalLink));
+            }
+        }
+
+        OnPropertyChanged(nameof(HasInternalLinks));
+    }
+
+    private void OpenInternalLink(InternalLinkViewModel link)
+    {
+        if (!link.IsResolved || string.IsNullOrWhiteSpace(link.NoteId))
+        {
+            Status = $"Link interno nao encontrado: {link.Target}";
+            return;
+        }
+
+        if (!TrySaveSelectedNote())
+        {
+            return;
+        }
+
+        OpenNoteById(link.NoteId);
+        Status = $"Link interno aberto: {link.DisplayText}";
     }
 
     private async Task CreateNewNoteAsync()
@@ -995,6 +1037,31 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (node is not null)
         {
             SelectedNode = node;
+        }
+    }
+
+    private void OpenNoteById(string noteId)
+    {
+        SelectNodeByNoteId(noteId);
+        if (SelectedNote?.Id == noteId)
+        {
+            return;
+        }
+
+        _searchDebounceCancellation?.Cancel();
+        _appliedSearchText = string.Empty;
+        if (SetProperty(ref _searchText, string.Empty, nameof(SearchText)))
+        {
+            OnPropertyChanged(nameof(HasSearchText));
+        }
+
+        SelectedTag = string.Empty;
+        RefreshTree();
+        SelectNodeByNoteId(noteId);
+
+        if (SelectedNote?.Id != noteId)
+        {
+            SelectedNote = _noteRepository.GetNoteById(noteId);
         }
     }
 
