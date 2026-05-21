@@ -385,3 +385,26 @@
 **Riscos tecnicos:** Medio-baixo; o preview e nativo e leve, mas documentos grandes podem exigir debounce ou virtualizacao. A evolucao para links clicaveis/imagens deve preservar seguranca local e consistencia visual.
 
 **Proximo passo sugerido:** Testar manualmente notas reais com headings, listas, checklist, code block, blockquote e tabela; depois avaliar links clicaveis e imagens locais.
+
+## 2026-05-20 20:59:43 -03:00
+
+**Objetivo da rodada:** Implementar busca local simples por titulo, caminho e conteudo das notas Markdown, filtrando a arvore da sidebar.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.Tests/MainWindowViewModelSearchTests.cs`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** `SearchText` agora filtra a arvore em memoria usando as notas ja carregadas pelo repositorio, sem reler arquivos a cada tecla. A busca e case-insensitive e considera titulo, nome do arquivo, caminho e conteudo Markdown. Com busca vazia, a arvore normal volta a aparecer. O status mostra a quantidade de resultados encontrados.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-20 20:59 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado final: 0 avisos, 0 erros. Observacao: a primeira tentativa falhou porque uma instancia aberta de `RepoNotes.App.exe` bloqueava o executavel de saida; a instancia foi encerrada e o build final passou.
+
+**Resultado dos testes:** Sucesso em `2026-05-20 20:59 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 30 testes aprovados, 0 falhas.
+
+**Pendencias:** Busca ainda nao tem destaque de termos, debounce, ranking, escopo por pasta/tag, nem busca full-text avancada. Conteudo criptografado futuro deve permanecer fora de indexacao/busca enquanto estiver bloqueado.
+
+**Riscos tecnicos:** Medio-baixo; a busca em memoria e adequada para o MVP, mas repositorios grandes podem exigir indice incremental, cancelamento/debounce e estrategia especifica para conteudo bloqueado por criptografia.
+
+**Proximo passo sugerido:** Testar manualmente buscas por nome de arquivo, pasta e trecho do conteudo; depois avaliar destaque visual de resultados e atalhos de navegacao entre resultados.

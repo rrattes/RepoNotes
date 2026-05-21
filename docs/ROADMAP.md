@@ -45,8 +45,9 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Do not use DPAPI or Windows Credential Manager as the primary model for encrypted notes/repositories.
 
 5. Search
-   - Local text search over Markdown notes.
+   - Local in-memory text search over Markdown notes by title, file name, path, and content is started.
    - Fast filtering in the sidebar and search box.
+   - Future encrypted/locked content must not be indexed or searched while locked.
 
 6. Markdown preview
    - Render headings, paragraphs, lists, simple checklists, links, code blocks, blockquotes, and simple pipe tables from the current note Markdown.

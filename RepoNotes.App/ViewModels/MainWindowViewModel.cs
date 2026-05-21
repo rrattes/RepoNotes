@@ -89,7 +89,16 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string SearchText
     {
         get => _searchText;
-        set => SetProperty(ref _searchText, value);
+        set
+        {
+            if (!SetProperty(ref _searchText, value))
+            {
+                return;
+            }
+
+            RefreshTree();
+            UpdateSearchStatus();
+        }
     }
 
     public RepositoryNodeViewModel? SelectedNode
@@ -419,11 +428,97 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         Nodes.Clear();
 
-        foreach (var node in _noteRepository.GetTree())
+        var sourceNodes = string.IsNullOrWhiteSpace(SearchText)
+            ? _noteRepository.GetTree()
+            : GetFilteredTree(SearchText);
+
+        foreach (var node in sourceNodes)
         {
             Nodes.Add(new RepositoryNodeViewModel(node));
         }
     }
+
+    private IReadOnlyList<RepositoryNode> GetFilteredTree(string query)
+    {
+        var matchedNoteIds = _noteRepository
+            .GetNotes()
+            .Where(note => MatchesSearch(note, query))
+            .Select(note => note.Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var filteredNodes = _noteRepository
+            .GetTree()
+            .Select(node => FilterNode(node, query, matchedNoteIds))
+            .Where(node => node is not null)
+            .Cast<RepositoryNode>()
+            .ToList();
+
+        return filteredNodes;
+    }
+
+    private static RepositoryNode? FilterNode(RepositoryNode node, string query, ISet<string> matchedNoteIds)
+    {
+        if (node.Type == RepositoryNodeType.Note)
+        {
+            var noteMatches = node.NoteId is not null && matchedNoteIds.Contains(node.NoteId);
+            var nodeMatches = ContainsIgnoreCase(node.Name, query) || ContainsIgnoreCase(node.Path, query);
+
+            return noteMatches || nodeMatches ? node : null;
+        }
+
+        var folderMatches = ContainsIgnoreCase(node.Name, query) || ContainsIgnoreCase(node.Path, query);
+        if (folderMatches)
+        {
+            return node;
+        }
+
+        var children = node.Children
+            .Select(child => FilterNode(child, query, matchedNoteIds))
+            .Where(child => child is not null)
+            .Cast<RepositoryNode>()
+            .ToList();
+
+        if (children.Count == 0)
+        {
+            return null;
+        }
+
+        return new RepositoryNode
+        {
+            Name = node.Name,
+            Type = node.Type,
+            NoteId = node.NoteId,
+            Path = node.Path,
+            Children = children
+        };
+    }
+
+    private static bool MatchesSearch(NoteItem note, string query) =>
+        ContainsIgnoreCase(note.Title, query)
+        || ContainsIgnoreCase(Path.GetFileName(note.Path), query)
+        || ContainsIgnoreCase(note.Path, query)
+        || ContainsIgnoreCase(note.Markdown, query);
+
+    private int GetSearchResultCount() =>
+        string.IsNullOrWhiteSpace(SearchText)
+            ? _noteRepository.GetNotes().Count
+            : _noteRepository.GetNotes().Count(note => MatchesSearch(note, SearchText));
+
+    private void UpdateSearchStatus()
+    {
+        if (string.IsNullOrWhiteSpace(SearchText))
+        {
+            Status = _hasUnsavedChanges ? "Alterado" : "Busca limpa";
+            return;
+        }
+
+        var count = GetSearchResultCount();
+        Status = count == 1 ? "Busca: 1 resultado" : $"Busca: {count} resultados";
+    }
+
+    private static bool ContainsIgnoreCase(string? value, string query) =>
+        !string.IsNullOrWhiteSpace(value)
+        && value.Contains(query, StringComparison.OrdinalIgnoreCase);
 
     private string? GetTargetFolderPath()
     {
