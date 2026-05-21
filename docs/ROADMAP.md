@@ -58,6 +58,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 6. Search
    - Local in-memory text search over Markdown notes by title, file name, path, and content is started.
    - Sidebar tag filtering from real frontmatter tags is started, including tag counts, active filter state, clear action, and combination with text search.
+   - Search feedback now includes debounce, result count, empty state, clear action, `Ctrl+K` focus, and subtle matched-note highlighting.
    - Fast filtering in the sidebar and search box.
    - Future encrypted/locked content must not be indexed or searched while locked.
 

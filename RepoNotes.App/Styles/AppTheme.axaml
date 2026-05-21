@@ -128,6 +128,22 @@
     <Setter Property="Background" Value="#0D141E" />
   </Style>
 
+  <Style Selector="Button.search-clear">
+    <Setter Property="Width" Value="20" />
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Background" Value="#111827" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextWeak}" />
+  </Style>
+
+  <Style Selector="Button.search-clear:pointerover">
+    <Setter Property="Background" Value="#1B2736" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+  </Style>
+
   <Style Selector="TextBox.metadata-field">
     <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="8,4" />
@@ -201,6 +217,14 @@
   <Style Selector="TreeViewItem:selected">
     <Setter Property="Background" Value="#24315D" />
     <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+  </Style>
+
+  <Style Selector="Border.search-empty">
+    <Setter Property="Background" Value="#0D141EE6" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="10" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="VerticalAlignment" Value="Stretch" />
   </Style>
 
   <Style Selector="TabControl">

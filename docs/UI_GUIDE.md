@@ -53,6 +53,16 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Notes inside `.reponotes-trash` must not contribute tags or counts.
 - Future encrypted or locked content must not expose tag counts or searchable metadata while locked.
 
+## Search Feedback
+
+- Search lives in the top of the sidebar and stays compact.
+- Text input uses a short debounce before filtering so typing does not recalculate the tree on every keypress.
+- A small feedback line under the search box shows result count, `Buscando...`, or `Nenhum resultado encontrado`.
+- A small clear action inside the search field removes the query; `Esc` may clear search while the field is focused.
+- `Ctrl+K` should focus the search field.
+- Search result highlighting should remain subtle; matched note rows may use a small accent indicator rather than heavy inline markup.
+- Search and tag filters should combine without relisting `.reponotes-trash`.
+
 ## Simple Name Dialog
 
 - File and folder creation/rename flows use a compact dark text prompt instead of relying only on automatic names.

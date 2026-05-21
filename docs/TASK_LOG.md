@@ -623,3 +623,31 @@
 **Riscos tecnicos:** Baixo; o filtro usa dados ja carregados em memoria e respeita a exclusao da lixeira. Em repositorios grandes, contagem e filtragem em memoria podem precisar de cache mais estruturado ou indexacao incremental.
 
 **Proximo passo sugerido:** Testar manualmente filtros por tags em notas com frontmatter e depois avaliar chips editaveis ou sugestoes de tags no painel Info.
+
+## 2026-05-21 09:01:42 -03:00
+
+**Objetivo da rodada:** Melhorar a busca funcional com debounce, feedback visual mais claro e destaque simples de resultados.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/ViewModels/RepositoryNodeViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `RepoNotes.Tests/MainWindowViewModelSearchTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A busca passou a usar debounce simples antes de aplicar o filtro na arvore, mantendo os arquivos carregados em memoria e sem reler o disco. A sidebar agora mostra uma linha discreta com `Buscando...`, contagem de resultados ou mensagem de resultado vazio, alem de um botao pequeno para limpar a busca. `Ctrl+K` foca o campo de busca e `Esc` limpa a busca quando o campo esta focado. Itens de nota que aparecem como resultado recebem um indicador visual sutil na arvore, e a busca continua combinando com filtro por tag e ignorando `.reponotes-trash`.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 09:00 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 09:00 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 59 testes aprovados, 0 falhas.
+
+**Pendencias:** O destaque ainda e simples por item de nota, sem realce inline do termo dentro do texto do TreeView. Nao ha ranking, snippets de conteudo, navegacao entre resultados ou indice persistente.
+
+**Riscos tecnicos:** Baixo; o debounce reduz trabalho durante digitacao, mas repositorios grandes ainda podem exigir cache/indexacao incremental no futuro. Conteudo criptografado futuro deve continuar fora de busca, feedback e destaques enquanto estiver bloqueado.
+
+**Proximo passo sugerido:** Testar manualmente `Ctrl+K`, busca sem resultado, limpar com botao/Esc e combinacao com filtro por tag antes de evoluir para snippets ou ranking.

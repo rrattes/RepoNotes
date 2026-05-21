@@ -43,7 +43,7 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     [Fact]
     public void SearchTextFiltersByTitlePathAndContentCaseInsensitive()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = CreateViewModel();
 
         viewModel.SearchText = "NGINX";
 
@@ -55,10 +55,8 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     [Fact]
     public void EmptySearchTextRestoresFullTree()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath))
-        {
-            SearchText = "portal"
-        };
+        var viewModel = CreateViewModel();
+        viewModel.SearchText = "portal";
 
         viewModel.SearchText = string.Empty;
 
@@ -68,9 +66,23 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     }
 
     [Fact]
+    public void ClearSearchCommandClearsSearchAndRestoresTree()
+    {
+        var viewModel = CreateViewModel();
+        viewModel.SearchText = "portal";
+
+        viewModel.ClearSearchCommand.Execute(null);
+
+        Assert.Equal("Busca limpa", viewModel.Status);
+        Assert.False(viewModel.HasSearchText);
+        Assert.True(ContainsNode(viewModel.Nodes, @"Apps\Portal.md"));
+        Assert.True(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+    }
+
+    [Fact]
     public void SearchTextFiltersByFolderPath()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = CreateViewModel();
 
         viewModel.SearchText = "runbooks";
 
@@ -80,9 +92,41 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     }
 
     [Fact]
+    public void SearchTextWithNoResultsShowsEmptyState()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.SearchText = "sem-resultado";
+
+        Assert.Equal("Nenhum resultado encontrado", viewModel.SearchFeedback);
+        Assert.Equal("Busca: 0 resultados", viewModel.Status);
+        Assert.True(viewModel.HasNoSearchResults);
+        Assert.Empty(viewModel.Nodes);
+    }
+
+    [Fact]
+    public async Task SearchTextAppliesAfterDebounceDelay()
+    {
+        var viewModel = new MainWindowViewModel(
+            new LocalMarkdownNoteRepository(_tempRepositoryPath),
+            searchDebounceDelay: TimeSpan.FromMilliseconds(25));
+
+        viewModel.SearchText = "nginx";
+
+        Assert.Equal("Buscando...", viewModel.Status);
+        Assert.True(ContainsNode(viewModel.Nodes, @"Apps\Portal.md"));
+
+        await Task.Delay(80);
+
+        Assert.Equal("Busca: 1 resultado", viewModel.Status);
+        Assert.False(ContainsNode(viewModel.Nodes, @"Apps\Portal.md"));
+        Assert.True(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+    }
+
+    [Fact]
     public void TagFiltersAreLoadedFromRepositoryNotesWithCounts()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = CreateViewModel();
 
         Assert.Contains(viewModel.TagFilters, tag => tag.Name == "producao" && tag.Count == 2);
         Assert.Contains(viewModel.TagFilters, tag => tag.Name == "infra" && tag.Count == 1);
@@ -92,7 +136,7 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     [Fact]
     public void SelectingTagFiltersTreeByTag()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = CreateViewModel();
         var infraTag = viewModel.TagFilters.First(tag => tag.Name == "infra");
 
         infraTag.SelectCommand.Execute(null);
@@ -106,7 +150,7 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     [Fact]
     public void SearchTextCombinesWithSelectedTagFilter()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = CreateViewModel();
         viewModel.TagFilters.First(tag => tag.Name == "producao").SelectCommand.Execute(null);
 
         viewModel.SearchText = "portal";
@@ -119,7 +163,7 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
     [Fact]
     public void ClearTagFilterRestoresTree()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = CreateViewModel();
         viewModel.TagFilters.First(tag => tag.Name == "infra").SelectCommand.Execute(null);
 
         viewModel.ClearTagFilterCommand.Execute(null);
@@ -142,6 +186,23 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
         Assert.DoesNotContain(viewModel.TagFilters, tag => tag.Name == "infra");
         Assert.Contains(viewModel.TagFilters, tag => tag.Name == "producao" && tag.Count == 1);
     }
+
+    [Fact]
+    public void SearchTextDoesNotReturnTrashContent()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        repository.MoveItemToTrash(@"Runbooks\Nginx.md");
+        var viewModel = new MainWindowViewModel(repository, searchDebounceDelay: TimeSpan.Zero);
+
+        viewModel.SearchText = "nginx";
+
+        Assert.Equal("Nenhum resultado encontrado", viewModel.SearchFeedback);
+        Assert.True(viewModel.HasNoSearchResults);
+        Assert.False(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+    }
+
+    private MainWindowViewModel CreateViewModel() =>
+        new(new LocalMarkdownNoteRepository(_tempRepositoryPath), searchDebounceDelay: TimeSpan.Zero);
 
     private static bool ContainsNode(IEnumerable<RepositoryNodeViewModel> nodes, string path)
     {

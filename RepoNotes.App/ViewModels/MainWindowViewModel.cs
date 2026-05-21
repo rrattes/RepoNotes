@@ -15,16 +15,21 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly INoteTemplateService _noteTemplateService;
     private readonly ITextPromptService _textPromptService;
     private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
+    private readonly TimeSpan _searchDebounceDelay;
     private NoteItem? _selectedNote;
     private RepositoryNodeViewModel? _selectedNode;
     private TrashItem? _selectedTrashItem;
     private string _repositoryName;
     private string _repositoryPath;
     private string _searchText = string.Empty;
+    private string _appliedSearchText = string.Empty;
+    private string _searchFeedback = "Digite para buscar em titulo, caminho e conteudo";
     private string _selectedTag = string.Empty;
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
+    private int _searchResultCount;
+    private CancellationTokenSource? _searchDebounceCancellation;
     private NoteTemplate _selectedTemplate;
     private readonly IReadOnlyList<string> _statusOptions = ["Draft", "Active", "Review", "Archived"];
 
@@ -36,7 +41,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         string? initialStatus = null,
         MarkdownPreviewService? markdownPreviewService = null,
         INoteTemplateService? noteTemplateService = null,
-        ITextPromptService? textPromptService = null)
+        ITextPromptService? textPromptService = null,
+        TimeSpan? searchDebounceDelay = null)
     {
         _noteRepository = noteRepository;
         _folderPickerService = folderPickerService ?? new NullFolderPickerService();
@@ -44,6 +50,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
         _noteTemplateService = noteTemplateService ?? new TechnicalNoteTemplateService();
         _textPromptService = textPromptService ?? new NullTextPromptService();
+        _searchDebounceDelay = searchDebounceDelay ?? TimeSpan.FromMilliseconds(250);
         Templates = _noteTemplateService.GetTemplates();
         _selectedTemplate = _noteTemplateService.GetDefaultTemplate();
         _noteRepositoryFactory = noteRepositoryFactory ?? (_ => noteRepository);
@@ -60,6 +67,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
+        ClearSearchCommand = new RelayCommand(ClearSearch);
         ClearTagFilterCommand = new RelayCommand(ClearTagFilter);
         RenameSelectedItemCommand = new AsyncRelayCommand(RenameSelectedItemAsync);
         DeleteSelectedItemCommand = new RelayCommand(DeleteSelectedItem);
@@ -124,6 +132,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand OpenSettingsCommand { get; }
 
+    public ICommand ClearSearchCommand { get; }
+
     public ICommand ClearTagFilterCommand { get; }
 
     public ICommand RenameSelectedItemCommand { get; }
@@ -148,10 +158,22 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            RefreshTree();
-            UpdateSearchStatus();
+            OnPropertyChanged(nameof(HasSearchText));
+            ScheduleSearchRefresh();
         }
     }
+
+    public bool HasSearchText => !string.IsNullOrWhiteSpace(SearchText);
+
+    public string SearchFeedback
+    {
+        get => _searchFeedback;
+        private set => SetProperty(ref _searchFeedback, value);
+    }
+
+    public bool HasNoSearchResults => IsSearchFiltering && _searchResultCount == 0;
+
+    private bool IsSearchFiltering => !string.IsNullOrWhiteSpace(_appliedSearchText) || !string.IsNullOrWhiteSpace(SelectedTag);
 
     public string SelectedTag
     {
@@ -660,6 +682,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         RepositoryName = noteRepository.CurrentRepository.Name;
         RepositoryPath = noteRepository.CurrentRepository.RootPath;
         SelectedTag = string.Empty;
+        _appliedSearchText = SearchText;
         RefreshTree();
         RefreshTagFilters();
         RefreshTrashItems();
@@ -682,15 +705,18 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         Nodes.Clear();
 
-        var hasSearch = !string.IsNullOrWhiteSpace(SearchText);
+        var hasSearch = !string.IsNullOrWhiteSpace(_appliedSearchText);
         var hasTag = !string.IsNullOrWhiteSpace(SelectedTag);
+        var highlightedNoteIds = hasSearch || hasTag
+            ? GetMatchedNoteIds(_appliedSearchText, SelectedTag)
+            : null;
         var sourceNodes = !hasSearch && !hasTag
             ? _noteRepository.GetTree()
-            : GetFilteredTree(SearchText, SelectedTag);
+            : GetFilteredTree(_appliedSearchText, SelectedTag, highlightedNoteIds!);
 
         foreach (var node in sourceNodes)
         {
-            Nodes.Add(new RepositoryNodeViewModel(node));
+            Nodes.Add(new RepositoryNodeViewModel(node, highlightedNoteIds));
         }
     }
 
@@ -755,14 +781,59 @@ public sealed class MainWindowViewModel : ViewModelBase
         UpdateSearchStatus();
     }
 
-    private IReadOnlyList<RepositoryNode> GetFilteredTree(string query, string tag)
+    private void ClearSearch()
     {
-        var matchedNoteIds = _noteRepository
-            .GetNotes()
-            .Where(note => MatchesTag(note, tag) && MatchesSearch(note, query))
-            .Select(note => note.Id)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        _searchDebounceCancellation?.Cancel();
+        _appliedSearchText = string.Empty;
+        SearchText = string.Empty;
+        RefreshTree();
+        UpdateSearchStatus();
+    }
 
+    private void ScheduleSearchRefresh()
+    {
+        _searchDebounceCancellation?.Cancel();
+
+        if (_searchDebounceDelay <= TimeSpan.Zero)
+        {
+            ApplySearchRefresh();
+            return;
+        }
+
+        SearchFeedback = "Buscando...";
+        Status = "Buscando...";
+
+        var cancellation = new CancellationTokenSource();
+        _searchDebounceCancellation = cancellation;
+        _ = ApplySearchRefreshAfterDelayAsync(cancellation.Token);
+    }
+
+    private async Task ApplySearchRefreshAfterDelayAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Task.Delay(_searchDebounceDelay, cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            ApplySearchRefresh();
+        }
+        catch (TaskCanceledException)
+        {
+        }
+    }
+
+    private void ApplySearchRefresh()
+    {
+        _appliedSearchText = SearchText;
+        RefreshTree();
+        UpdateSearchStatus();
+    }
+
+    private IReadOnlyList<RepositoryNode> GetFilteredTree(string query, string tag, ISet<string> matchedNoteIds)
+    {
         var filteredNodes = _noteRepository
             .GetTree()
             .Select(node => FilterNode(node, query, tag, matchedNoteIds))
@@ -772,6 +843,13 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         return filteredNodes;
     }
+
+    private ISet<string> GetMatchedNoteIds(string query, string tag) =>
+        _noteRepository
+            .GetNotes()
+            .Where(note => MatchesTag(note, tag) && MatchesSearch(note, query))
+            .Select(note => note.Id)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
     private static RepositoryNode? FilterNode(RepositoryNode node, string query, string tag, ISet<string> matchedNoteIds)
     {
@@ -824,19 +902,29 @@ public sealed class MainWindowViewModel : ViewModelBase
         || note.Tags.Any(noteTag => string.Equals(noteTag, tag, StringComparison.OrdinalIgnoreCase));
 
     private int GetSearchResultCount() =>
-        _noteRepository.GetNotes().Count(note => MatchesTag(note, SelectedTag) && MatchesSearch(note, SearchText));
+        _noteRepository.GetNotes().Count(note => MatchesTag(note, SelectedTag) && MatchesSearch(note, _appliedSearchText));
 
     private void UpdateSearchStatus()
     {
-        if (string.IsNullOrWhiteSpace(SearchText) && string.IsNullOrWhiteSpace(SelectedTag))
+        if (string.IsNullOrWhiteSpace(_appliedSearchText) && string.IsNullOrWhiteSpace(SelectedTag))
         {
             Status = _hasUnsavedChanges ? "Alterado" : "Busca limpa";
+            SearchFeedback = "Digite para buscar em titulo, caminho e conteudo";
+            _searchResultCount = 0;
+            OnPropertyChanged(nameof(HasNoSearchResults));
             return;
         }
 
         var count = GetSearchResultCount();
         var prefix = string.IsNullOrWhiteSpace(SelectedTag) ? "Busca" : $"Tag {SelectedTag}";
+        _searchResultCount = count;
         Status = count == 1 ? $"{prefix}: 1 resultado" : $"{prefix}: {count} resultados";
+        SearchFeedback = count == 0
+            ? "Nenhum resultado encontrado"
+            : count == 1
+                ? $"{prefix}: 1 resultado"
+                : $"{prefix}: {count} resultados";
+        OnPropertyChanged(nameof(HasNoSearchResults));
     }
 
     private static bool ContainsIgnoreCase(string? value, string query) =>

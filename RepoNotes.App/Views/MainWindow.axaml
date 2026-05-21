@@ -13,8 +13,14 @@
 
   <Window.DataTemplates>
     <TreeDataTemplate DataType="{x:Type vm:RepositoryNodeViewModel}" ItemsSource="{Binding Children}">
-      <Grid ColumnDefinitions="22,*" Height="23" VerticalAlignment="Center">
+      <Grid ColumnDefinitions="4,22,*" Height="23" VerticalAlignment="Center">
         <Border Grid.Column="0"
+                Width="3"
+                Height="16"
+                CornerRadius="3"
+                Background="{StaticResource Brush.Accent}"
+                IsVisible="{Binding IsSearchMatch}" />
+        <Border Grid.Column="1"
                 Width="18"
                 Height="18"
                 CornerRadius="5"
@@ -29,7 +35,7 @@
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center" />
         </Border>
-        <TextBlock Grid.Column="1"
+        <TextBlock Grid.Column="2"
                    Text="{Binding Name}"
                    Foreground="{StaticResource Brush.TextMuted}"
                    FontSize="13"
@@ -158,30 +164,45 @@
             </Grid>
           </Button>
 
-          <Grid Grid.Row="2">
-            <TextBox Classes="search"
-                     PlaceholderText="Buscar notas..."
-                     Text="{Binding SearchText}" />
-            <TextBlock Text="/"
+          <StackPanel Grid.Row="2" Spacing="4">
+            <Grid>
+              <TextBox x:Name="SearchBox"
+                       Classes="search"
+                       PlaceholderText="Buscar notas..."
+                       Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+              <TextBlock Text="/"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="18"
+                         Margin="12,0,0,0"
+                         VerticalAlignment="Center"
+                         IsHitTestVisible="False" />
+              <Button Classes="search-clear"
+                      Content="X"
+                      Command="{Binding ClearSearchCommand}"
+                      IsVisible="{Binding HasSearchText}"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Center"
+                      Margin="0,0,48,0"
+                      ToolTip.Tip="Limpar busca" />
+              <Border HorizontalAlignment="Right"
+                      VerticalAlignment="Center"
+                      Margin="0,0,8,0"
+                      Background="#111827"
+                      BorderBrush="{StaticResource Brush.Border}"
+                      BorderThickness="1"
+                      CornerRadius="6"
+                      Padding="6,2"
+                      IsHitTestVisible="False">
+                <TextBlock Text="Ctrl+K"
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           FontSize="11" />
+              </Border>
+            </Grid>
+            <TextBlock Text="{Binding SearchFeedback}"
                        Foreground="{StaticResource Brush.TextWeak}"
-                       FontSize="18"
-                       Margin="12,0,0,0"
-                       VerticalAlignment="Center"
-                       IsHitTestVisible="False" />
-            <Border HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Margin="0,0,8,0"
-                    Background="#111827"
-                    BorderBrush="{StaticResource Brush.Border}"
-                    BorderThickness="1"
-                    CornerRadius="6"
-                    Padding="6,2"
-                    IsHitTestVisible="False">
-              <TextBlock Text="Ctrl+K"
-                         Foreground="{StaticResource Brush.TextMuted}"
-                         FontSize="11" />
-            </Border>
-          </Grid>
+                       FontSize="10"
+                       TextTrimming="CharacterEllipsis" />
+          </StackPanel>
 
           <Grid Grid.Row="4" ColumnDefinitions="*,6,*">
             <Button Grid.Column="0"
@@ -238,9 +259,19 @@
                        LetterSpacing="0" />
 
             <Border Classes="card" Padding="4" CornerRadius="8">
-              <TreeView ItemsSource="{Binding Nodes}"
-                        SelectedItem="{Binding SelectedNode}"
-                        MinHeight="156" />
+              <Grid>
+                <TreeView ItemsSource="{Binding Nodes}"
+                          SelectedItem="{Binding SelectedNode}"
+                          MinHeight="156" />
+                <Border Classes="search-empty"
+                        IsVisible="{Binding HasNoSearchResults}">
+                  <TextBlock Text="Nenhuma nota encontrada"
+                             Foreground="{StaticResource Brush.TextMuted}"
+                             FontSize="12"
+                             HorizontalAlignment="Center"
+                             VerticalAlignment="Center" />
+                </Border>
+              </Grid>
             </Border>
 
             <StackPanel Spacing="5">
