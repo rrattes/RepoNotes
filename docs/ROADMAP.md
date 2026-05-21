@@ -26,6 +26,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Load real folders and Markdown files from the configured local repository.
    - Let the user open or switch to a local repository folder and persist the last opened repository in local settings.
    - Basic file operations started with automatic creation, rename, and trash-based delete for Markdown notes and folders.
+   - Simple name prompts are started for creating and renaming notes/folders.
    - Trash restore, permanent delete, and empty-trash flows are started with `.reponotes-trash` kept out of the main tree/search.
    - Add refresh and confirmation UX for destructive trash actions.
    - Keep mock data available for design/dev mode if useful.

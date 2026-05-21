@@ -568,3 +568,31 @@
 **Riscos tecnicos:** Medio-baixo; as operacoes destrutivas estao restringidas a `.reponotes-trash`, mas a falta de confirmacao visual aumenta risco de clique acidental ate a proxima rodada de UX. O metadado de lixeira e simples e pode precisar de migracao se houver historico mais rico no futuro.
 
 **Proximo passo sugerido:** Adicionar confirmacao discreta para `DeletePermanentlyCommand` e `EmptyTrashCommand`, ou uma pequena vista de lixeira com caminho original antes de ampliar outros fluxos de arquivo.
+
+## 2026-05-21 08:51:26 -03:00
+
+**Objetivo da rodada:** Adicionar um dialogo simples para nomear notas/pastas na criacao e renomeacao, substituindo parcialmente nomes automaticos.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/App.axaml.cs`
+- `RepoNotes.App/Services/AvaloniaTextPromptService.cs`
+- `RepoNotes.App/Services/ITextPromptService.cs`
+- `RepoNotes.App/Services/NullTextPromptService.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.Tests/MainWindowViewModelCreateTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foi criada a abstracao `ITextPromptService` com implementacao real em Avalonia para um dialogo dark simples de entrada de nome e fallback `NullTextPromptService`. Criacao de nota, criacao por template, criacao de pasta e renomeacao agora pedem nome ao usuario quando ha prompt disponivel. Cancelar interrompe a operacao sem criar/renomear. O dialogo valida nome vazio e caracteres invalidos do Windows; o storage continua responsavel por sanitizar e evitar sobrescrita com sufixos seguros. Testes com fake prompt cobrem cancelamento, nome invalido sanitizado, renomeacao valida e conflito sem sobrescrita.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:52 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:52 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 50 testes aprovados, 0 falhas.
+
+**Pendencias:** O dialogo ainda e propositalmente simples: nao ha sugestao interativa de nome alternativo quando existe conflito, nem historico de nomes ou validacao visual mais rica. O fallback automatico continua existindo para ambientes sem UI/prompt.
+
+**Riscos tecnicos:** Baixo; o ViewModel permanece testavel por interface e o storage segue como camada final de seguranca contra nomes invalidos e sobrescrita. O principal cuidado futuro e nao transformar prompts simples em framework modal complexo.
+
+**Proximo passo sugerido:** Testar manualmente criacao/renomeacao com nomes validos, cancelamento e conflito; depois avaliar confirmacoes visuais para acoes destrutivas da lixeira.

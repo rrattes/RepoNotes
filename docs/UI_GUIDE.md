@@ -43,6 +43,13 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - `created`, `updated`, and `path` are read-only informational fields.
 - Metadata editing must mark the note as changed and rely on the normal save flow to write frontmatter.
 
+## Simple Name Dialog
+
+- File and folder creation/rename flows use a compact dark text prompt instead of relying only on automatic names.
+- The prompt must show a clear title, a short message, one text field, and `Cancelar` / `Confirmar` actions.
+- Empty names and Windows-invalid characters should be rejected in the dialog when possible; storage still remains responsible for safe file names and avoiding overwrites.
+- If a prompt is unavailable, the app may fall back to the previous automatic name so file operations remain usable.
+
 ## Current Density Targets
 
 - Sidebar: around 250px to 260px, currently `252px`.

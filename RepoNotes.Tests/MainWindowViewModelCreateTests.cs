@@ -1,3 +1,4 @@
+using RepoNotes.App.Services;
 using RepoNotes.App.ViewModels;
 using RepoNotes.Storage;
 
@@ -24,6 +25,32 @@ public sealed class MainWindowViewModelCreateTests : IDisposable
         Assert.Equal("Nova nota", viewModel.Title);
         Assert.Equal("Nota criada: Nova nota.md", viewModel.Status);
         Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota.md")));
+    }
+
+    [Fact]
+    public void NewNoteCommandDoesNotCreateFileWhenNamePromptIsCanceled()
+    {
+        var viewModel = new MainWindowViewModel(
+            new LocalMarkdownNoteRepository(_tempRepositoryPath),
+            textPromptService: new TestTextPromptService((string?)null));
+
+        viewModel.NewNoteCommand.Execute(null);
+
+        Assert.Equal("Criacao cancelada", viewModel.Status);
+        Assert.False(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota.md")));
+    }
+
+    [Fact]
+    public void NewNoteCommandUsesPromptedNameAndSanitizesInvalidCharacters()
+    {
+        var viewModel = new MainWindowViewModel(
+            new LocalMarkdownNoteRepository(_tempRepositoryPath),
+            textPromptService: new TestTextPromptService("Nota:Invalida"));
+
+        viewModel.NewNoteCommand.Execute(null);
+
+        Assert.Equal("Nota-Invalida.md", viewModel.NotePath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nota-Invalida.md")));
     }
 
     [Fact]
@@ -74,9 +101,10 @@ public sealed class MainWindowViewModelCreateTests : IDisposable
     [Fact]
     public void RenameSelectedItemCommandRenamesOpenNoteUsingTitle()
     {
-        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var viewModel = new MainWindowViewModel(
+            new LocalMarkdownNoteRepository(_tempRepositoryPath),
+            textPromptService: new TestTextPromptService("Nova nota", "Nota Renomeada"));
         viewModel.NewNoteCommand.Execute(null);
-        viewModel.Title = "Nota Renomeada";
 
         viewModel.RenameSelectedItemCommand.Execute(null);
 
@@ -84,6 +112,21 @@ public sealed class MainWindowViewModelCreateTests : IDisposable
         Assert.Equal("Item renomeado: Nota Renomeada.md", viewModel.Status);
         Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nota Renomeada.md")));
         Assert.False(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota.md")));
+    }
+
+    [Fact]
+    public void RenameSelectedItemCommandDoesNotOverwriteExistingFileOnConflict()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var viewModel = new MainWindowViewModel(repository, textPromptService: new TestTextPromptService("Nova nota", "Conflito"));
+        viewModel.NewNoteCommand.Execute(null);
+        File.WriteAllText(Path.Combine(_tempRepositoryPath, "Conflito.md"), "# Existente");
+
+        viewModel.RenameSelectedItemCommand.Execute(null);
+
+        Assert.Equal("Conflito 2.md", viewModel.NotePath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Conflito.md")));
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Conflito 2.md")));
     }
 
     [Fact]
@@ -116,5 +159,13 @@ public sealed class MainWindowViewModelCreateTests : IDisposable
         {
             Directory.Delete(_tempRepositoryPath, recursive: true);
         }
+    }
+
+    private sealed class TestTextPromptService(params string?[] values) : ITextPromptService
+    {
+        private readonly Queue<string?> _values = new(values);
+
+        public Task<string?> PromptAsync(string title, string message, string initialValue) =>
+            Task.FromResult(_values.Count == 0 ? initialValue : _values.Dequeue());
     }
 }

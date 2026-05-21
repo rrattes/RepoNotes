@@ -13,6 +13,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly MarkdownPreviewService _markdownPreviewService;
     private readonly IRepositorySettingsStore _settingsStore;
     private readonly INoteTemplateService _noteTemplateService;
+    private readonly ITextPromptService _textPromptService;
     private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
     private NoteItem? _selectedNote;
     private RepositoryNodeViewModel? _selectedNode;
@@ -33,13 +34,15 @@ public sealed class MainWindowViewModel : ViewModelBase
         Func<string?, INoteRepository>? noteRepositoryFactory = null,
         string? initialStatus = null,
         MarkdownPreviewService? markdownPreviewService = null,
-        INoteTemplateService? noteTemplateService = null)
+        INoteTemplateService? noteTemplateService = null,
+        ITextPromptService? textPromptService = null)
     {
         _noteRepository = noteRepository;
         _folderPickerService = folderPickerService ?? new NullFolderPickerService();
         _markdownPreviewService = markdownPreviewService ?? new MarkdownPreviewService();
         _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
         _noteTemplateService = noteTemplateService ?? new TechnicalNoteTemplateService();
+        _textPromptService = textPromptService ?? new NullTextPromptService();
         Templates = _noteTemplateService.GetTemplates();
         _selectedTemplate = _noteTemplateService.GetDefaultTemplate();
         _noteRepositoryFactory = noteRepositoryFactory ?? (_ => noteRepository);
@@ -49,13 +52,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         PreviewBlocks = [];
         TrashItems = [];
 
-        NewNoteCommand = new RelayCommand(CreateNewNote);
-        NewFromTemplateCommand = new RelayCommand(CreateNewNoteFromSelectedTemplate);
-        NewFolderCommand = new RelayCommand(CreateNewFolder);
+        NewNoteCommand = new AsyncRelayCommand(CreateNewNoteAsync);
+        NewFromTemplateCommand = new AsyncRelayCommand(CreateNewNoteFromSelectedTemplateAsync);
+        NewFolderCommand = new AsyncRelayCommand(CreateNewFolderAsync);
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
-        RenameSelectedItemCommand = new RelayCommand(RenameSelectedItem);
+        RenameSelectedItemCommand = new AsyncRelayCommand(RenameSelectedItemAsync);
         DeleteSelectedItemCommand = new RelayCommand(DeleteSelectedItem);
         RestoreFromTrashCommand = new RelayCommand(RestoreFromTrash);
         DeletePermanentlyCommand = new RelayCommand(DeletePermanently);
@@ -354,21 +357,33 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void CreateNewNote()
+    private async Task CreateNewNoteAsync()
     {
-        CreateNewNoteFromTemplate(_noteTemplateService.GetDefaultTemplate(), "Nova nota", "Nota criada");
+        await CreateNewNoteFromTemplateAsync(_noteTemplateService.GetDefaultTemplate(), "Nova nota", "Criar nova nota", "Nome da nota", "Nota criada");
     }
 
-    private void CreateNewNoteFromSelectedTemplate()
+    private async Task CreateNewNoteFromSelectedTemplateAsync()
     {
         var noteName = GetTemplateNoteName(SelectedTemplate);
-        CreateNewNoteFromTemplate(SelectedTemplate, noteName, "Nota criada por template");
+        await CreateNewNoteFromTemplateAsync(SelectedTemplate, noteName, "Criar nota por template", "Nome da nota", "Nota criada por template");
     }
 
-    private void CreateNewNoteFromTemplate(NoteTemplate template, string noteName, string successPrefix)
+    private async Task CreateNewNoteFromTemplateAsync(
+        NoteTemplate template,
+        string defaultNoteName,
+        string promptTitle,
+        string promptMessage,
+        string successPrefix)
     {
         if (!TrySaveSelectedNote())
         {
+            return;
+        }
+
+        var noteName = await PromptForNameAsync(promptTitle, promptMessage, defaultNoteName);
+        if (noteName is null)
+        {
+            Status = "Criacao cancelada";
             return;
         }
 
@@ -386,16 +401,23 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void CreateNewFolder()
+    private async Task CreateNewFolderAsync()
     {
         if (!TrySaveSelectedNote())
         {
             return;
         }
 
+        var folderName = await PromptForNameAsync("Criar nova pasta", "Nome da pasta", "Nova pasta");
+        if (folderName is null)
+        {
+            Status = "Criacao cancelada";
+            return;
+        }
+
         try
         {
-            var folderPath = _noteRepository.CreateFolder(GetTargetFolderPath());
+            var folderPath = _noteRepository.CreateFolder(GetTargetFolderPath(), folderName);
             RefreshTree();
             SelectNodeByPath(folderPath);
             Status = $"Pasta criada: {folderPath}";
@@ -407,7 +429,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void RenameSelectedItem()
+    private async Task RenameSelectedItemAsync()
     {
         if (SelectedNode is null)
         {
@@ -420,10 +442,18 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
+        var defaultName = GetPromptNameForSelectedNode(SelectedNode);
+        var newName = await PromptForNameAsync("Renomear item", "Novo nome", defaultName);
+        if (newName is null)
+        {
+            Status = "Renomeacao cancelada";
+            return;
+        }
+
         try
         {
             var wasNote = SelectedNode.IsNote;
-            var newPath = _noteRepository.RenameItem(SelectedNode.Path, GetRenameTargetName(SelectedNode));
+            var newPath = _noteRepository.RenameItem(SelectedNode.Path, newName);
             RefreshTree();
 
             if (wasNote)
@@ -734,6 +764,25 @@ public sealed class MainWindowViewModel : ViewModelBase
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
+    private async Task<string?> PromptForNameAsync(string title, string message, string initialValue)
+    {
+        var value = await _textPromptService.PromptAsync(title, message, initialValue);
+        if (value is null)
+        {
+            return null;
+        }
+
+        value = value.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            LastErrorMessage = "Nome vazio.";
+            Status = "Nome invalido";
+            return null;
+        }
+
+        return value;
+    }
+
     private string? GetTargetFolderPath()
     {
         if (SelectedNode is null)
@@ -750,20 +799,11 @@ public sealed class MainWindowViewModel : ViewModelBase
         return string.IsNullOrWhiteSpace(directoryName) ? null : directoryName;
     }
 
-    private string GetRenameTargetName(RepositoryNodeViewModel node)
+    private string GetPromptNameForSelectedNode(RepositoryNodeViewModel node)
     {
-        var currentName = node.IsNote ? Path.GetFileNameWithoutExtension(node.Name) : node.Name;
-
-        if (node.IsNote
-            && SelectedNote is not null
-            && node.NoteId == SelectedNote.Id
-            && !string.IsNullOrWhiteSpace(Title)
-            && !string.Equals(currentName, Title, StringComparison.OrdinalIgnoreCase))
-        {
-            return Title;
-        }
-
-        return $"{currentName} renomeado";
+        return node.IsNote
+            ? Path.GetFileNameWithoutExtension(node.Name)
+            : node.Name;
     }
 
     private static bool IsPathInside(string path, string candidateParentPath) =>
