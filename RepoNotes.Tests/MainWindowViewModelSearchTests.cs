@@ -13,11 +13,27 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
         Directory.CreateDirectory(Path.Combine(_tempRepositoryPath, "Apps"));
         Directory.CreateDirectory(Path.Combine(_tempRepositoryPath, "Runbooks"));
         File.WriteAllText(Path.Combine(_tempRepositoryPath, "Apps", "Portal.md"), """
+        ---
+        title: Portal
+        type: application
+        tags: [app, producao]
+        status: active
+        created: 2026-05-20T10:00:00.0000000Z
+        updated: 2026-05-20T10:00:00.0000000Z
+        ---
         # Portal
 
         Documentacao da aplicacao principal.
         """);
         File.WriteAllText(Path.Combine(_tempRepositoryPath, "Runbooks", "Nginx.md"), """
+        ---
+        title: Proxy
+        type: runbook
+        tags: [infra, producao]
+        status: active
+        created: 2026-05-20T10:00:00.0000000Z
+        updated: 2026-05-20T10:00:00.0000000Z
+        ---
         # Proxy
 
         Reiniciar servico nginx em incidente.
@@ -61,6 +77,70 @@ public sealed class MainWindowViewModelSearchTests : IDisposable
         Assert.Equal("Busca: 1 resultado", viewModel.Status);
         Assert.True(ContainsNode(viewModel.Nodes, "Runbooks"));
         Assert.True(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+    }
+
+    [Fact]
+    public void TagFiltersAreLoadedFromRepositoryNotesWithCounts()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+
+        Assert.Contains(viewModel.TagFilters, tag => tag.Name == "producao" && tag.Count == 2);
+        Assert.Contains(viewModel.TagFilters, tag => tag.Name == "infra" && tag.Count == 1);
+        Assert.Contains(viewModel.TagFilters, tag => tag.Name == "app" && tag.Count == 1);
+    }
+
+    [Fact]
+    public void SelectingTagFiltersTreeByTag()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        var infraTag = viewModel.TagFilters.First(tag => tag.Name == "infra");
+
+        infraTag.SelectCommand.Execute(null);
+
+        Assert.Equal("Tag infra: 1 resultado", viewModel.Status);
+        Assert.True(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+        Assert.False(ContainsNode(viewModel.Nodes, @"Apps\Portal.md"));
+        Assert.True(viewModel.HasTagFilter);
+    }
+
+    [Fact]
+    public void SearchTextCombinesWithSelectedTagFilter()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        viewModel.TagFilters.First(tag => tag.Name == "producao").SelectCommand.Execute(null);
+
+        viewModel.SearchText = "portal";
+
+        Assert.Equal("Tag producao: 1 resultado", viewModel.Status);
+        Assert.True(ContainsNode(viewModel.Nodes, @"Apps\Portal.md"));
+        Assert.False(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+    }
+
+    [Fact]
+    public void ClearTagFilterRestoresTree()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        viewModel.TagFilters.First(tag => tag.Name == "infra").SelectCommand.Execute(null);
+
+        viewModel.ClearTagFilterCommand.Execute(null);
+
+        Assert.Equal("Busca limpa", viewModel.Status);
+        Assert.False(viewModel.HasTagFilter);
+        Assert.True(ContainsNode(viewModel.Nodes, @"Apps\Portal.md"));
+        Assert.True(ContainsNode(viewModel.Nodes, @"Runbooks\Nginx.md"));
+    }
+
+    [Fact]
+    public void TagsFromTrashAreNotListed()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.GetNotes().First(candidate => candidate.Tags.Contains("infra"));
+        repository.MoveItemToTrash(note.Path);
+
+        var viewModel = new MainWindowViewModel(repository);
+
+        Assert.DoesNotContain(viewModel.TagFilters, tag => tag.Name == "infra");
+        Assert.Contains(viewModel.TagFilters, tag => tag.Name == "producao" && tag.Count == 1);
     }
 
     private static bool ContainsNode(IEnumerable<RepositoryNodeViewModel> nodes, string path)

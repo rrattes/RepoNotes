@@ -43,6 +43,16 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - `created`, `updated`, and `path` are read-only informational fields.
 - Metadata editing must mark the note as changed and rely on the normal save flow to write frontmatter.
 
+## Tags Sidebar
+
+- The sidebar `TAGS` section must show real tags read from note frontmatter, not mock chips.
+- Tag chips are compact and show the tag name plus note count, for example `infra 3`.
+- Clicking a tag filters the note tree to notes containing that tag; clicking the active tag again or using `Limpar` removes the filter.
+- Tag filtering and text search should work together when both are active.
+- The active tag needs a subtle visual indicator while preserving the dark compact sidebar rhythm.
+- Notes inside `.reponotes-trash` must not contribute tags or counts.
+- Future encrypted or locked content must not expose tag counts or searchable metadata while locked.
+
 ## Simple Name Dialog
 
 - File and folder creation/rename flows use a compact dark text prompt instead of relying only on automatic names.

@@ -596,3 +596,30 @@
 **Riscos tecnicos:** Baixo; o ViewModel permanece testavel por interface e o storage segue como camada final de seguranca contra nomes invalidos e sobrescrita. O principal cuidado futuro e nao transformar prompts simples em framework modal complexo.
 
 **Proximo passo sugerido:** Testar manualmente criacao/renomeacao com nomes validos, cancelamento e conflito; depois avaliar confirmacoes visuais para acoes destrutivas da lixeira.
+
+## 2026-05-21 08:56:22 -03:00
+
+**Objetivo da rodada:** Transformar tags em recurso funcional basico, exibindo tags reais das notas e permitindo filtrar por tag.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/ViewModels/TagFilterViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Tests/MainWindowViewModelSearchTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A sidebar deixou de usar tags mockadas e agora lista tags reais lidas do frontmatter das notas carregadas, com contagem por tag. Clicar em uma tag filtra a arvore de notas, `Limpar` remove o filtro e a busca textual combina com o filtro de tag quando ambos estao ativos. O ViewModel atualiza a lista de tags apos criacao, renomeacao, exclusao, restauracao e mudancas de metadados. Itens dentro de `.reponotes-trash` continuam fora da arvore, busca e contagem de tags.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:56 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:56 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 55 testes aprovados, 0 falhas.
+
+**Pendencias:** A edicao de tags ainda e textual no painel Info; nao ha autocomplete, hierarquia de tags, chips editaveis ou busca dedicada por tags. Conteudo criptografado futuro ainda precisa bloquear exposicao de tags/metadados quando estiver travado.
+
+**Riscos tecnicos:** Baixo; o filtro usa dados ja carregados em memoria e respeita a exclusao da lixeira. Em repositorios grandes, contagem e filtragem em memoria podem precisar de cache mais estruturado ou indexacao incremental.
+
+**Proximo passo sugerido:** Testar manualmente filtros por tags em notas com frontmatter e depois avaliar chips editaveis ou sugestoes de tags no painel Info.

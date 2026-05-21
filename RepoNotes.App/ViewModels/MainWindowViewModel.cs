@@ -21,6 +21,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _repositoryName;
     private string _repositoryPath;
     private string _searchText = string.Empty;
+    private string _selectedTag = string.Empty;
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
@@ -51,6 +52,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         Nodes = [];
         PreviewBlocks = [];
         TrashItems = [];
+        TagFilters = [];
 
         NewNoteCommand = new AsyncRelayCommand(CreateNewNoteAsync);
         NewFromTemplateCommand = new AsyncRelayCommand(CreateNewNoteFromSelectedTemplateAsync);
@@ -58,6 +60,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
         OpenSettingsCommand = new RelayCommand(() => Status = "Configuracoes ainda nao implementadas no MVP");
+        ClearTagFilterCommand = new RelayCommand(ClearTagFilter);
         RenameSelectedItemCommand = new AsyncRelayCommand(RenameSelectedItemAsync);
         DeleteSelectedItemCommand = new RelayCommand(DeleteSelectedItem);
         RestoreFromTrashCommand = new RelayCommand(RestoreFromTrash);
@@ -87,6 +90,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
 
     public ObservableCollection<TrashItem> TrashItems { get; }
+
+    public ObservableCollection<TagFilterViewModel> TagFilters { get; }
 
     public IReadOnlyList<NoteTemplate> Templates { get; }
 
@@ -119,6 +124,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand OpenSettingsCommand { get; }
 
+    public ICommand ClearTagFilterCommand { get; }
+
     public ICommand RenameSelectedItemCommand { get; }
 
     public ICommand DeleteSelectedItemCommand { get; }
@@ -145,6 +152,25 @@ public sealed class MainWindowViewModel : ViewModelBase
             UpdateSearchStatus();
         }
     }
+
+    public string SelectedTag
+    {
+        get => _selectedTag;
+        private set
+        {
+            if (!SetProperty(ref _selectedTag, value))
+            {
+                return;
+            }
+
+            OnPropertyChanged(nameof(HasTagFilter));
+            RefreshTagFilters();
+        }
+    }
+
+    public bool HasTagFilter => !string.IsNullOrWhiteSpace(SelectedTag);
+
+    public bool HasTags => TagFilters.Count > 0;
 
     public RepositoryNodeViewModel? SelectedNode
     {
@@ -199,6 +225,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(NoteStatus));
             OnPropertyChanged(nameof(MetadataTagsText));
             UpdatePreviewBlocks();
+            RefreshTagFilters();
             _hasUnsavedChanges = false;
             LastErrorMessage = string.Empty;
             Status = "Salvo";
@@ -314,6 +341,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             MarkNoteChanged();
             OnPropertyChanged();
             OnPropertyChanged(nameof(TagsText));
+            RefreshTagFilters();
         }
     }
 
@@ -391,6 +419,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             var note = _noteRepository.CreateNote(GetTargetFolderPath(), noteName, template);
             RefreshTree();
+            RefreshTagFilters();
             SelectNodeByNoteId(note.Id);
             Status = $"{successPrefix}: {note.Path}";
         }
@@ -455,6 +484,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             var wasNote = SelectedNode.IsNote;
             var newPath = _noteRepository.RenameItem(SelectedNode.Path, newName);
             RefreshTree();
+            RefreshTagFilters();
 
             if (wasNote)
             {
@@ -493,6 +523,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             _noteRepository.MoveItemToTrash(deletedPath);
             RefreshTree();
+            RefreshTagFilters();
             RefreshTrashItems();
             _selectedNode = null;
             OnPropertyChanged(nameof(SelectedNode));
@@ -528,6 +559,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             var restoredPath = _noteRepository.RestoreFromTrash(SelectedTrashItem.TrashPath);
             RefreshTree();
+            RefreshTagFilters();
             RefreshTrashItems();
             SelectNodeByPath(restoredPath);
             SelectNodeByNoteId(restoredPath);
@@ -627,7 +659,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         _noteRepository = noteRepository;
         RepositoryName = noteRepository.CurrentRepository.Name;
         RepositoryPath = noteRepository.CurrentRepository.RootPath;
+        SelectedTag = string.Empty;
         RefreshTree();
+        RefreshTagFilters();
         RefreshTrashItems();
 
         _selectedNode = null;
@@ -648,9 +682,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         Nodes.Clear();
 
-        var sourceNodes = string.IsNullOrWhiteSpace(SearchText)
+        var hasSearch = !string.IsNullOrWhiteSpace(SearchText);
+        var hasTag = !string.IsNullOrWhiteSpace(SelectedTag);
+        var sourceNodes = !hasSearch && !hasTag
             ? _noteRepository.GetTree()
-            : GetFilteredTree(SearchText);
+            : GetFilteredTree(SearchText, SelectedTag);
 
         foreach (var node in sourceNodes)
         {
@@ -670,17 +706,66 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectedTrashItem = TrashItems.FirstOrDefault();
     }
 
-    private IReadOnlyList<RepositoryNode> GetFilteredTree(string query)
+    private void RefreshTagFilters()
+    {
+        var tagCounts = _noteRepository
+            .GetNotes()
+            .SelectMany(note => note.Tags)
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .GroupBy(tag => tag, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new
+            {
+                Name = group.OrderBy(tag => tag, StringComparer.Ordinal).First(),
+                Count = group.Count()
+            })
+            .OrderByDescending(tag => tag.Count)
+            .ThenBy(tag => tag.Name, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        TagFilters.Clear();
+
+        foreach (var tag in tagCounts)
+        {
+            TagFilters.Add(new TagFilterViewModel(
+                tag.Name,
+                tag.Count,
+                string.Equals(tag.Name, SelectedTag, StringComparison.OrdinalIgnoreCase),
+                SelectTag));
+        }
+
+        OnPropertyChanged(nameof(HasTags));
+    }
+
+    private void SelectTag(string tag)
+    {
+        SelectedTag = string.Equals(SelectedTag, tag, StringComparison.OrdinalIgnoreCase) ? string.Empty : tag;
+        RefreshTree();
+        UpdateSearchStatus();
+    }
+
+    private void ClearTagFilter()
+    {
+        if (string.IsNullOrWhiteSpace(SelectedTag))
+        {
+            return;
+        }
+
+        SelectedTag = string.Empty;
+        RefreshTree();
+        UpdateSearchStatus();
+    }
+
+    private IReadOnlyList<RepositoryNode> GetFilteredTree(string query, string tag)
     {
         var matchedNoteIds = _noteRepository
             .GetNotes()
-            .Where(note => MatchesSearch(note, query))
+            .Where(note => MatchesTag(note, tag) && MatchesSearch(note, query))
             .Select(note => note.Id)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
         var filteredNodes = _noteRepository
             .GetTree()
-            .Select(node => FilterNode(node, query, matchedNoteIds))
+            .Select(node => FilterNode(node, query, tag, matchedNoteIds))
             .Where(node => node is not null)
             .Cast<RepositoryNode>()
             .ToList();
@@ -688,24 +773,26 @@ public sealed class MainWindowViewModel : ViewModelBase
         return filteredNodes;
     }
 
-    private static RepositoryNode? FilterNode(RepositoryNode node, string query, ISet<string> matchedNoteIds)
+    private static RepositoryNode? FilterNode(RepositoryNode node, string query, string tag, ISet<string> matchedNoteIds)
     {
         if (node.Type == RepositoryNodeType.Note)
         {
             var noteMatches = node.NoteId is not null && matchedNoteIds.Contains(node.NoteId);
-            var nodeMatches = ContainsIgnoreCase(node.Name, query) || ContainsIgnoreCase(node.Path, query);
+            var nodeMatches = string.IsNullOrWhiteSpace(tag)
+                && (ContainsIgnoreCase(node.Name, query) || ContainsIgnoreCase(node.Path, query));
 
             return noteMatches || nodeMatches ? node : null;
         }
 
-        var folderMatches = ContainsIgnoreCase(node.Name, query) || ContainsIgnoreCase(node.Path, query);
+        var folderMatches = string.IsNullOrWhiteSpace(tag)
+            && (ContainsIgnoreCase(node.Name, query) || ContainsIgnoreCase(node.Path, query));
         if (folderMatches)
         {
             return node;
         }
 
         var children = node.Children
-            .Select(child => FilterNode(child, query, matchedNoteIds))
+            .Select(child => FilterNode(child, query, tag, matchedNoteIds))
             .Where(child => child is not null)
             .Cast<RepositoryNode>()
             .ToList();
@@ -726,26 +813,30 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     private static bool MatchesSearch(NoteItem note, string query) =>
-        ContainsIgnoreCase(note.Title, query)
+        string.IsNullOrWhiteSpace(query)
+        || ContainsIgnoreCase(note.Title, query)
         || ContainsIgnoreCase(Path.GetFileName(note.Path), query)
         || ContainsIgnoreCase(note.Path, query)
         || ContainsIgnoreCase(note.Markdown, query);
 
+    private static bool MatchesTag(NoteItem note, string tag) =>
+        string.IsNullOrWhiteSpace(tag)
+        || note.Tags.Any(noteTag => string.Equals(noteTag, tag, StringComparison.OrdinalIgnoreCase));
+
     private int GetSearchResultCount() =>
-        string.IsNullOrWhiteSpace(SearchText)
-            ? _noteRepository.GetNotes().Count
-            : _noteRepository.GetNotes().Count(note => MatchesSearch(note, SearchText));
+        _noteRepository.GetNotes().Count(note => MatchesTag(note, SelectedTag) && MatchesSearch(note, SearchText));
 
     private void UpdateSearchStatus()
     {
-        if (string.IsNullOrWhiteSpace(SearchText))
+        if (string.IsNullOrWhiteSpace(SearchText) && string.IsNullOrWhiteSpace(SelectedTag))
         {
             Status = _hasUnsavedChanges ? "Alterado" : "Busca limpa";
             return;
         }
 
         var count = GetSearchResultCount();
-        Status = count == 1 ? "Busca: 1 resultado" : $"Busca: {count} resultados";
+        var prefix = string.IsNullOrWhiteSpace(SelectedTag) ? "Busca" : $"Tag {SelectedTag}";
+        Status = count == 1 ? $"{prefix}: 1 resultado" : $"{prefix}: {count} resultados";
     }
 
     private static bool ContainsIgnoreCase(string? value, string query) =>

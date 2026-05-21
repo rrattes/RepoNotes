@@ -227,4 +227,30 @@
     <Setter Property="CornerRadius" Value="6" />
     <Setter Property="Padding" Value="6,2" />
   </Style>
+
+  <Style Selector="Button.tag-chip">
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Padding" Value="6,0" />
+    <Setter Property="Margin" Value="0,0,5,5" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Background" Value="#24203E" />
+    <Setter Property="BorderBrush" Value="#352B68" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+  </Style>
+
+  <Style Selector="Button.tag-chip:pointerover">
+    <Setter Property="Background" Value="#30275A" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
+  </Style>
+
+  <Style Selector="Button.tag-clear">
+    <Setter Property="Height" Value="20" />
+    <Setter Property="Padding" Value="6,0" />
+    <Setter Property="FontSize" Value="10" />
+    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="Background" Value="#111B28" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextWeak}" />
+  </Style>
 </Styles>
