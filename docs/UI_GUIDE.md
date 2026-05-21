@@ -33,6 +33,14 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Context actions such as Save, Info, and Tags belong near the document tab/breadcrumb, while formatting commands stay in the editor toolbar.
 - The app must not draw fake window controls in the top area; native OS/Avalonia window controls remain responsible for minimize, maximize, and close.
 
+## Metadata Panel
+
+- Basic frontmatter metadata lives in the right-side Info area so it does not reduce editor width.
+- Editable metadata should stay compact and stacked: `type`, `status`, and `tags`.
+- Tags are edited as comma-separated text in the initial MVP UI.
+- `created`, `updated`, and `path` are read-only informational fields.
+- Metadata editing must mark the note as changed and rely on the normal save flow to write frontmatter.
+
 ## Current Density Targets
 
 - Sidebar: around 250px to 260px, currently `252px`.

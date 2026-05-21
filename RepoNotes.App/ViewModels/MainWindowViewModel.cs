@@ -23,6 +23,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
     private NoteTemplate _selectedTemplate;
+    private readonly IReadOnlyList<string> _statusOptions = ["Draft", "Active", "Review", "Archived"];
 
     public MainWindowViewModel(
         INoteRepository noteRepository,
@@ -78,6 +79,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
 
     public IReadOnlyList<NoteTemplate> Templates { get; }
+
+    public IReadOnlyList<string> StatusOptions => _statusOptions;
 
     public NoteTemplate SelectedTemplate
     {
@@ -168,7 +171,11 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(NotePath));
             OnPropertyChanged(nameof(WordCountText));
             OnPropertyChanged(nameof(UpdatedAtText));
+            OnPropertyChanged(nameof(CreatedAtText));
             OnPropertyChanged(nameof(TagsText));
+            OnPropertyChanged(nameof(NoteType));
+            OnPropertyChanged(nameof(NoteStatus));
+            OnPropertyChanged(nameof(MetadataTagsText));
             UpdatePreviewBlocks();
             _hasUnsavedChanges = false;
             LastErrorMessage = string.Empty;
@@ -225,9 +232,68 @@ public sealed class MainWindowViewModel : ViewModelBase
         ? "-"
         : SelectedNote.UpdatedAt.ToString("dd/MM/yyyy HH:mm");
 
+    public string CreatedAtText => SelectedNote is null
+        ? "-"
+        : SelectedNote.CreatedAt.ToString("dd/MM/yyyy HH:mm");
+
     public string TagsText => SelectedNote is null || SelectedNote.Tags.Count == 0
         ? "Sem tags"
         : string.Join(", ", SelectedNote.Tags);
+
+    public string NoteType
+    {
+        get => SelectedNote?.Type ?? string.Empty;
+        set
+        {
+            if (SelectedNote is null || SelectedNote.Type == value)
+            {
+                return;
+            }
+
+            SelectedNote.Type = string.IsNullOrWhiteSpace(value) ? "note" : value.Trim();
+            MarkNoteChanged();
+            OnPropertyChanged();
+        }
+    }
+
+    public string NoteStatus
+    {
+        get => SelectedNote?.Status ?? string.Empty;
+        set
+        {
+            if (SelectedNote is null || SelectedNote.Status == value)
+            {
+                return;
+            }
+
+            SelectedNote.Status = string.IsNullOrWhiteSpace(value) ? "draft" : value.Trim();
+            MarkNoteChanged();
+            OnPropertyChanged();
+        }
+    }
+
+    public string MetadataTagsText
+    {
+        get => SelectedNote is null ? string.Empty : string.Join(", ", SelectedNote.Tags);
+        set
+        {
+            if (SelectedNote is null)
+            {
+                return;
+            }
+
+            var tags = ParseTagsText(value);
+            if (SelectedNote.Tags.SequenceEqual(tags, StringComparer.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            SelectedNote.Tags = tags;
+            MarkNoteChanged();
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(TagsText));
+        }
+    }
 
     public string Status
     {
@@ -561,6 +627,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         template.Id == TechnicalNoteTemplateService.FreeNoteTemplateId
             ? "Nova nota"
             : $"Novo {template.SuggestedType}";
+
+    private static IReadOnlyList<string> ParseTagsText(string value) =>
+        value
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
 
     private string? GetTargetFolderPath()
     {

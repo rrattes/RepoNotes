@@ -2,6 +2,7 @@ using RepoNotes.App.ViewModels;
 using RepoNotes.App.Services;
 using RepoNotes.Core.Models;
 using RepoNotes.Core.Services;
+using RepoNotes.Storage;
 
 namespace RepoNotes.Tests;
 
@@ -54,6 +55,77 @@ public sealed class MainWindowViewModelSaveTests
         Assert.Equal("Erro ao salvar", viewModel.Status);
         Assert.Equal("Arquivo bloqueado para teste.", viewModel.LastErrorMessage);
         Assert.Equal("# Conteudo que nao deve ser perdido", viewModel.Markdown);
+    }
+
+    [Fact]
+    public void SaveCommandWritesEditedTypeTagsAndStatusToFrontmatter()
+    {
+        var tempRepositoryPath = CreateTempRepository();
+        try
+        {
+            var notePath = Path.Combine(tempRepositoryPath, "Nota.md");
+            File.WriteAllText(notePath, """
+            # Nota
+
+            Corpo original.
+            """);
+            var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(tempRepositoryPath))
+            {
+                NoteType = "runbook",
+                MetadataTagsText = "infra, windows, infra",
+                NoteStatus = "Review"
+            };
+
+            viewModel.SaveNoteCommand.Execute(null);
+
+            var savedContent = File.ReadAllText(notePath);
+            Assert.Contains("type: runbook", savedContent);
+            Assert.Contains("tags: [infra, windows]", savedContent);
+            Assert.Contains("status: Review", savedContent);
+            Assert.Contains("# Nota", savedContent);
+            Assert.Contains("Corpo original.", savedContent);
+            Assert.Equal("Salvo", viewModel.Status);
+        }
+        finally
+        {
+            DeleteTempRepository(tempRepositoryPath);
+        }
+    }
+
+    [Fact]
+    public void SaveCommandCreatesFrontmatterForNoteWithoutFrontmatter()
+    {
+        var tempRepositoryPath = CreateTempRepository();
+        try
+        {
+            var notePath = Path.Combine(tempRepositoryPath, "SemFrontmatter.md");
+            File.WriteAllText(notePath, """
+            # Nota sem frontmatter
+
+            Conteudo Markdown preservado.
+            """);
+            var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(tempRepositoryPath))
+            {
+                NoteType = "script",
+                MetadataTagsText = "powershell, automacao",
+                NoteStatus = "Active"
+            };
+
+            viewModel.SaveNoteCommand.Execute(null);
+
+            var savedContent = File.ReadAllText(notePath);
+            Assert.StartsWith("---", savedContent);
+            Assert.Contains("title: Nota sem frontmatter", savedContent);
+            Assert.Contains("type: script", savedContent);
+            Assert.Contains("tags: [powershell, automacao]", savedContent);
+            Assert.Contains("status: Active", savedContent);
+            Assert.Contains("# Nota sem frontmatter", savedContent);
+            Assert.Contains("Conteudo Markdown preservado.", savedContent);
+        }
+        finally
+        {
+            DeleteTempRepository(tempRepositoryPath);
+        }
     }
 
     [Fact]
@@ -149,6 +221,21 @@ public sealed class MainWindowViewModelSaveTests
         Assert.Equal("sample-repository", viewModel.RepositoryName);
         Assert.Null(settingsStore.LastRepositoryPath);
         Assert.Equal("Repositorio nao encontrado. Usando sample-repository.", viewModel.Status);
+    }
+
+    private static string CreateTempRepository()
+    {
+        var tempRepositoryPath = Path.Combine(Path.GetTempPath(), "RepoNotes.Tests", Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempRepositoryPath);
+        return tempRepositoryPath;
+    }
+
+    private static void DeleteTempRepository(string tempRepositoryPath)
+    {
+        if (Directory.Exists(tempRepositoryPath))
+        {
+            Directory.Delete(tempRepositoryPath, recursive: true);
+        }
     }
 
     private sealed class TestNoteRepository : INoteRepository

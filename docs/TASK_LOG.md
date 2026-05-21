@@ -511,3 +511,29 @@
 **Riscos tecnicos:** Baixo; o fluxo continua local-first e baseado em Markdown/frontmatter. O principal cuidado futuro e manter o seletor compacto para nao poluir a sidebar e nao acoplar regras de template diretamente no XAML.
 
 **Proximo passo sugerido:** Testar manualmente criacao de Runbook, Handover e Servidor pela UI e depois avaliar uma melhoria leve de UX, como lembrar o ultimo template selecionado.
+
+## 2026-05-21 08:42:35 -03:00
+
+**Objetivo da rodada:** Criar uma UI compacta para visualizar e editar metadados basicos da nota sem exigir edicao manual de YAML frontmatter.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O painel direito passou a mostrar uma area compacta de Info da nota com campos editaveis para `type`, `status` e `tags`, alem de campos informativos para criado, atualizado e caminho. Tags sao editadas como texto separado por virgula. Alteracoes nesses metadados marcam a nota como `Alterado` e usam o fluxo normal de salvar para escrever o frontmatter, preservando o Markdown. Foram adicionados testes cobrindo alteracao de type/tags/status, criacao de frontmatter em nota sem frontmatter e preservacao do conteudo Markdown.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:43 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:43 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 42 testes aprovados, 0 falhas.
+
+**Pendencias:** A edicao de tags ainda e textual e nao tem chips editaveis, sugestoes, validacao avancada ou busca por tags. O seletor de status e simples e nao ha normalizacao final de valores antigos como `draft` para exibicao capitalizada.
+
+**Riscos tecnicos:** Baixo; o fluxo reutiliza o save existente e o frontmatter ja consolidado. O maior cuidado futuro e manter compatibilidade com notas antigas e evitar que metadados de conteudo criptografado futuro sejam indexados ou exibidos quando bloqueados.
+
+**Proximo passo sugerido:** Testar manualmente notas com e sem frontmatter e depois avaliar uma melhoria pequena para tags em chips editaveis ou filtro por tags.

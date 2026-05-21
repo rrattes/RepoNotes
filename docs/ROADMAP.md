@@ -16,6 +16,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 1. File-backed notes
    - Basic read/write Markdown files from a local sample repository is started.
    - YAML frontmatter support is started for title, type, tags, status, created, and updated metadata.
+   - Initial compact UI for editing frontmatter metadata is started for `type`, `tags`, and `status`.
    - Save feedback now distinguishes saved, changed, saving, and save error states.
    - Switching notes now auto-saves pending changes and blocks the switch if saving fails.
    - Preserve folder structure in the loaded tree.

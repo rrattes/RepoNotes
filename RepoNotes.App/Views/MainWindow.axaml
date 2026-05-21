@@ -509,19 +509,38 @@
               <StackPanel Spacing="10">
                 <ItemsControl ItemsSource="{Binding PreviewBlocks}" />
                 <Border Classes="card" Padding="10" Margin="0,0,0,0">
-                  <StackPanel Spacing="6">
+                  <StackPanel Spacing="8">
                     <TextBlock Text="Info da nota" FontWeight="SemiBold" />
-                    <Grid ColumnDefinitions="72,*">
-                      <TextBlock Text="Caminho" Foreground="{StaticResource Brush.TextWeak}" />
-                      <TextBlock Grid.Column="1" Text="{Binding NotePath}" Foreground="{StaticResource Brush.TextMuted}" TextWrapping="Wrap" />
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="Tipo" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+                      <TextBox Classes="metadata-field"
+                               Text="{Binding NoteType}"
+                               PlaceholderText="note" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="Status" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+                      <ComboBox Classes="metadata-picker"
+                                ItemsSource="{Binding StatusOptions}"
+                                SelectedItem="{Binding NoteStatus}" />
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="Tags" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+                      <TextBox Classes="metadata-field"
+                               Text="{Binding MetadataTagsText}"
+                               PlaceholderText="infra, runbook" />
+                    </StackPanel>
+                    <Border Height="1" Background="{StaticResource Brush.Divider}" Margin="0,2" />
+                    <Grid ColumnDefinitions="76,*">
+                      <TextBlock Text="Criado" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+                      <TextBlock Grid.Column="1" Text="{Binding CreatedAtText}" Foreground="{StaticResource Brush.TextMuted}" FontSize="11" />
                     </Grid>
-                    <Grid ColumnDefinitions="72,*">
-                      <TextBlock Text="Atualizado" Foreground="{StaticResource Brush.TextWeak}" />
-                      <TextBlock Grid.Column="1" Text="{Binding UpdatedAtText}" Foreground="{StaticResource Brush.TextMuted}" />
+                    <Grid ColumnDefinitions="76,*">
+                      <TextBlock Text="Atualizado" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+                      <TextBlock Grid.Column="1" Text="{Binding UpdatedAtText}" Foreground="{StaticResource Brush.TextMuted}" FontSize="11" />
                     </Grid>
-                    <Grid ColumnDefinitions="72,*">
-                      <TextBlock Text="Tags" Foreground="{StaticResource Brush.TextWeak}" />
-                      <TextBlock Grid.Column="1" Text="{Binding TagsText}" Foreground="{StaticResource Brush.TextMuted}" />
+                    <Grid ColumnDefinitions="76,*">
+                      <TextBlock Text="Caminho" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
+                      <TextBlock Grid.Column="1" Text="{Binding NotePath}" Foreground="{StaticResource Brush.TextMuted}" FontSize="11" TextWrapping="Wrap" />
                     </Grid>
                   </StackPanel>
                 </Border>
