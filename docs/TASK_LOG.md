@@ -432,3 +432,25 @@
 **Riscos tecnicos:** Medio-baixo; o formato e portavel e local-first, mas evolucoes futuras de entidades tecnicas e criptografia precisam manter compatibilidade com frontmatter existente e evitar indexar metadados/conteudo bloqueado quando houver criptografia.
 
 **Proximo passo sugerido:** Testar manualmente notas com e sem frontmatter e, em rodada futura, criar uma UI compacta para editar tags/status sem expor YAML bruto ao usuario.
+
+## 2026-05-21 08:29:45 -03:00
+
+**Objetivo da rodada:** Fazer um checkpoint tecnico completo apos as ultimas rodadas funcionais, sem implementar nova feature.
+
+**Arquivos alterados:**
+
+- `docs/TASK_LOG.md`
+
+**Status do working tree:** O checkpoint iniciou com alteracoes acidentais em `sample-repository`: `Inbox/Bem-vindo.md` modificado e notas/pastas `Nova nota`/`Nova pasta` criadas por testes manuais do app. Essas sobras foram revertidas/removidas apenas dentro de `sample-repository`. Apos a limpeza e antes do commit do log, `git status --short` nao mostrou alteracoes alem deste registro.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:29 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:29 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 33 testes aprovados, 0 falhas.
+
+**Achados da revisao:** `.reponotes-trash` esta excluida de `Reload()` e `BuildTree()` no storage; como busca usa `GetNotes()`/`GetTree()` e preview usa a nota selecionada, a lixeira nao entra na arvore, busca ou preview. Os testes atuais cobrem mover item para `.reponotes-trash`, remover da lista de notas/arvore, notas sem frontmatter, notas com frontmatter e escrita de `updated` ao salvar.
+
+**Pendencias atuais reais:** Templates tecnicos, Lightweight Technical Entities e exportacao simples ainda nao foram implementados. Tambem seguem pendentes UI para editar frontmatter (`type`, `tags`, `status`), dialogo de nome para criacao/renomeacao, restaurar da lixeira, exclusao permanente, links clicaveis/imagens no preview e busca com destaque/debounce/ranking.
+
+**Riscos tecnicos atuais:** A busca em memoria ainda pode precisar de indice/debounce em repositorios grandes. Operacoes de filesystem ainda sao sincronas. O parser YAML e propositalmente simples. Futuras features de criptografia devem impedir indexacao/busca/preview de conteudo bloqueado e manter `.reponotes-trash` fora da navegacao operacional.
+
+**Proximo passo sugerido:** Implementar templates tecnicos como proxima fatia pequena, com `NewFromTemplateCommand`, servico de templates e testes, antes de iniciar entidades tecnicas ou exportacao.
