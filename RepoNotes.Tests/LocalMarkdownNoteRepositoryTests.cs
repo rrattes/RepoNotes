@@ -1,3 +1,4 @@
+using RepoNotes.Core.Services;
 using RepoNotes.Storage;
 
 namespace RepoNotes.Tests;
@@ -130,6 +131,44 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
         Assert.Equal("Nova nota 2.md", secondNote.Path);
         Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota.md")));
         Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Nova nota 2.md")));
+    }
+
+    [Fact]
+    public void CreatesNewNoteAsValidMarkdownFileWithFrontmatter()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+
+        var note = repository.CreateNote(null);
+
+        var savedContent = File.ReadAllText(Path.Combine(_tempRepositoryPath, note.Path));
+        Assert.Equal("Nova nota", note.Title);
+        Assert.Equal("note", note.Type);
+        Assert.Equal("draft", note.Status);
+        Assert.True(note.CreatedAt <= note.UpdatedAt);
+        Assert.Contains("title: Nova nota", savedContent);
+        Assert.Contains("type: note", savedContent);
+        Assert.Contains("tags: []", savedContent);
+        Assert.Contains("status: draft", savedContent);
+        Assert.Contains("created:", savedContent);
+        Assert.Contains("updated:", savedContent);
+        Assert.Contains("# Nova nota", savedContent);
+    }
+
+    [Fact]
+    public void CreatesNewNoteFromTemplateWithFrontmatter()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var template = new TechnicalNoteTemplateService().GetTemplateById("runbook")!;
+
+        var note = repository.CreateNote(null, template: template);
+
+        var savedContent = File.ReadAllText(Path.Combine(_tempRepositoryPath, note.Path));
+        Assert.Equal("runbook", note.Type);
+        Assert.Contains("type: runbook", savedContent);
+        Assert.Contains("tags: [runbook, operacao]", savedContent);
+        Assert.Contains("## Pre-requisitos", savedContent);
+        Assert.Contains("## Rollback", savedContent);
+        Assert.True(note.CreatedAt <= note.UpdatedAt);
     }
 
     [Fact]

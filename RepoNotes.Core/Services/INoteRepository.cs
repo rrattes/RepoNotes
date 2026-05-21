@@ -14,7 +14,7 @@ public interface INoteRepository
 
     void SaveNote(NoteItem note);
 
-    NoteItem CreateNote(string? folderPath, string noteName = "Nova nota");
+    NoteItem CreateNote(string? folderPath, string noteName = "Nova nota", NoteTemplate? template = null);
 
     string CreateFolder(string? parentFolderPath, string folderName = "Nova pasta");
 

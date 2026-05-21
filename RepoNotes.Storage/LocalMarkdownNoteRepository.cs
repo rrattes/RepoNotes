@@ -58,7 +58,7 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         }
     }
 
-    public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota")
+    public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota", NoteTemplate? template = null)
     {
         var safeFolderPath = NormalizeOptionalPath(folderPath);
         var safeNoteName = SanitizeFileName(Path.GetFileNameWithoutExtension(noteName), "Nova nota");
@@ -68,14 +68,18 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         var fileName = GetUniqueFileName(targetDirectory, safeNoteName, ".md");
         var fullPath = Path.Combine(targetDirectory, fileName);
         var title = Path.GetFileNameWithoutExtension(fileName);
+        var now = DateTime.Now;
         var note = new NoteItem
         {
             Id = NormalizePath(Path.GetRelativePath(_rootPath, fullPath)),
             Title = title,
-            Markdown = $"# {title}{Environment.NewLine}",
+            Markdown = template?.CreateMarkdown(title) ?? $"# {title}{Environment.NewLine}",
             Path = NormalizePath(Path.GetRelativePath(_rootPath, fullPath)),
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            Type = template?.SuggestedType ?? "note",
+            Status = "draft",
+            Tags = template?.SuggestedTags ?? [],
+            CreatedAt = now,
+            UpdatedAt = now
         };
 
         File.WriteAllText(fullPath, ComposeMarkdownFile(note));

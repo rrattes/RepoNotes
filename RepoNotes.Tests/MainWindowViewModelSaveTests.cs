@@ -241,7 +241,7 @@ public sealed class MainWindowViewModelSaveTests
             }
         }
 
-        public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota")
+        public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota", NoteTemplate? template = null)
         {
             var fileName = $"{noteName}.md";
             var path = string.IsNullOrWhiteSpace(folderPath) ? fileName : @$"{folderPath}\{fileName}";
@@ -249,8 +249,10 @@ public sealed class MainWindowViewModelSaveTests
             {
                 Id = path,
                 Title = noteName,
-                Markdown = $"# {noteName}{Environment.NewLine}",
+                Markdown = template?.CreateMarkdown(noteName) ?? $"# {noteName}{Environment.NewLine}",
                 Path = path,
+                Type = template?.SuggestedType ?? "note",
+                Tags = template?.SuggestedTags ?? [],
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };

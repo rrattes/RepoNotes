@@ -454,3 +454,34 @@
 **Riscos tecnicos atuais:** A busca em memoria ainda pode precisar de indice/debounce em repositorios grandes. Operacoes de filesystem ainda sao sincronas. O parser YAML e propositalmente simples. Futuras features de criptografia devem impedir indexacao/busca/preview de conteudo bloqueado e manter `.reponotes-trash` fora da navegacao operacional.
 
 **Proximo passo sugerido:** Implementar templates tecnicos como proxima fatia pequena, com `NewFromTemplateCommand`, servico de templates e testes, antes de iniciar entidades tecnicas ou exportacao.
+
+## 2026-05-21 08:35:58 -03:00
+
+**Objetivo da rodada:** Implementar a base funcional de templates tecnicos no RepoNotes, sem criar ainda uma UI avancada de selecao.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.Core/Models/NoteTemplate.cs`
+- `RepoNotes.Core/Services/INoteRepository.cs`
+- `RepoNotes.Core/Services/INoteTemplateService.cs`
+- `RepoNotes.Core/Services/TechnicalNoteTemplateService.cs`
+- `RepoNotes.Storage/LocalMarkdownNoteRepository.cs`
+- `RepoNotes.Storage/MockNoteRepository.cs`
+- `RepoNotes.Tests/LocalMarkdownNoteRepositoryTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `RepoNotes.Tests/TechnicalNoteTemplateServiceTests.cs`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foi criada a base de templates tecnicos com modelo `NoteTemplate`, contrato `INoteTemplateService` e implementacao `TechnicalNoteTemplateService`. A lista inicial inclui Nota livre, Runbook, Handover tecnico, Incidente, Script, Prompt, Reuniao, Checklist, Aplicacao e Servidor. A criacao de nova nota passou a usar o template padrao de Nota livre internamente, mantendo a UI atual e preparando `NewFromTemplateCommand` para uma futura tela de escolha. O storage grava notas criadas por template com frontmatter basico e corpo Markdown inicial.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:34 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:35 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 38 testes aprovados, 0 falhas.
+
+**Pendencias:** Ainda nao ha UI para escolher template; `NewFromTemplateCommand` usa o fluxo simples preparado para Nota livre. Tambem seguem pendentes edicao visual de frontmatter, personalizacao de templates e criacao a partir dos demais templates pela interface.
+
+**Riscos tecnicos:** Baixo; os templates estao code-backed e simples, mas a futura UI de selecao precisa evitar acoplar nomes/ids diretamente no XAML. Quando entidades tecnicas entrarem, sera necessario alinhar `type`, `tags` e futuros campos de relacionamento sem quebrar notas ja criadas.
+
+**Proximo passo sugerido:** Criar uma UI compacta de escolha de template ligada a `NewFromTemplateCommand`, mantendo Nota livre como padrao e sem adicionar editor visual de templates ainda.

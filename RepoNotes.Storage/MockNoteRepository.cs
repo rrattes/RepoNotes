@@ -99,7 +99,7 @@ public sealed class MockNoteRepository : INoteRepository
         note.UpdatedAt = DateTime.Now;
     }
 
-    public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota")
+    public NoteItem CreateNote(string? folderPath, string noteName = "Nova nota", NoteTemplate? template = null)
     {
         var now = DateTime.Now;
         var safeName = string.IsNullOrWhiteSpace(noteName) ? "Nova nota" : noteName;
@@ -112,7 +112,10 @@ public sealed class MockNoteRepository : INoteRepository
             Path = path,
             CreatedAt = now,
             UpdatedAt = now,
-            Markdown = $"# {Path.GetFileNameWithoutExtension(fileName)}{Environment.NewLine}"
+            Type = template?.SuggestedType ?? "note",
+            Tags = template?.SuggestedTags ?? [],
+            Markdown = template?.CreateMarkdown(Path.GetFileNameWithoutExtension(fileName))
+                ?? $"# {Path.GetFileNameWithoutExtension(fileName)}{Environment.NewLine}"
         };
 
         _notes.Add(note);

@@ -12,6 +12,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly IFolderPickerService _folderPickerService;
     private readonly MarkdownPreviewService _markdownPreviewService;
     private readonly IRepositorySettingsStore _settingsStore;
+    private readonly INoteTemplateService _noteTemplateService;
     private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
     private NoteItem? _selectedNote;
     private RepositoryNodeViewModel? _selectedNode;
@@ -28,12 +29,14 @@ public sealed class MainWindowViewModel : ViewModelBase
         IRepositorySettingsStore? settingsStore = null,
         Func<string?, INoteRepository>? noteRepositoryFactory = null,
         string? initialStatus = null,
-        MarkdownPreviewService? markdownPreviewService = null)
+        MarkdownPreviewService? markdownPreviewService = null,
+        INoteTemplateService? noteTemplateService = null)
     {
         _noteRepository = noteRepository;
         _folderPickerService = folderPickerService ?? new NullFolderPickerService();
         _markdownPreviewService = markdownPreviewService ?? new MarkdownPreviewService();
         _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
+        _noteTemplateService = noteTemplateService ?? new TechnicalNoteTemplateService();
         _noteRepositoryFactory = noteRepositoryFactory ?? (_ => noteRepository);
         _repositoryName = noteRepository.CurrentRepository.Name;
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
@@ -41,6 +44,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         PreviewBlocks = [];
 
         NewNoteCommand = new RelayCommand(CreateNewNote);
+        NewFromTemplateCommand = new RelayCommand(CreateNewNoteFromDefaultTemplate);
         NewFolderCommand = new RelayCommand(CreateNewFolder);
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
@@ -71,6 +75,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
 
     public ICommand NewNoteCommand { get; }
+
+    public ICommand NewFromTemplateCommand { get; }
 
     public ICommand NewFolderCommand { get; }
 
@@ -252,7 +258,7 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         try
         {
-            var note = _noteRepository.CreateNote(GetTargetFolderPath());
+            var note = _noteRepository.CreateNote(GetTargetFolderPath(), template: _noteTemplateService.GetDefaultTemplate());
             RefreshTree();
             SelectNodeByNoteId(note.Id);
             Status = $"Nota criada: {note.Path}";
@@ -262,6 +268,11 @@ public sealed class MainWindowViewModel : ViewModelBase
             LastErrorMessage = ex.Message;
             Status = "Erro ao criar nota";
         }
+    }
+
+    private void CreateNewNoteFromDefaultTemplate()
+    {
+        CreateNewNote();
     }
 
     private void CreateNewFolder()
