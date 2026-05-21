@@ -31,7 +31,8 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 3. Technical note templates
    - Initial code-backed templates are started for free notes, runbooks, technical handovers, incidents, scripts, prompts, meetings, checklists, applications, and servers.
    - New note creation now uses the free-note template internally while preserving the existing simple UI.
-   - Add a compact UI for choosing templates in a future round.
+   - A compact sidebar UI for choosing templates is started; `Nova nota` remains the fast free-note action and `Novo por template` creates from the selected template.
+   - Future rounds may improve template selection ergonomics without adding custom template editing yet.
    - Keep templates local, simple, and Markdown/frontmatter based; do not add marketplace, plugins, cloud, or sync.
 
 4. Lightweight Technical Entities

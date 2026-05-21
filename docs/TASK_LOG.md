@@ -485,3 +485,29 @@
 **Riscos tecnicos:** Baixo; os templates estao code-backed e simples, mas a futura UI de selecao precisa evitar acoplar nomes/ids diretamente no XAML. Quando entidades tecnicas entrarem, sera necessario alinhar `type`, `tags` e futuros campos de relacionamento sem quebrar notas ja criadas.
 
 **Proximo passo sugerido:** Criar uma UI compacta de escolha de template ligada a `NewFromTemplateCommand`, mantendo Nota livre como padrao e sem adicionar editor visual de templates ainda.
+
+## 2026-05-21 08:39:08 -03:00
+
+**Objetivo da rodada:** Criar uma UI simples e discreta para escolher o template ao criar uma nova nota.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Tests/MainWindowViewModelCreateTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A sidebar ganhou um seletor compacto de templates com descricao curta e acao `Novo por template`. O botao `Nova nota` continua criando rapidamente uma Nota livre. `NewFromTemplateCommand` agora usa o template selecionado, cria arquivo Markdown real com nome automatico seguro baseado no tipo do template, atualiza a arvore e abre a nota criada no editor. Foram adicionados testes para criar Runbook por template, preservar frontmatter `type`, evitar sobrescrita com nomes unicos e deixar a nota criada selecionada.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 08:39 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 08:39 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 40 testes aprovados, 0 falhas.
+
+**Pendencias:** A UI ainda e propositalmente simples: nao ha busca de templates, categorias, preview do template, editor de templates customizados ou persistencia de ultimo template escolhido.
+
+**Riscos tecnicos:** Baixo; o fluxo continua local-first e baseado em Markdown/frontmatter. O principal cuidado futuro e manter o seletor compacto para nao poluir a sidebar e nao acoplar regras de template diretamente no XAML.
+
+**Proximo passo sugerido:** Testar manualmente criacao de Runbook, Handover e Servidor pela UI e depois avaliar uma melhoria leve de UX, como lembrar o ultimo template selecionado.

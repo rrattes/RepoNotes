@@ -132,7 +132,7 @@
               BorderBrush="{StaticResource Brush.Divider}"
               BorderThickness="0,0,1,0"
               Padding="10">
-        <Grid RowDefinitions="Auto,8,Auto,8,Auto,10,*,40">
+        <Grid RowDefinitions="Auto,8,Auto,8,Auto,8,Auto,10,*,40">
           <Button Grid.Row="0"
                   Classes="repository-card"
                   Height="34"
@@ -196,7 +196,41 @@
                     Height="34" />
           </Grid>
 
-          <StackPanel Grid.Row="6" Spacing="6">
+          <Border Grid.Row="6"
+                  Classes="card"
+                  Padding="7"
+                  CornerRadius="8">
+            <StackPanel Spacing="6">
+              <TextBlock Text="TEMPLATE"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="10"
+                         FontWeight="Bold" />
+              <ComboBox Classes="template-picker"
+                        ItemsSource="{Binding Templates}"
+                        SelectedItem="{Binding SelectedTemplate}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding Name}"
+                               FontSize="12"
+                               TextTrimming="CharacterEllipsis" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+              <TextBlock Text="{Binding SelectedTemplateDescription}"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="10"
+                         LineHeight="13"
+                         TextWrapping="Wrap"
+                         MaxHeight="28" />
+              <Button Classes="secondary"
+                      Command="{Binding NewFromTemplateCommand}"
+                      Content="Novo por template"
+                      Height="30"
+                      ToolTip.Tip="Criar nota usando o template selecionado" />
+            </StackPanel>
+          </Border>
+
+          <StackPanel Grid.Row="8" Spacing="6">
             <TextBlock Text="EXPLORADOR"
                        Foreground="{StaticResource Brush.TextWeak}"
                        FontSize="11"
@@ -253,7 +287,7 @@
             </StackPanel>
           </StackPanel>
 
-          <Border Grid.Row="7"
+          <Border Grid.Row="9"
                   BorderBrush="{StaticResource Brush.Divider}"
                   BorderThickness="0,1,0,0"
                   Padding="0,6,0,0">

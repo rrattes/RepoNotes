@@ -27,6 +27,39 @@ public sealed class MainWindowViewModelCreateTests : IDisposable
     }
 
     [Fact]
+    public void NewFromTemplateCommandCreatesSelectedTemplateFileAndOpensItInEditor()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        viewModel.SelectedTemplate = viewModel.Templates.First(template => template.Id == "runbook");
+
+        viewModel.NewFromTemplateCommand.Execute(null);
+
+        Assert.Equal("Novo runbook.md", viewModel.NotePath);
+        Assert.Equal("Novo runbook", viewModel.Title);
+        Assert.Equal("Nota criada por template: Novo runbook.md", viewModel.Status);
+        Assert.Contains("## Pre-requisitos", viewModel.Markdown);
+        Assert.Contains("## Rollback", viewModel.Markdown);
+
+        var savedContent = File.ReadAllText(Path.Combine(_tempRepositoryPath, "Novo runbook.md"));
+        Assert.Contains("type: runbook", savedContent);
+        Assert.Contains("tags: [runbook, operacao]", savedContent);
+    }
+
+    [Fact]
+    public void NewFromTemplateCommandUsesUniqueNamesForRepeatedTemplateCreation()
+    {
+        var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));
+        viewModel.SelectedTemplate = viewModel.Templates.First(template => template.Id == "runbook");
+
+        viewModel.NewFromTemplateCommand.Execute(null);
+        viewModel.NewFromTemplateCommand.Execute(null);
+
+        Assert.Equal("Novo runbook 2.md", viewModel.NotePath);
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Novo runbook.md")));
+        Assert.True(File.Exists(Path.Combine(_tempRepositoryPath, "Novo runbook 2.md")));
+    }
+
+    [Fact]
     public void NewFolderCommandCreatesFolderAndRefreshesTree()
     {
         var viewModel = new MainWindowViewModel(new LocalMarkdownNoteRepository(_tempRepositoryPath));

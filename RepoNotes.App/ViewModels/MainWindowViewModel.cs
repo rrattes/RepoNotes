@@ -22,6 +22,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
+    private NoteTemplate _selectedTemplate;
 
     public MainWindowViewModel(
         INoteRepository noteRepository,
@@ -37,6 +38,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         _markdownPreviewService = markdownPreviewService ?? new MarkdownPreviewService();
         _settingsStore = settingsStore ?? new NullRepositorySettingsStore();
         _noteTemplateService = noteTemplateService ?? new TechnicalNoteTemplateService();
+        Templates = _noteTemplateService.GetTemplates();
+        _selectedTemplate = _noteTemplateService.GetDefaultTemplate();
         _noteRepositoryFactory = noteRepositoryFactory ?? (_ => noteRepository);
         _repositoryName = noteRepository.CurrentRepository.Name;
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
@@ -44,7 +47,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         PreviewBlocks = [];
 
         NewNoteCommand = new RelayCommand(CreateNewNote);
-        NewFromTemplateCommand = new RelayCommand(CreateNewNoteFromDefaultTemplate);
+        NewFromTemplateCommand = new RelayCommand(CreateNewNoteFromSelectedTemplate);
         NewFolderCommand = new RelayCommand(CreateNewFolder);
         OpenFavoritesCommand = new RelayCommand(() => Status = "Favoritos ainda nao implementados no MVP");
         OpenRepositoryCommand = new AsyncRelayCommand(OpenRepositoryAsync);
@@ -73,6 +76,23 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<RepositoryNodeViewModel> Nodes { get; }
 
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
+
+    public IReadOnlyList<NoteTemplate> Templates { get; }
+
+    public NoteTemplate SelectedTemplate
+    {
+        get => _selectedTemplate;
+        set
+        {
+            if (value is not null)
+            {
+                SetProperty(ref _selectedTemplate, value);
+                OnPropertyChanged(nameof(SelectedTemplateDescription));
+            }
+        }
+    }
+
+    public string SelectedTemplateDescription => SelectedTemplate.Description;
 
     public ICommand NewNoteCommand { get; }
 
@@ -251,6 +271,17 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void CreateNewNote()
     {
+        CreateNewNoteFromTemplate(_noteTemplateService.GetDefaultTemplate(), "Nova nota", "Nota criada");
+    }
+
+    private void CreateNewNoteFromSelectedTemplate()
+    {
+        var noteName = GetTemplateNoteName(SelectedTemplate);
+        CreateNewNoteFromTemplate(SelectedTemplate, noteName, "Nota criada por template");
+    }
+
+    private void CreateNewNoteFromTemplate(NoteTemplate template, string noteName, string successPrefix)
+    {
         if (!TrySaveSelectedNote())
         {
             return;
@@ -258,21 +289,16 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         try
         {
-            var note = _noteRepository.CreateNote(GetTargetFolderPath(), template: _noteTemplateService.GetDefaultTemplate());
+            var note = _noteRepository.CreateNote(GetTargetFolderPath(), noteName, template);
             RefreshTree();
             SelectNodeByNoteId(note.Id);
-            Status = $"Nota criada: {note.Path}";
+            Status = $"{successPrefix}: {note.Path}";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             LastErrorMessage = ex.Message;
             Status = "Erro ao criar nota";
         }
-    }
-
-    private void CreateNewNoteFromDefaultTemplate()
-    {
-        CreateNewNote();
     }
 
     private void CreateNewFolder()
@@ -530,6 +556,11 @@ public sealed class MainWindowViewModel : ViewModelBase
     private static bool ContainsIgnoreCase(string? value, string query) =>
         !string.IsNullOrWhiteSpace(value)
         && value.Contains(query, StringComparison.OrdinalIgnoreCase);
+
+    private static string GetTemplateNoteName(NoteTemplate template) =>
+        template.Id == TechnicalNoteTemplateService.FreeNoteTemplateId
+            ? "Nova nota"
+            : $"Novo {template.SuggestedType}";
 
     private string? GetTargetFolderPath()
     {

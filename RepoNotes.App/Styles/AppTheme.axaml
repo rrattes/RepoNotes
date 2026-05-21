@@ -128,6 +128,23 @@
     <Setter Property="Background" Value="#0D141E" />
   </Style>
 
+  <Style Selector="ComboBox.template-picker">
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Padding" Value="8,3" />
+    <Setter Property="Background" Value="#0D141E" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="7" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+  </Style>
+
+  <Style Selector="ComboBox.template-picker:pointerover">
+    <Setter Property="Background" Value="#111B28" />
+    <Setter Property="BorderBrush" Value="#34445A" />
+  </Style>
+
   <Style Selector="TreeView">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />

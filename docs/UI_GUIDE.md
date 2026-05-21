@@ -22,6 +22,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Repository selection and search live in the top of the left sidebar, close to note navigation.
 - The repository area in the sidebar presents the current repository context and may act as the local repository switcher when wired to `OpenRepositoryCommand`.
 - The repository switcher tooltip should be `Abrir ou trocar repositorio local`.
+- Note creation uses two sidebar actions: `Nova nota` remains the fast default path for a free Markdown note, while `Novo por template` uses a compact template picker in the sidebar.
+- The template picker should stay visually secondary to repository navigation: compact combo box, short selected-template description, and one small action button.
 - Global actions such as settings live in the lower-left sidebar toolbar.
 - Lower-left global actions should use clear compact labels and tooltips. Avoid cryptic placeholder labels such as `N`, `*`, or `Cfg`.
 - Sidebar item actions such as rename and delete may live in the lower-left toolbar as compact controls while the app has no context menu; labels and tooltips must remain explicit.
