@@ -11,14 +11,19 @@
 
 ## Build And Validation
 
-- Run `dotnet build` before finishing each development round.
-- If using the local SDK installed in this workspace, run:
+- Run `dotnet build` and `dotnet test` before finishing each development round.
+- If using the local SDK installed in this workspace (Windows), run:
 
 ```powershell
 .\.dotnet\dotnet.exe build RepoNotes.sln
+.\.dotnet\dotnet.exe test RepoNotes.sln --no-build
 ```
 
-- Record the build result in `docs/TASK_LOG.md`.
+- In remote Linux sessions (Claude Code on the web), the .NET SDK is not available locally.
+  In that case, push to the remote and let GitHub Actions CI validate build and tests.
+  CI runs automatically on every push to `main` and on every pull request via `.github/workflows/ci.yml`.
+- Record the build/test result (or CI status) in `docs/TASK_LOG.md`.
+- Never report a round as complete without confirmed build success — either local or CI green.
 
 ## Task Logging
 

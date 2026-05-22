@@ -739,3 +739,25 @@
 **Riscos tecnicos:** Nenhum risco novo; rodada apenas de verificacao.
 
 **Proximo passo sugerido:** Executar `dotnet build` e `dotnet test` localmente no Windows para confirmar os 20 testes passam, depois avaliar renderizacao rica de negrito/italico no preview.
+
+## 2026-05-22 02:00:00 -03:00
+
+**Objetivo da rodada:** Adicionar GitHub Actions CI para validar build e testes automaticamente, substituindo a dependencia de SDK local no ambiente remoto Linux.
+
+**Arquivos alterados:**
+
+- `.github/workflows/ci.yml`
+- `docs/CODEX_RULES.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Criado `.github/workflows/ci.yml` que roda em todo push e PR para `main`. O workflow instala .NET 8, restaura dependencias, faz `dotnet build RepoNotes.sln --configuration Release` e roda `dotnet test RepoNotes.Tests/RepoNotes.Tests.csproj --no-build`. O projeto de testes e referenciado diretamente para evitar problemas de runtime headless do Avalonia.Desktop em Linux. O `CODEX_RULES.md` foi atualizado para documentar que em sessoes remotas Linux o CI substitui o build local e que nenhuma rodada pode ser encerrada sem build confirmado.
+
+**Resultado do dotnet build:** Nao executado localmente — CI validara no proximo push.
+
+**Resultado dos testes:** Nao executado localmente — CI validara no proximo push.
+
+**Pendencias:** Confirmar que o primeiro CI verde passa. Se Avalonia.Desktop tiver dependencias nativas que bloqueiem o build no ubuntu, pode ser necessario adicionar pacotes `libx11-dev` ou similar ao workflow.
+
+**Riscos tecnicos:** Baixo-medio; builds Avalonia no Linux geralmente funcionam sem display para compilacao. Se o CI falhar por dependencias nativas do Avalonia, o fix e adicionar um step `apt-get` com os pacotes necessarios.
+
+**Proximo passo sugerido:** Monitorar o primeiro CI no GitHub Actions e corrigir se houver falha de dependencia nativa do Avalonia.
