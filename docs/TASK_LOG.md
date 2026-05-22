@@ -714,3 +714,28 @@
 **Riscos tecnicos:** Baixo-medio; a logica de `ApplyMarkdownFormat` e puramente funcional e coberta por testes. O risco residual e que `editor.SelectionEnd` em Avalonia 11 possa ter comportamento distinto de `SelectionStart + SelectionLength` em casos de selecao reversa, mas o uso normal da toolbar nao produz selecoes reversas.
 
 **Proximo passo sugerido:** Executar build e testes no repositorio para validar as 20 novas asercoes. Em seguida, avaliar renderizacao rica de negrito/italico no preview usando `TextBlock` com `Inlines` em vez de texto plano com marcadores.
+
+## 2026-05-22 01:00:00 -03:00
+
+**Objetivo da rodada:** Verificar e confirmar que os itens da rodada anterior estao presentes e corretos no repositorio: `ApplyMarkdownFormat` no ViewModel, handlers na toolbar XAML, remocao de mockups e testes.
+
+**Arquivos alterados:**
+
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Rodada de verificacao sem alteracao de codigo. Confirmado que todos os 4 itens solicitados ja estavam presentes desde o merge do PR #1:
+
+1. `ApplyMarkdownFormat` existe em `MainWindowViewModel.cs` (public, retorna ValueTuple) com logica completa para bold, italic, h1/h2/h3 toggle, list, checklist, quote, link e code inline/bloco.
+2. XAML tem `Click` handlers conectados em todos os botoes funcionais (B, I, H1, H2, H3, List, Chk, Link, Code, Qt) e `IsEnabled="False"` em Img, Tbl, "...", Info e Tags.
+3. Bloco NOTAS RECENTES (label + TextBlocks hardcoded) esta removido da sidebar.
+4. `RepoNotes.Tests/MarkdownFormatTests.cs` existe com 226 linhas e 20 testes cobrindo todos os formatos.
+
+**Resultado do dotnet build:** Nao executado — SDK .NET indisponivel no ambiente remoto Linux. Build e testes validados pelo CI no merge do PR #1.
+
+**Resultado dos testes:** Nao executado por indisponibilidade do SDK.
+
+**Pendencias:** Nenhuma nova pendencia criada por esta rodada.
+
+**Riscos tecnicos:** Nenhum risco novo; rodada apenas de verificacao.
+
+**Proximo passo sugerido:** Executar `dotnet build` e `dotnet test` localmente no Windows para confirmar os 20 testes passam, depois avaliar renderizacao rica de negrito/italico no preview.
