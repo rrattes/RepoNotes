@@ -311,24 +311,6 @@
                          FontSize="11" />
             </StackPanel>
 
-            <StackPanel Spacing="6">
-              <TextBlock Text="NOTAS RECENTES"
-                         Foreground="{StaticResource Brush.TextWeak}"
-                         FontSize="11"
-                         FontWeight="Bold" />
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Configuracao Nginx" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" />
-                <TextBlock Grid.Column="1" Text="20/05/2026" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
-              </Grid>
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Ideias para o App" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" />
-                <TextBlock Grid.Column="1" Text="19/05/2026" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
-              </Grid>
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Arquitetura em Camadas" Foreground="{StaticResource Brush.TextMuted}" FontSize="12" />
-                <TextBlock Grid.Column="1" Text="18/05/2026" Foreground="{StaticResource Brush.TextWeak}" FontSize="11" />
-              </Grid>
-            </StackPanel>
           </StackPanel>
 
           <Border Grid.Row="9"
@@ -458,10 +440,12 @@
                       ToolTip.Tip="Salvar nota (Ctrl+S)" />
               <Button Classes="context-action"
                       Content="Info"
-                      ToolTip.Tip="Informacoes da nota" />
+                      ToolTip.Tip="Informacoes da nota"
+                      IsEnabled="False" />
               <Button Classes="context-action"
                       Content="Tags"
-                      ToolTip.Tip="Tags da nota" />
+                      ToolTip.Tip="Tags da nota"
+                      IsEnabled="False" />
             </StackPanel>
           </Grid>
         </Border>
@@ -498,21 +482,21 @@
         <Border Grid.Row="2" Padding="12,0">
           <Border Classes="card" Height="34" Padding="4,0">
             <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Center">
-              <Button Classes="icon" Content="B" FontWeight="Bold" Width="27" Height="26" />
-              <Button Classes="icon" Content="I" FontStyle="Italic" Width="27" Height="26" />
-              <Button Classes="icon" Content="H1" FontSize="11" Width="30" Height="26" />
-              <Button Classes="icon" Content="H2" FontSize="11" Width="30" Height="26" />
-              <Button Classes="icon" Content="H3" FontSize="11" Width="30" Height="26" />
+              <Button Classes="icon" Content="B" FontWeight="Bold" Width="27" Height="26" Click="OnBoldClick" />
+              <Button Classes="icon" Content="I" FontStyle="Italic" Width="27" Height="26" Click="OnItalicClick" />
+              <Button Classes="icon" Content="H1" FontSize="11" Width="30" Height="26" Click="OnH1Click" />
+              <Button Classes="icon" Content="H2" FontSize="11" Width="30" Height="26" Click="OnH2Click" />
+              <Button Classes="icon" Content="H3" FontSize="11" Width="30" Height="26" Click="OnH3Click" />
               <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,6" />
-              <Button Classes="icon" Content="List" FontSize="10" Width="32" Height="26" />
-              <Button Classes="icon" Content="Chk" FontSize="10" Width="32" Height="26" />
-              <Button Classes="icon" Content="Link" FontSize="10" Width="32" Height="26" />
-              <Button Classes="icon" Content="Code" FontSize="10" Width="34" Height="26" />
-              <Button Classes="icon" Content="Qt" FontSize="10" Width="28" Height="26" />
+              <Button Classes="icon" Content="List" FontSize="10" Width="32" Height="26" Click="OnListClick" />
+              <Button Classes="icon" Content="Chk" FontSize="10" Width="32" Height="26" Click="OnChecklistClick" />
+              <Button Classes="icon" Content="Link" FontSize="10" Width="32" Height="26" Click="OnLinkClick" />
+              <Button Classes="icon" Content="Code" FontSize="10" Width="34" Height="26" Click="OnCodeClick" />
+              <Button Classes="icon" Content="Qt" FontSize="10" Width="28" Height="26" Click="OnQuoteClick" />
               <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,6" />
-              <Button Classes="icon" Content="Img" FontSize="10" Width="32" Height="26" />
-              <Button Classes="icon" Content="Tbl" FontSize="10" Width="32" Height="26" />
-              <Button Classes="icon" Content="..." FontSize="14" Width="28" Height="26" />
+              <Button Classes="icon" Content="Img" FontSize="10" Width="32" Height="26" IsEnabled="False" />
+              <Button Classes="icon" Content="Tbl" FontSize="10" Width="32" Height="26" IsEnabled="False" />
+              <Button Classes="icon" Content="..." FontSize="14" Width="28" Height="26" IsEnabled="False" />
             </StackPanel>
           </Border>
         </Border>
@@ -537,6 +521,7 @@
                            Margin="0,0,6,0" />
               </Border>
               <TextBox Grid.Column="1"
+                       x:Name="MarkdownEditor"
                        Text="{Binding Markdown}"
                        AcceptsReturn="True"
                        TextWrapping="Wrap"
