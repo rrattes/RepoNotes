@@ -652,6 +652,36 @@
 
 **Proximo passo sugerido:** Testar manualmente `Ctrl+K`, busca sem resultado, limpar com botao/Esc e combinacao com filtro por tag antes de evoluir para snippets ou ranking.
 
+## 2026-05-21 09:07:48 -03:00
+
+**Objetivo da rodada:** Adicionar suporte inicial a links internos entre notas usando sintaxe `[[Nome da Nota]]`.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/App.axaml.cs`
+- `RepoNotes.App/Services/InternalLinkService.cs`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.App/ViewModels/InternalLinkViewModel.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.Tests/InternalLinkServiceTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelInternalLinkTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foi criado `InternalLinkService` para detectar links `[[...]]`, resolver por titulo da nota ou nome de arquivo Markdown e identificar links quebrados sem erro. O ViewModel agora expoe `InternalLinks` para a nota atual e permite abrir links resolvidos via comando, salvando alteracoes pendentes antes de navegar. O painel direito ganhou uma lista compacta de links internos com estado `Resolvido` ou `Quebrado`. Links quebrados nao criam notas automaticamente.
+
+**Resultado do dotnet build:** Sucesso em `2026-05-21 09:06 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
+
+**Resultado dos testes:** Sucesso em `2026-05-21 09:06 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 65 testes aprovados, 0 falhas.
+
+**Pendencias:** Links internos ainda nao sao renderizados inline dentro dos parágrafos do preview e nao ha backlinks, graph view, aliases, headings anchors ou criacao automatica de notas quebradas. A lista compacta no painel direito e o ponto inicial de navegacao.
+
+**Riscos tecnicos:** Baixo; a resolucao usa apenas notas ja carregadas em memoria. No futuro, renomeacao de notas, aliases e titulos duplicados precisarao de regras mais explicitas para evitar ambiguidades.
+
+**Proximo passo sugerido:** Testar manualmente links resolvidos e quebrados, depois avaliar renderizacao inline no preview ou uma secao de backlinks simples.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
@@ -684,33 +714,3 @@
 **Riscos tecnicos:** Baixo-medio; a logica de `ApplyMarkdownFormat` e puramente funcional e coberta por testes. O risco residual e que `editor.SelectionEnd` em Avalonia 11 possa ter comportamento distinto de `SelectionStart + SelectionLength` em casos de selecao reversa, mas o uso normal da toolbar nao produz selecoes reversas.
 
 **Proximo passo sugerido:** Executar build e testes no repositorio para validar as 20 novas asercoes. Em seguida, avaliar renderizacao rica de negrito/italico no preview usando `TextBlock` com `Inlines` em vez de texto plano com marcadores.
-
-## 2026-05-21 09:07:48 -03:00
-
-**Objetivo da rodada:** Adicionar suporte inicial a links internos entre notas usando sintaxe `[[Nome da Nota]]`.
-
-**Arquivos alterados:**
-
-- `RepoNotes.App/App.axaml.cs`
-- `RepoNotes.App/Services/InternalLinkService.cs`
-- `RepoNotes.App/Styles/AppTheme.axaml`
-- `RepoNotes.App/ViewModels/InternalLinkViewModel.cs`
-- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
-- `RepoNotes.App/Views/MainWindow.axaml`
-- `RepoNotes.Tests/InternalLinkServiceTests.cs`
-- `RepoNotes.Tests/MainWindowViewModelInternalLinkTests.cs`
-- `docs/UI_GUIDE.md`
-- `docs/ROADMAP.md`
-- `docs/TASK_LOG.md`
-
-**Resumo das mudancas:** Foi criado `InternalLinkService` para detectar links `[[...]]`, resolver por titulo da nota ou nome de arquivo Markdown e identificar links quebrados sem erro. O ViewModel agora expoe `InternalLinks` para a nota atual e permite abrir links resolvidos via comando, salvando alteracoes pendentes antes de navegar. O painel direito ganhou uma lista compacta de links internos com estado `Resolvido` ou `Quebrado`. Links quebrados nao criam notas automaticamente.
-
-**Resultado do dotnet build:** Sucesso em `2026-05-21 09:06 -03:00` usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros.
-
-**Resultado dos testes:** Sucesso em `2026-05-21 09:06 -03:00` usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 65 testes aprovados, 0 falhas.
-
-**Pendencias:** Links internos ainda nao sao renderizados inline dentro dos parágrafos do preview e nao ha backlinks, graph view, aliases, headings anchors ou criacao automatica de notas quebradas. A lista compacta no painel direito e o ponto inicial de navegacao.
-
-**Riscos tecnicos:** Baixo; a resolucao usa apenas notas ja carregadas em memoria. No futuro, renomeacao de notas, aliases e titulos duplicados precisarao de regras mais explicitas para evitar ambiguidades.
-
-**Proximo passo sugerido:** Testar manualmente links resolvidos e quebrados, depois avaliar renderizacao inline no preview ou uma secao de backlinks simples.
