@@ -203,6 +203,16 @@ public sealed partial class MarkdownPreviewService
                 }
 
                 break;
+            case EmphasisInline emphasis:
+                var marker = emphasis.DelimiterCount == 2 ? "**" : "*";
+                builder.Append(marker);
+                foreach (var child in emphasis)
+                {
+                    AppendInlineText(builder, child);
+                }
+
+                builder.Append(marker);
+                break;
             case ContainerInline container:
                 foreach (var child in container)
                 {

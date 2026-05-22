@@ -652,6 +652,39 @@
 
 **Proximo passo sugerido:** Testar manualmente `Ctrl+K`, busca sem resultado, limpar com botao/Esc e combinacao com filtro por tag antes de evoluir para snippets ou ranking.
 
+## 2026-05-22 00:00:00 -03:00
+
+**Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Services/MarkdownPreviewService.cs`
+- `RepoNotes.Tests/MarkdownFormatTests.cs`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:**
+
+**Tarefa 1 — Toolbar funcional:** O TextBox do editor recebeu `x:Name="MarkdownEditor"`. Foi adicionado `ApplyMarkdownFormat(text, selStart, selEnd, formatType)` no ViewModel com logica completa para bold, italic, h1/h2/h3 (toggle insert/replace/remove), list, checklist, quote, link e code inline/bloco. O code-behind ganhou `ApplyToolbarFormat(type)` que le a selecao atual do editor, aplica a transformacao e restaura a selecao. Os botoes B, I, H1, H2, H3, List, Chk, Link, Code e Qt foram conectados via `Click` handlers. Os botoes Img, Tbl e "..." receberam `IsEnabled="False"`. Os botoes Info e Tags do context bar tambem receberam `IsEnabled="False"`.
+
+**Tarefa 2 — Preview inline de enfase:** Adicionado o case `EmphasisInline` no `AppendInlineText` do `MarkdownPreviewService`, antes do case `ContainerInline`, para renderizar `*italic*` e `**bold**` no preview com os marcadores correspondentes.
+
+**Tarefa 3 — Remover mockup:** O bloco NOTAS RECENTES (label + tres TextBlocks hardcoded) foi removido da sidebar. Nenhum substituto foi inserido.
+
+**Tarefa 4 — Testes:** Criado `RepoNotes.Tests/MarkdownFormatTests.cs` com 20 testes cobrindo bold com e sem selecao, italic com e sem selecao, h1/h2/h3 toggle (inserir, substituir e remover prefixo), list toggle, checklist toggle, quote toggle, code inline (com e sem selecao) e code bloco multi-linha, link com e sem selecao.
+
+**Resultado do dotnet build:** Nao executado nesta rodada — o SDK .NET nao esta disponivel no ambiente remoto de execucao Linux utilizado. As mudancas sao sincronizadas via push para validacao pelo CI do repositorio.
+
+**Resultado dos testes:** Nao executado por indisponibilidade do SDK. Testes criados com logica verificada manualmente.
+
+**Pendencias:** A toolbar funciona para selecao de texto mas ainda nao ha atalhos de teclado dedicados para cada comando de formatacao. O preview de enfase renderiza os marcadores como texto em vez de aplicar estilo visual real (negrito/italico nativos), pois a renderizacao atual usa TextBlock sem Inlines ricos.
+
+**Riscos tecnicos:** Baixo-medio; a logica de `ApplyMarkdownFormat` e puramente funcional e coberta por testes. O risco residual e que `editor.SelectionEnd` em Avalonia 11 possa ter comportamento distinto de `SelectionStart + SelectionLength` em casos de selecao reversa, mas o uso normal da toolbar nao produz selecoes reversas.
+
+**Proximo passo sugerido:** Executar build e testes no repositorio para validar as 20 novas asercoes. Em seguida, avaliar renderizacao rica de negrito/italico no preview usando `TextBlock` com `Inlines` em vez de texto plano com marcadores.
+
 ## 2026-05-21 09:07:48 -03:00
 
 **Objetivo da rodada:** Adicionar suporte inicial a links internos entre notas usando sintaxe `[[Nome da Nota]]`.

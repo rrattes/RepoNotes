@@ -1122,6 +1122,116 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
+    public (string newText, int newSelStart, int newSelEnd) ApplyMarkdownFormat(
+        string text, int selStart, int selEnd, string formatType)
+    {
+        selStart = Math.Clamp(selStart, 0, text.Length);
+        selEnd = Math.Clamp(selEnd, selStart, text.Length);
+        var selection = text[selStart..selEnd];
+
+        return formatType switch
+        {
+            "bold" => WrapInline(text, selStart, selEnd, selection, "**"),
+            "italic" => WrapInline(text, selStart, selEnd, selection, "*"),
+            "h1" => ApplyHeadingFormat(text, selStart, selEnd, "# "),
+            "h2" => ApplyHeadingFormat(text, selStart, selEnd, "## "),
+            "h3" => ApplyHeadingFormat(text, selStart, selEnd, "### "),
+            "list" => ApplyLinePrefix(text, selStart, selEnd, "- "),
+            "checklist" => ApplyLinePrefix(text, selStart, selEnd, "- [ ] "),
+            "quote" => ApplyLinePrefix(text, selStart, selEnd, "> "),
+            "link" => ApplyLink(text, selStart, selEnd, selection),
+            "code" => ApplyCode(text, selStart, selEnd, selection),
+            _ => (text, selStart, selEnd)
+        };
+    }
+
+    private static (string, int, int) WrapInline(string text, int selStart, int selEnd, string selection, string marker)
+    {
+        if (selection.Length > 0)
+        {
+            var newText = text[..selStart] + marker + selection + marker + text[selEnd..];
+            return (newText, selStart + marker.Length, selEnd + marker.Length);
+        }
+        else
+        {
+            var newText = text[..selStart] + marker + marker + text[selStart..];
+            return (newText, selStart + marker.Length, selStart + marker.Length);
+        }
+    }
+
+    private static (string, int, int) ApplyHeadingFormat(string text, int selStart, int selEnd, string prefix)
+    {
+        var lineStart = selStart > 0 ? text.LastIndexOf('\n', selStart - 1) + 1 : 0;
+        var lineFromStart = text[lineStart..];
+
+        string[] headingPrefixes = ["### ", "## ", "# "];
+        var currentPrefix = headingPrefixes.FirstOrDefault(p => lineFromStart.StartsWith(p, StringComparison.Ordinal));
+
+        if (currentPrefix is null)
+        {
+            var newText = text[..lineStart] + prefix + text[lineStart..];
+            return (newText, selStart + prefix.Length, selEnd + prefix.Length);
+        }
+
+        var contentStart = lineStart + currentPrefix.Length;
+
+        if (currentPrefix == prefix)
+        {
+            var newText = text[..lineStart] + text[contentStart..];
+            return (newText,
+                    Math.Max(lineStart, selStart - currentPrefix.Length),
+                    Math.Max(lineStart, selEnd - currentPrefix.Length));
+        }
+        else
+        {
+            var newText = text[..lineStart] + prefix + text[contentStart..];
+            var diff = prefix.Length - currentPrefix.Length;
+            return (newText, selStart + diff, selEnd + diff);
+        }
+    }
+
+    private static (string, int, int) ApplyLinePrefix(string text, int selStart, int selEnd, string prefix)
+    {
+        var lineStart = selStart > 0 ? text.LastIndexOf('\n', selStart - 1) + 1 : 0;
+
+        if (text[lineStart..].StartsWith(prefix, StringComparison.Ordinal))
+        {
+            var contentStart = lineStart + prefix.Length;
+            var newText = text[..lineStart] + text[contentStart..];
+            return (newText,
+                    Math.Max(lineStart, selStart - prefix.Length),
+                    Math.Max(lineStart, selEnd - prefix.Length));
+        }
+        else
+        {
+            var newText = text[..lineStart] + prefix + text[lineStart..];
+            return (newText, selStart + prefix.Length, selEnd + prefix.Length);
+        }
+    }
+
+    private static (string, int, int) ApplyLink(string text, int selStart, int selEnd, string selection)
+    {
+        var linkText = selection.Length > 0 ? selection : "texto";
+        var insert = $"[{linkText}](url)";
+        var newText = text[..selStart] + insert + text[selEnd..];
+        var urlStart = selStart + linkText.Length + 3;
+        return (newText, urlStart, urlStart + 3);
+    }
+
+    private static (string, int, int) ApplyCode(string text, int selStart, int selEnd, string selection)
+    {
+        if (selection.Length > 0 && selection.Contains('\n'))
+        {
+            var newText = text[..selStart] + "```\n" + selection + "\n```" + text[selEnd..];
+            return (newText, selStart + 4, selEnd + 4);
+        }
+        else
+        {
+            var newText = text[..selStart] + "`" + selection + "`" + text[selEnd..];
+            return (newText, selStart + 1, selEnd + 1);
+        }
+    }
+
     private sealed class NullRepositorySettingsStore : IRepositorySettingsStore
     {
         public string? GetLastRepositoryPath() => null;
