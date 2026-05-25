@@ -72,6 +72,17 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - The initial MVP may show detected links as a compact list in the preview/info panel instead of inline rich text inside paragraphs.
 - Clicking a resolved internal link should open the target note when possible; broken links must not auto-create notes in this round.
 
+## Rich Markdown Preview
+
+- The preview renders Markdown through native Avalonia controls, not WebView.
+- Paragraphs, headings, and list items use inline runs so Markdown markers are removed from the visual preview.
+- `**bold**` must render with real bold weight.
+- `*italic*` must render with real italic style.
+- `***bold italic***` must combine bold and italic.
+- Inline code uses a monospace font and accent color so it is visually distinct while staying compact in the dark preview.
+- Markdown links render as visually distinct underlined link text with the link accent color; they do not need to be clickable in this preview layer unless wired by a separate command.
+- Code blocks, blockquotes, checklists, lists, and simple tables remain block-level preview elements.
+
 ## Simple Name Dialog
 
 - File and folder creation/rename flows use a compact dark text prompt instead of relying only on automatic names.

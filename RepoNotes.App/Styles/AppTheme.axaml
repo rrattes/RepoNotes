@@ -14,6 +14,8 @@
     <SolidColorBrush x:Key="Brush.Accent" Color="#6366F1" />
     <SolidColorBrush x:Key="Brush.AccentHover" Color="#4F46E5" />
     <SolidColorBrush x:Key="Brush.StatusSaved" Color="#22C55E" />
+    <SolidColorBrush x:Key="Brush.PreviewInlineCode" Color="#C4B5FD" />
+    <SolidColorBrush x:Key="Brush.PreviewLink" Color="#93C5FD" />
   </Styles.Resources>
 
   <Style Selector="Window">

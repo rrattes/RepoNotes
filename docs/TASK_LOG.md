@@ -778,6 +778,36 @@
 
 **Proximo passo recomendado:** Implementar preview inline rico para bold, italic, bold+italic, inline code e link visual.
 
+## 2026-05-25 10:44:29 -03:00
+
+**Objetivo da rodada:** Implementar preview Markdown inline rico real para bold, italic, bold+italic, inline code e links visuais usando `TextBlock.Inlines` ou abordagem equivalente em Avalonia.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Controls/MarkdownInlineTextBlock.cs`
+- `RepoNotes.App/Services/MarkdownPreviewService.cs`
+- `RepoNotes.App/ViewModels/MarkdownPreviewBlocks.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MarkdownPreviewServiceTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O preview deixou de reduzir paragrafo, heading, itens de lista e blockquotes a texto simples antes da UI. Foram adicionados runs inline ricos com flags para bold, italic, code e link, e um `MarkdownInlineTextBlock` que transforma esses runs em `Run` nativos do Avalonia. Os DataTemplates do preview agora usam esses inlines para renderizar enfase real, inline code monoespacado/accent e links sublinhados, preservando os blocos existentes de headings, listas, checklists, code blocks, blockquotes e tabelas. Os testes do `MarkdownPreviewService` foram ampliados para cobrir as sintaxes inline e regressao de blocos.
+
+**Resultado do restore:** `dotnet restore RepoNotes.sln` com `dotnet` global falhou porque nao ha SDK global instalado neste Windows. A restauracao equivalente com `.\.dotnet\dotnet.exe restore RepoNotes.sln` passou.
+
+**Resultado do build:** A primeira tentativa com `.\.dotnet\dotnet.exe build RepoNotes.sln` falhou por colisao de nome ao referenciar `TextDecorations.Underline` dentro de um `TextBlock`; foi corrigido com qualificacao completa. O build final passou com 0 avisos e 0 erros.
+
+**Resultado dos testes:** A primeira execucao de `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` encontrou uma regressao no texto fallback de item de lista com bold; o fallback foi alinhado aos inlines limpos. A execucao final passou com 95 testes aprovados, 0 falhas.
+
+**Pendencias:** Links visuais no preview ainda nao sao clicaveis como anchors gerais; links internos continuam tratados pela lista existente no painel direito. Inline code usa monospace/accent, mas nao tem background por-run por limitacao simples do uso atual de `Run`.
+
+**Riscos tecnicos:** Baixo a medio; o preview agora depende de um controle Avalonia pequeno para montar inlines nativos. Deve-se evitar expandir esse controle para virar renderer Markdown completo ou duplicar logica que pertence ao `MarkdownPreviewService`.
+
+**Proximo passo sugerido:** Validar visualmente o preview em notas reais e, em rodada futura, avaliar clique em links externos/internos diretamente no texto se isso for prioritario.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.

@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:RepoNotes.App.Controls"
         xmlns:vm="using:RepoNotes.App.ViewModels"
         x:Class="RepoNotes.App.Views.MainWindow"
         Width="1600"
@@ -45,21 +46,21 @@
     </TreeDataTemplate>
 
     <DataTemplate DataType="{x:Type vm:MarkdownHeadingBlock}">
-      <TextBlock Text="{Binding Text}"
-                 FontSize="{Binding FontSize}"
-                 FontWeight="Bold"
-                 LineHeight="28"
-                 TextWrapping="Wrap"
-                 Margin="0,4,0,2" />
+      <controls:MarkdownInlineTextBlock InlineRuns="{Binding Inlines}"
+                                        FontSize="{Binding FontSize}"
+                                        FontWeight="Bold"
+                                        LineHeight="28"
+                                        TextWrapping="Wrap"
+                                        Margin="0,4,0,2" />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:MarkdownParagraphBlock}">
-      <TextBlock Text="{Binding Text}"
-                 Foreground="{StaticResource Brush.Text}"
-                 FontSize="14"
-                 LineHeight="22"
-                 TextWrapping="Wrap"
-                 Margin="0,2" />
+      <controls:MarkdownInlineTextBlock InlineRuns="{Binding Inlines}"
+                                        Foreground="{StaticResource Brush.Text}"
+                                        FontSize="14"
+                                        LineHeight="22"
+                                        TextWrapping="Wrap"
+                                        Margin="0,2" />
     </DataTemplate>
 
     <DataTemplate DataType="{x:Type vm:MarkdownListBlock}">
@@ -72,11 +73,11 @@
                          FontFamily="Cascadia Mono, Consolas"
                          FontSize="12"
                          VerticalAlignment="Top" />
-              <TextBlock Grid.Column="1"
-                         Text="{Binding Text}"
-                         FontSize="14"
-                         LineHeight="21"
-                         TextWrapping="Wrap" />
+              <controls:MarkdownInlineTextBlock Grid.Column="1"
+                                                InlineRuns="{Binding Inlines}"
+                                                FontSize="14"
+                                                LineHeight="21"
+                                                TextWrapping="Wrap" />
             </Grid>
           </DataTemplate>
         </ItemsControl.DataTemplates>
@@ -104,12 +105,12 @@
               BorderThickness="3,0,0,0"
               Padding="10,2,0,2"
               Margin="0,4">
-        <TextBlock Text="{Binding Text}"
-                   Foreground="{StaticResource Brush.TextMuted}"
-                   FontSize="14"
-                   FontStyle="Italic"
-                   LineHeight="22"
-                   TextWrapping="Wrap" />
+        <controls:MarkdownInlineTextBlock InlineRuns="{Binding Inlines}"
+                                          Foreground="{StaticResource Brush.TextMuted}"
+                                          FontSize="14"
+                                          FontStyle="Italic"
+                                          LineHeight="22"
+                                          TextWrapping="Wrap" />
       </Border>
     </DataTemplate>
 

@@ -4,9 +4,26 @@ namespace RepoNotes.App.ViewModels;
 
 public abstract class MarkdownPreviewBlock;
 
+public sealed class MarkdownInlineRun
+{
+    public required string Text { get; init; }
+
+    public bool IsBold { get; init; }
+
+    public bool IsItalic { get; init; }
+
+    public bool IsCode { get; init; }
+
+    public bool IsLink { get; init; }
+
+    public string? Url { get; init; }
+}
+
 public sealed class MarkdownHeadingBlock : MarkdownPreviewBlock
 {
     public required string Text { get; init; }
+
+    public IReadOnlyList<MarkdownInlineRun> Inlines { get; init; } = [];
 
     public int Level { get; init; }
 
@@ -22,6 +39,8 @@ public sealed class MarkdownHeadingBlock : MarkdownPreviewBlock
 public sealed class MarkdownParagraphBlock : MarkdownPreviewBlock
 {
     public required string Text { get; init; }
+
+    public IReadOnlyList<MarkdownInlineRun> Inlines { get; init; } = [];
 }
 
 public sealed class MarkdownListBlock : MarkdownPreviewBlock
@@ -32,6 +51,8 @@ public sealed class MarkdownListBlock : MarkdownPreviewBlock
 public sealed class MarkdownListItem
 {
     public required string Text { get; init; }
+
+    public IReadOnlyList<MarkdownInlineRun> Inlines { get; init; } = [];
 
     public bool IsTask { get; init; }
 
@@ -48,6 +69,8 @@ public sealed class MarkdownCodeBlock : MarkdownPreviewBlock
 public sealed class MarkdownQuoteBlock : MarkdownPreviewBlock
 {
     public required string Text { get; init; }
+
+    public IReadOnlyList<MarkdownInlineRun> Inlines { get; init; } = [];
 }
 
 public sealed class MarkdownTableBlock : MarkdownPreviewBlock
