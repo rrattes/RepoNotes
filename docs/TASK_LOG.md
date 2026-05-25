@@ -724,6 +724,24 @@
 
 **Proximo passo recomendado:** Primeiro corrigir/investigar o CI remoto ate ficar verde; em seguida implementar rich inline preview para bold/italic/inline code sem alterar o fluxo de storage.
 
+## 2026-05-25 10:19:31 -03:00
+
+**Objetivo da rodada:** Validar e corrigir o GitHub Actions CI do RepoNotes ate ele ficar verde.
+
+**Arquivo de workflow analisado:** `.github/workflows/ci.yml`.
+
+**Mudanca feita no CI:** O workflow ja usava .NET 8, fazia `dotnet restore RepoNotes.sln` e `dotnet build RepoNotes.sln --no-restore --configuration Release`. O passo de testes foi ajustado de `dotnet test RepoNotes.Tests/RepoNotes.Tests.csproj --no-build --configuration Release --verbosity normal` para `dotnet test RepoNotes.Tests/RepoNotes.Tests.csproj --configuration Release --verbosity normal`, permitindo que o projeto de testes seja compilado no proprio passo de teste no runner Linux.
+
+**Validacao local:** O comando `dotnet restore RepoNotes.sln` com `dotnet` global falhou porque o SDK global nao esta instalado no Windows local. A validacao foi executada com o SDK local `.\.dotnet\dotnet.exe`: restore da solution passou, build Release da solution passou com 0 avisos e 0 erros, e `.\.dotnet\dotnet.exe test RepoNotes.Tests\RepoNotes.Tests.csproj --configuration Release` passou com 85 testes aprovados, 0 falhas.
+
+**Status do working tree:** Antes do commit, havia a alteracao intencional em `.github/workflows/ci.yml` e arquivos nao rastreados em `sample-repository`: `Nova nota.md`, `Novo server.md` e `Runbooks/Novo application.md`. Esses arquivos de exemplo nao foram alterados, removidos nem incluidos no commit.
+
+**Resultado esperado:** O proximo push deve disparar o GitHub Actions novamente e o passo `Run tests` deve usar o comando mais robusto sem `--no-build`.
+
+**Pendencia de confirmar GitHub Actions verde:** Confirmar o resultado do novo workflow apos o push deste commit. Se ainda falhar, abrir logs autenticados do job para obter a mensagem exata.
+
+**Proximo passo recomendado:** Aguardar o novo run do CI e, se persistir falha somente no GitHub Actions, ajustar os testes para compatibilidade Linux ou obter logs completos via GitHub autenticado.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
