@@ -742,6 +742,20 @@
 
 **Proximo passo recomendado:** Aguardar o novo run do CI e, se persistir falha somente no GitHub Actions, ajustar os testes para compatibilidade Linux ou obter logs completos via GitHub autenticado.
 
+## 2026-05-25 10:24:18 -03:00
+
+**Objetivo da rodada:** Corrigir a falha persistente do GitHub Actions apos remover `--no-build` do passo de testes.
+
+**Arquivo de workflow analisado:** `.github/workflows/ci.yml`.
+
+**Mudanca feita no CI:** O runner foi alterado de `ubuntu-latest` para `windows-latest`. A razao e que RepoNotes e um aplicativo desktop Windows e os testes/storage atuais usam caminhos internos normalizados com `\`; no runner Linux isso pode divergir do filesystem real e quebrar testes mesmo com build local Windows verde. O passo de teste permanece sem `--no-build`: `dotnet test RepoNotes.Tests/RepoNotes.Tests.csproj --configuration Release --verbosity normal`.
+
+**Resultado esperado:** O CI deve validar no mesmo sistema operacional alvo do MVP e reduzir falsos negativos causados por semantica de caminho Linux/Windows.
+
+**Pendencia de confirmar GitHub Actions verde:** Confirmar o novo run apos push. Se ainda falhar em `windows-latest`, obter logs autenticados do job e corrigir o erro exato.
+
+**Proximo passo recomendado:** Depois de obter CI verde em Windows, decidir se vale criar uma rodada separada para tornar storage/testes cross-platform e voltar a validar tambem em Linux.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
