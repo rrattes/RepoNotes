@@ -682,6 +682,48 @@
 
 **Proximo passo sugerido:** Testar manualmente links resolvidos e quebrados, depois avaliar renderizacao inline no preview ou uma secao de backlinks simples.
 
+## 2026-05-25 10:13:42 -03:00
+
+**Objetivo da rodada:** Fazer uma validacao local completa do estado atual do RepoNotes, confirmar build/testes apos a toolbar Markdown funcional e verificar a configuracao do GitHub Actions CI.
+
+**Comandos executados:**
+
+- `git status --short`
+- `git log --oneline -10`
+- `git fetch origin --prune`
+- `git pull --ff-only`
+- `.\.dotnet\dotnet.exe restore RepoNotes.sln`
+- `.\.dotnet\dotnet.exe build RepoNotes.sln`
+- `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`
+- `.\.dotnet\dotnet.exe test RepoNotes.Tests\RepoNotes.Tests.csproj --no-build --filter FullyQualifiedName~MarkdownFormatTests --logger "console;verbosity=normal"`
+- `.\.dotnet\dotnet.exe build RepoNotes.sln --no-restore --configuration Release`
+- `.\.dotnet\dotnet.exe test RepoNotes.Tests\RepoNotes.Tests.csproj --no-build --configuration Release --verbosity normal`
+- `git diff --stat`
+
+**Resultado do restore:** Sucesso usando SDK local `.\.dotnet\dotnet.exe` versao `8.0.421`. Todos os projetos estavam atualizados para restauracao.
+
+**Resultado do build:** Sucesso em Debug usando `.\.dotnet\dotnet.exe build RepoNotes.sln`. Resultado: 0 avisos, 0 erros. Tambem foi validado build Release com `--no-restore --configuration Release`, igualmente com 0 avisos e 0 erros.
+
+**Resultado dos testes:** Sucesso usando `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`. Resultado: 85 testes aprovados, 0 falhas. `MarkdownFormatTests` existe e contem 20 testes; a execucao filtrada passou com 20/20 testes aprovados. O comando equivalente ao CI em Release tambem passou localmente com 85/85 testes aprovados.
+
+**Status do working tree:** Apos `git fetch`, o workspace local estava 5 commits atras de `origin/main`; foi aplicado `git pull --ff-only` para validar o estado real atual. Permanecem dois arquivos nao rastreados em `sample-repository`: `sample-repository/Nova nota.md` e `sample-repository/Novo server.md`. Eles parecem restos de teste manual/criacao de nota, foram listados e nao foram removidos nesta rodada.
+
+**Validacao da toolbar:** Por inspecao, os botoes `B`, `I`, `H1`, `H2`, `H3`, `List`, `Chk`, `Link`, `Code` e `Qt` estao ligados a handlers reais em `MainWindow.axaml.cs`, que chamam `ApplyToolbarFormat(...)` e delegam para `MainWindowViewModel.ApplyMarkdownFormat(...)`. Os testes `MarkdownFormatTests` cobrem bold, italic, headings, lista, checklist, quote, code inline/bloco e link.
+
+**Validacao dos botoes desabilitados:** Por inspecao, `Img`, `Tbl` e `...` estao com `IsEnabled="False"` na toolbar. Os botoes contextuais `Info` e `Tags` tambem estao com `IsEnabled="False"`.
+
+**Validacao da remocao de Notas Recentes:** Por inspecao e busca textual, o bloco mockado `NOTAS RECENTES` e os textos `Configuracao Nginx`, `Ideias para o App` e `Arquitetura em Camadas` nao aparecem mais em `RepoNotes.App/Views/MainWindow.axaml`.
+
+**Validacao do preview Markdown:** Headings, listas, checklist, code blocks, blockquotes e tabelas simples seguem cobertos pelo `MarkdownPreviewService` e testes existentes. Inline code fica distinguivel por crases no texto renderizado. Bold, italic e bold italic ainda nao sao renderizados como rich text visual; o preview preserva marcadores (`**`, `*`) em blocos de texto simples.
+
+**Validacao do CI:** `.github/workflows/ci.yml` existe, usa `actions/setup-dotnet@v4` com `.NET 8.0.x`, executa `dotnet restore RepoNotes.sln`, `dotnet build RepoNotes.sln --no-restore --configuration Release` e `dotnet test RepoNotes.Tests/RepoNotes.Tests.csproj --no-build --configuration Release --verbosity normal`. A configuracao e coerente e o comando equivalente passou localmente. O ultimo workflow remoto disponivel no GitHub Actions (`CI`, run `26263458700`, commit `d5e44d7`) esta com conclusao `failure`; restore e build passaram, o passo `Run tests` falhou com `Process completed with exit code 1`. Os logs detalhados nao ficaram acessiveis pela API publica sem autenticacao; ha tambem aviso de depreciacao futura de Node.js 20 para `actions/checkout@v4` e `actions/setup-dotnet@v4`.
+
+**Pendencias reais:** Implementar rich inline preview usando `TextBlock.Inlines` ou equivalente em Avalonia para bold/italic/bold italic e inline code com estilo visual real. Investigar a falha do CI remoto com logs autenticados; uma hipotese a verificar e divergencia Linux/Windows em testes que usam caminhos com separadores ou comportamento de filesystem. Limpar ou decidir destino dos arquivos nao rastreados em `sample-repository`.
+
+**Riscos tecnicos:** CI remoto falhando reduz confianca em merges mesmo com validacao local verde. A toolbar usa handlers no code-behind para manipular selecao do `TextBox`, o que e aceitavel para integracao visual/editor neste momento, mas deve permanecer pequeno para nao deslocar regras de negocio para a View. Preview inline ainda e textual e pode frustrar a expectativa criada pela toolbar de bold/italic.
+
+**Proximo passo recomendado:** Primeiro corrigir/investigar o CI remoto ate ficar verde; em seguida implementar rich inline preview para bold/italic/inline code sem alterar o fluxo de storage.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
