@@ -756,6 +756,28 @@
 
 **Proximo passo recomendado:** Depois de obter CI verde em Windows, decidir se vale criar uma rodada separada para tornar storage/testes cross-platform e voltar a validar tambem em Linux.
 
+## 2026-05-25 10:27:43 -03:00
+
+**Objetivo da rodada:** Registrar validacao local pos-toolbar Markdown funcional.
+
+**Comandos executados registrados:**
+
+- `dotnet restore RepoNotes.sln`
+- `dotnet build RepoNotes.sln`
+- `dotnet test RepoNotes.sln --no-build`
+
+**Resultado:** Sucesso. A validacao local no Windows confirmou que o build passou e que os testes passaram apos a implementacao da toolbar Markdown funcional.
+
+**Confirmacao do build local:** Build local passou corretamente.
+
+**Confirmacao dos testes:** Testes locais passaram corretamente. `MarkdownFormatTests` passou, validando os comportamentos de formatacao Markdown cobertos pela suite.
+
+**Confirmacao da toolbar Markdown:** A toolbar Markdown funcional foi validada localmente, incluindo os comandos basicos de formatacao conectados ao editor.
+
+**Pendencia principal:** Implementar rich inline preview visual real com `TextBlock.Inlines` ou equivalente em Avalonia.
+
+**Proximo passo recomendado:** Implementar preview inline rico para bold, italic, bold+italic, inline code e link visual.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
