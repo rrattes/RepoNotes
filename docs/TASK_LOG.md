@@ -808,6 +808,35 @@
 
 **Proximo passo sugerido:** Validar visualmente o preview em notas reais e, em rodada futura, avaliar clique em links externos/internos diretamente no texto se isso for prioritario.
 
+## 2026-05-25 10:52:16 -03:00
+
+**Objetivo da rodada:** Implementar barra da janela customizada/integrada ao visual do RepoNotes, substituindo a title bar padrao por client-side window chrome em Avalonia com controles reais de minimizar, maximizar/restaurar e fechar.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A janela passou a usar `ExtendClientAreaToDecorationsHint`, `ExtendClientAreaTitleBarHeightHint` e `WindowDecorations=BorderOnly`, com uma barra integrada compacta de `34px`. A nova barra tem area arrastavel marcada como title bar do chrome Avalonia, contexto leve de repositorio/nota e botoes pequenos de minimizar, maximizar/restaurar e fechar. Os botoes chamam operacoes reais da `Window` no code-behind, mantendo o comportamento visual na View. Estilos dedicados foram adicionados para hover e estado de fechar sem reintroduzir top bar pesada.
+
+**Resultado do restore:** `dotnet restore RepoNotes.sln` com `dotnet` global falhou porque nao ha SDK global instalado neste Windows. A restauracao equivalente com `.\.dotnet\dotnet.exe restore RepoNotes.sln` passou.
+
+**Resultado do build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` passou com 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` passou com 95 testes aprovados, 0 falhas.
+
+**Validacao manual da janela:** O app foi aberto localmente. Via UI Automation foram encontrados apenas os botoes customizados `Minimizar`, `Maximizar ou restaurar` e `Fechar` no chrome da aplicacao. O botao maximizar mudou a janela para `Maximized`, o mesmo botao restaurou para `Normal`, o botao minimizar mudou para `Minimized`, e o botao fechar encerrou o processo. A area integrada foi arrastada por simulacao de mouse e a posicao da janela mudou de `190,183` para `310,233`. O redimensionamento foi validado via `TransformPattern`, com `CanResize=True` e resize de `1600x900` para aproximadamente `1404x811`.
+
+**Pendencias:** Validar visualmente em uso prolongado se a barra integrada esta confortavel em DPI/monitores diferentes. Avaliar se os simbolos dos botoes devem evoluir para icones vetoriais em uma rodada futura.
+
+**Riscos tecnicos:** Medio-baixo; custom chrome depende de comportamento de janela/plataforma do Avalonia no Windows. O codigo de code-behind foi mantido pequeno e restrito a operacoes visuais da janela.
+
+**Proximo passo sugerido:** Usar o app manualmente em 1366x768 e 1600x900 para confirmar densidade e hit areas da barra integrada, depois priorizar polimentos menores ou a proxima feature funcional.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.

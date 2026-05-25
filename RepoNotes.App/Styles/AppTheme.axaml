@@ -99,6 +99,35 @@
     <Setter Property="CornerRadius" Value="7" />
   </Style>
 
+  <Style Selector="Border.window-bar">
+    <Setter Property="Background" Value="{StaticResource Brush.TopBar}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Divider}" />
+    <Setter Property="BorderThickness" Value="0,0,0,1" />
+  </Style>
+
+  <Style Selector="Button.window-control">
+    <Setter Property="Width" Value="36" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="CornerRadius" Value="0" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}" />
+    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
+  <Style Selector="Button.window-control:pointerover">
+    <Setter Property="Background" Value="#17213A" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+  </Style>
+
+  <Style Selector="Button.window-control.close:pointerover">
+    <Setter Property="Background" Value="#991B1B" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+
   <Style Selector="Button.sidebar-action">
     <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="5,0" />

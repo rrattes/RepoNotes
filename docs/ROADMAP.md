@@ -10,6 +10,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 - Improve Markdown editing ergonomics without adding complex persistence.
 - Replace static visual preview with a simple Markdown rendering path when requested.
 - Add focused UI tests or view model tests for selection/editing behavior.
+- Continue visual polish carefully; custom integrated window chrome is started/completed with real window controls.
 
 ## Next Product Milestones
 

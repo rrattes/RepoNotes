@@ -1,5 +1,6 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:chrome="using:Avalonia.Controls.Chrome"
         xmlns:controls="using:RepoNotes.App.Controls"
         xmlns:vm="using:RepoNotes.App.ViewModels"
         x:Class="RepoNotes.App.Views.MainWindow"
@@ -7,6 +8,10 @@
         Height="900"
         MinWidth="1366"
         MinHeight="768"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="34"
+        WindowDecorations="BorderOnly"
+        CanResize="True"
         Title="">
   <Window.KeyBindings>
     <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveNoteCommand}" />
@@ -131,9 +136,70 @@
     </DataTemplate>
   </Window.DataTemplates>
 
-  <Grid RowDefinitions="*,38"
+  <Grid RowDefinitions="34,*,38"
         Background="{StaticResource Brush.AppBackground}">
-    <Grid Grid.Row="0" ColumnDefinitions="252,*,326">
+    <Border Grid.Row="0"
+            Classes="window-bar"
+            chrome:WindowDecorationProperties.ElementRole="TitleBar"
+            PointerPressed="OnWindowBarPointerPressed">
+      <Grid ColumnDefinitions="252,*,108">
+        <Grid Grid.Column="0"
+              ColumnDefinitions="24,*"
+              Margin="10,0,8,0"
+              VerticalAlignment="Center">
+          <Border Width="18"
+                  Height="18"
+                  CornerRadius="5"
+                  Background="#151F2C"
+                  BorderBrush="{StaticResource Brush.Border}"
+                  BorderThickness="1"
+                  VerticalAlignment="Center">
+            <TextBlock Text="R"
+                       Foreground="{StaticResource Brush.Accent}"
+                       FontSize="10"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Grid.Column="1"
+                     Text="{Binding RepositoryName}"
+                     Foreground="{StaticResource Brush.TextMuted}"
+                     FontSize="12"
+                     VerticalAlignment="Center"
+                     TextTrimming="CharacterEllipsis" />
+        </Grid>
+        <TextBlock Grid.Column="1"
+                   Text="{Binding NotePath}"
+                   Foreground="{StaticResource Brush.TextWeak}"
+                   FontSize="12"
+                   VerticalAlignment="Center"
+                   TextTrimming="CharacterEllipsis"
+                   Margin="8,0" />
+        <StackPanel Grid.Column="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Stretch">
+          <Button Classes="window-control"
+                  chrome:WindowDecorationProperties.ElementRole="User"
+                  Content="&#x2212;"
+                  Click="OnMinimizeClick"
+                  ToolTip.Tip="Minimizar" />
+          <Button x:Name="MaximizeRestoreButton"
+                  Classes="window-control"
+                  chrome:WindowDecorationProperties.ElementRole="User"
+                  Content="&#x25A1;"
+                  Click="OnMaximizeRestoreClick"
+                  ToolTip.Tip="Maximizar ou restaurar" />
+          <Button Classes="window-control close"
+                  chrome:WindowDecorationProperties.ElementRole="User"
+                  Content="&#x00D7;"
+                  Click="OnCloseClick"
+                  ToolTip.Tip="Fechar" />
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Grid Grid.Row="1" ColumnDefinitions="252,*,326">
       <Border Grid.Column="0"
               Background="{StaticResource Brush.Sidebar}"
               BorderBrush="{StaticResource Brush.Divider}"
@@ -638,7 +704,7 @@
       </Border>
     </Grid>
 
-    <Border Grid.Row="1"
+    <Border Grid.Row="2"
             Classes="status-bar"
             Padding="10,0">
       <Grid ColumnDefinitions="16,84,1,*,1,118,1,96" VerticalAlignment="Center">

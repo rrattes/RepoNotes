@@ -6,19 +6,21 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 
 ## Layout
 
-- Main window uses a two-row grid:
+- Main window uses a three-row grid:
+  - Integrated custom window bar.
   - Main content.
   - Status bar.
 - Main content uses a three-column grid:
   - Compact sidebar.
   - Flexible editor-first center column.
   - Compact preview/info panel.
-- The internal top bar has been removed. The MVP uses native Windows/Avalonia window controls and should avoid app-level chrome that repeats window or product branding.
-- Custom window chrome can be evaluated in a future design round, but it is intentionally out of scope for now.
+- RepoNotes uses client-side custom window chrome in Avalonia. The native Windows title bar must not appear as a duplicated separate bar.
+- The custom window controls are real controls wired to the `Window`: minimize sets `WindowState.Minimized`, maximize/restore toggles `WindowState`, and close calls `Close()`.
+- The window remains resizable and includes a compact draggable area in the integrated bar.
 
 ## Top Area
 
-- The app no longer has an internal global top bar.
+- The app has a compact integrated window bar for client-side chrome only; it is not a heavy global app top bar.
 - Repository selection and search live in the top of the left sidebar, close to note navigation.
 - The repository area in the sidebar presents the current repository context and may act as the local repository switcher when wired to `OpenRepositoryCommand`.
 - The repository switcher tooltip should be `Abrir ou trocar repositorio local`.
@@ -33,7 +35,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - The document context bar should show the active document tab, breadcrumb, and note-scoped actions.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.
 - Context actions such as Save, Info, and Tags belong near the document tab/breadcrumb, while formatting commands stay in the editor toolbar.
-- The app must not draw fake window controls in the top area; native OS/Avalonia window controls remain responsible for minimize, maximize, and close.
+- The app must not draw fake window controls. When custom chrome is used, minimize, maximize/restore, close, drag, and resize behavior must be real and validated.
+- The integrated window bar should stay around `34px` high, dark, quiet, and visually secondary to the editor.
 
 ## Metadata Panel
 
@@ -94,7 +97,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 
 - Sidebar: around 250px to 260px, currently `252px`.
 - Preview panel: around 320px to 340px, currently `326px`.
-- Internal top bar: removed.
+- Integrated window bar: compact, currently `34px`, used only for drag/window controls and very light context.
 - Status bar: compact, around 38px to 42px, currently `38px`.
 - Editor column gets priority for all extra horizontal space.
 - Editor chrome should stay compact: document context bar around `38px`, title row around `46px` to `50px`, and formatting toolbar around `34px` to `40px`.

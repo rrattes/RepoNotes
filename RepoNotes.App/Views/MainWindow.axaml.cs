@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Threading;
 using RepoNotes.App.ViewModels;
 
 namespace RepoNotes.App.Views;
@@ -11,6 +12,15 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         KeyDown += OnWindowKeyDown;
+        PropertyChanged += (_, e) =>
+        {
+            if (e.Property == WindowStateProperty)
+            {
+                UpdateWindowStateChrome();
+            }
+        };
+
+        Dispatcher.UIThread.Post(UpdateWindowStateChrome);
     }
 
     private void OnWindowKeyDown(object? sender, KeyEventArgs e)
@@ -59,4 +69,44 @@ public sealed partial class MainWindow : Window
     private void OnLinkClick(object? sender, RoutedEventArgs e) => ApplyToolbarFormat("link");
     private void OnCodeClick(object? sender, RoutedEventArgs e) => ApplyToolbarFormat("code");
     private void OnQuoteClick(object? sender, RoutedEventArgs e) => ApplyToolbarFormat("quote");
+
+    private void OnWindowBarPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (e.GetCurrentPoint(this).Properties.IsLeftButtonPressed)
+        {
+            if (e.ClickCount == 2)
+            {
+                ToggleMaximizeRestore();
+                e.Handled = true;
+                return;
+            }
+
+            BeginMoveDrag(e);
+        }
+    }
+
+    private void OnMinimizeClick(object? sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private void OnMaximizeRestoreClick(object? sender, RoutedEventArgs e) => ToggleMaximizeRestore();
+
+    private void OnCloseClick(object? sender, RoutedEventArgs e) => Close();
+
+    private void ToggleMaximizeRestore()
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+
+        UpdateWindowStateChrome();
+    }
+
+    private void UpdateWindowStateChrome()
+    {
+        if (MaximizeRestoreButton is null)
+        {
+            return;
+        }
+
+        MaximizeRestoreButton.Content = WindowState == WindowState.Maximized ? "\u2750" : "\u25A1";
+    }
 }
