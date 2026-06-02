@@ -58,7 +58,7 @@ public sealed class MarkdownListItem
 
     public bool IsChecked { get; init; }
 
-    public string Marker => IsTask ? (IsChecked ? "[x]" : "[ ]") : "-";
+    public string Marker => IsTask ? (IsChecked ? "✓" : "☐") : "•";
 }
 
 public sealed class MarkdownCodeBlock : MarkdownPreviewBlock

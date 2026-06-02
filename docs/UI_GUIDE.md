@@ -84,6 +84,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - `***bold italic***` must combine bold and italic.
 - Inline code uses a monospace font and accent color so it is visually distinct while staying compact in the dark preview.
 - Markdown links render as visually distinct underlined link text with the link accent color; they do not need to be clickable in this preview layer unless wired by a separate command.
+- Lists render with a visual bullet marker instead of exposing the Markdown `-` marker.
+- Checklists render with visual checked/unchecked markers instead of exposing raw `- [ ]` or `- [x]` text.
 - Code blocks, blockquotes, checklists, lists, and simple tables remain block-level preview elements.
 
 ## Simple Name Dialog

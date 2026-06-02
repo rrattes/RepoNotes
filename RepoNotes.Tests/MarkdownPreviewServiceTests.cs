@@ -60,6 +60,22 @@ public sealed class MarkdownPreviewServiceTests
         Assert.DoesNotContain("**", paragraph.Text, StringComparison.Ordinal);
     }
 
+    [Theory]
+    [InlineData("# Titulo", 1, "Titulo")]
+    [InlineData("## Titulo", 2, "Titulo")]
+    [InlineData("### Titulo", 3, "Titulo")]
+    public void HeadingsRenderAsCleanHeadingBlocks(string markdown, int expectedLevel, string expectedText)
+    {
+        var service = new MarkdownPreviewService();
+
+        var heading = Assert.IsType<MarkdownHeadingBlock>(Assert.Single(service.Render(markdown)));
+
+        Assert.Equal(expectedLevel, heading.Level);
+        Assert.Equal(expectedText, heading.Text);
+        Assert.Equal(expectedText, string.Concat(heading.Inlines.Select(run => run.Text)));
+        Assert.DoesNotContain("#", heading.Text, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void IdentifiesItalicInline()
     {
@@ -148,6 +164,24 @@ public sealed class MarkdownPreviewServiceTests
     }
 
     [Fact]
+    public void CodeBlocksDoNotRenderFenceMarkersAsParagraphText()
+    {
+        var service = new MarkdownPreviewService();
+
+        var blocks = service.Render("""
+        ```powershell
+        dotnet test
+        ```
+        """);
+
+        var codeBlock = Assert.IsType<MarkdownCodeBlock>(Assert.Single(blocks));
+        Assert.Contains("dotnet test", codeBlock.Text, StringComparison.Ordinal);
+        Assert.DoesNotContain("```", codeBlock.Text, StringComparison.Ordinal);
+        Assert.DoesNotContain(blocks, block => block is MarkdownParagraphBlock paragraph
+            && paragraph.Text.Contains("```", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void BlockquotesPreserveInlineRuns()
     {
         var service = new MarkdownPreviewService();
@@ -156,6 +190,35 @@ public sealed class MarkdownPreviewServiceTests
 
         Assert.Equal("aviso forte", quote.Text);
         Assert.Contains(quote.Inlines, run => run is { Text: "forte", IsBold: true });
+        Assert.DoesNotContain(">", quote.Text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void TaskListMarkersUseVisualChecklistMarkers()
+    {
+        var service = new MarkdownPreviewService();
+
+        var list = Assert.IsType<MarkdownListBlock>(Assert.Single(service.Render("""
+        - [ ] aberta
+        - [x] concluida
+        """)));
+
+        Assert.Collection(
+            list.Items,
+            open =>
+            {
+                Assert.True(open.IsTask);
+                Assert.False(open.IsChecked);
+                Assert.Equal("☐", open.Marker);
+                Assert.Equal("aberta", open.Text);
+            },
+            done =>
+            {
+                Assert.True(done.IsTask);
+                Assert.True(done.IsChecked);
+                Assert.Equal("✓", done.Marker);
+                Assert.Equal("concluida", done.Text);
+            });
     }
 
     private static MarkdownParagraphBlock RenderSingleParagraph(string markdown)

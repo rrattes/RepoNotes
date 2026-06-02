@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Documents;
 using Avalonia.Media;
+using Avalonia.VisualTree;
 using RepoNotes.App.ViewModels;
 
 namespace RepoNotes.App.Controls;
@@ -27,9 +28,16 @@ public sealed class MarkdownInlineTextBlock : TextBlock
         }
     }
 
+    protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        RebuildInlines();
+    }
+
     private void RebuildInlines()
     {
-        Inlines?.Clear();
+        Inlines ??= [];
+        Inlines.Clear();
 
         if (InlineRuns is null)
         {
@@ -45,6 +53,8 @@ public sealed class MarkdownInlineTextBlock : TextBlock
 
             Inlines?.Add(CreateRun(inlineRun));
         }
+
+        Text = string.Empty;
     }
 
     private static Run CreateRun(MarkdownInlineRun inlineRun)

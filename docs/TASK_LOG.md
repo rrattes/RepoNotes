@@ -837,6 +837,37 @@
 
 **Proximo passo sugerido:** Usar o app manualmente em 1366x768 e 1600x900 para confirmar densidade e hit areas da barra integrada, depois priorizar polimentos menores ou a proxima feature funcional.
 
+## 2026-06-02 18:00:16 -03:00
+
+**Objetivo da rodada:** Corrigir a experiencia visual do Markdown no preview para que headings, inline formatting, listas, checklists, quotes, code blocks e links aparecam renderizados no painel de preview, mantendo o editor como Markdown puro.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Controls/MarkdownInlineTextBlock.cs`
+- `RepoNotes.App/ViewModels/MarkdownPreviewBlocks.cs`
+- `RepoNotes.Tests/MarkdownPreviewServiceTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Diagnostico:** O painel direito ja usa `PreviewBlocks`, e os DataTemplates de heading, paragraph, list item e quote ja apontavam para `MarkdownInlineTextBlock`. O `MarkdownPreviewService` ja entregava headings, quote e code block sem marcadores Markdown. O ponto mais fragil era o ciclo visual do `MarkdownInlineTextBlock`: ele reconstruia inlines apenas quando a propriedade mudava, podendo ficar dependente do momento de materializacao do template. As checklists tambem ainda usavam marcadores textuais parecidos com Markdown (`[ ]` e `[x]`) em vez de marcadores visuais.
+
+**Resumo das mudancas:** `MarkdownInlineTextBlock` agora reconstrui os `Inlines` ao anexar na arvore visual, garante a colecao de inlines inicializada e limpa o `Text` fallback depois de montar os runs. Os marcadores de lista/checklist passaram a ser visuais (`•`, `☐`, `✓`) em vez de expor `-`, `[ ]` e `[x]`. Os testes do preview foram ampliados para cobrir H1/H2/H3 limpos, bold/italic/bold+italic sem marcadores, inline code sem crases, link com texto/URL, quote sem `>`, code block sem fences e checklist visual.
+
+**Resultado do restore:** `dotnet restore RepoNotes.sln` com `dotnet` global falhou porque nao ha SDK global instalado neste Windows. A restauracao equivalente com `.\.dotnet\dotnet.exe restore RepoNotes.sln` passou.
+
+**Resultado do build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` passou com 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` passou com 100 testes aprovados, 0 falhas.
+
+**Validacao manual:** O app foi aberto localmente e o editor recebeu conteudo de teste via automacao com H1/H2/H3, bold, italic, bold+italic, inline code, link, lista, checklist, quote, code block e tabela. A inspecao do painel de preview mostrou textos limpos como `H1 titulo`, `H2 titulo`, `H3 titulo`, lista com `•`, checklist com `☐` e `✓`, quote sem `>`, e code block `dotnet test` sem fences. O editor continuou sendo Markdown puro.
+
+**Pendencias:** UI Automation confirma texto limpo, mas nao valida visualmente peso/italico/cor por pixel; o comportamento visual e coberto pela estrutura de `MarkdownInlineRun` e pelo `MarkdownInlineTextBlock`. Links seguem visuais, ainda nao clicaveis no texto do preview.
+
+**Riscos tecnicos:** Baixo; a mudanca e localizada no controle de preview inline e nos marcadores visuais. Uso de simbolos Unicode nos marcadores pode precisar de ajuste se alguma fonte/plataforma renderizar diferente.
+
+**Proximo passo sugerido:** Fazer uma revisao visual humana do preview em uma nota real e, depois, avaliar se links externos/internos devem ficar clicaveis diretamente no texto do preview.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
