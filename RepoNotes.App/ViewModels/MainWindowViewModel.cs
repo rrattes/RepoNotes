@@ -29,6 +29,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
+    private bool _isPreviewMode;
     private int _searchResultCount;
     private CancellationTokenSource? _searchDebounceCancellation;
     private NoteTemplate _selectedTemplate;
@@ -79,6 +80,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         DeletePermanentlyCommand = new RelayCommand(DeletePermanently);
         EmptyTrashCommand = new RelayCommand(EmptyTrash);
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
+        ShowEditorCommand = new RelayCommand(ShowEditor);
+        ShowPreviewCommand = new RelayCommand(ShowPreview);
 
         ReloadRepository(noteRepository, initialStatus);
     }
@@ -153,6 +156,14 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand EmptyTrashCommand { get; }
 
     public ICommand SaveNoteCommand { get; }
+
+    public ICommand ShowEditorCommand { get; }
+
+    public ICommand ShowPreviewCommand { get; }
+
+    public bool IsEditorMode => !_isPreviewMode;
+
+    public bool IsPreviewMode => _isPreviewMode;
 
     public string SearchText
     {
@@ -403,6 +414,30 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void SaveSelectedNote()
     {
         _ = TrySaveSelectedNote();
+    }
+
+    private void ShowEditor()
+    {
+        if (!_isPreviewMode)
+        {
+            return;
+        }
+
+        _isPreviewMode = false;
+        OnPropertyChanged(nameof(IsEditorMode));
+        OnPropertyChanged(nameof(IsPreviewMode));
+    }
+
+    private void ShowPreview()
+    {
+        if (_isPreviewMode)
+        {
+            return;
+        }
+
+        _isPreviewMode = true;
+        OnPropertyChanged(nameof(IsEditorMode));
+        OnPropertyChanged(nameof(IsPreviewMode));
     }
 
     private void UpdatePreviewBlocks()

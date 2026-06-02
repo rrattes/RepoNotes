@@ -34,6 +34,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - The only persistent top area inside the main content is the document context bar above the editor.
 - The document context bar should show the active document tab, breadcrumb, and note-scoped actions.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.
+- The central document area has a clear `Editor` / `Preview` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar.
 - Context actions such as Save, Info, and Tags belong near the document tab/breadcrumb, while formatting commands stay in the editor toolbar.
 - The app must not draw fake window controls. When custom chrome is used, minimize, maximize/restore, close, drag, and resize behavior must be real and validated.
 - The integrated window bar should stay around `34px` high, dark, quiet, and visually secondary to the editor.
@@ -78,6 +79,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 ## Rich Markdown Preview
 
 - The preview renders Markdown through native Avalonia controls, not WebView.
+- The primary rendered preview belongs in the central document area behind the `Preview` mode, not as the main content of the right sidebar.
+- The right sidebar focuses on note info, internal links, and metadata; it must not present a confusing fake `Preview` tab when preview mode is handled centrally.
 - Paragraphs, headings, and list items use inline runs so Markdown markers are removed from the visual preview.
 - `**bold**` must render with real bold weight.
 - `*italic*` must render with real italic style.

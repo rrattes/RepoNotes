@@ -448,13 +448,13 @@
       </Border>
 
       <Grid Grid.Column="1"
-            RowDefinitions="38,46,34,*"
+            RowDefinitions="38,46,Auto,*"
             Background="{StaticResource Brush.AppBackground}">
         <Border Grid.Row="0"
                 Background="#0D141E"
                 BorderBrush="{StaticResource Brush.Divider}"
                 BorderThickness="0,0,1,1">
-          <Grid ColumnDefinitions="212,*,176" Margin="8,0">
+          <Grid ColumnDefinitions="212,*,148,176" Margin="8,0">
             <Border Grid.Column="0"
                     Background="{StaticResource Brush.Panel}"
                     BorderBrush="{StaticResource Brush.Border}"
@@ -497,6 +497,22 @@
                          VerticalAlignment="Center" />
             </Grid>
             <StackPanel Grid.Column="2"
+                        Orientation="Horizontal"
+                        Spacing="4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+              <Button Classes.mode-toggle="True"
+                      Classes.active="{Binding IsEditorMode}"
+                      Content="Editor"
+                      Command="{Binding ShowEditorCommand}"
+                      ToolTip.Tip="Mostrar editor Markdown" />
+              <Button Classes.mode-toggle="True"
+                      Classes.active="{Binding IsPreviewMode}"
+                      Content="Preview"
+                      Command="{Binding ShowPreviewCommand}"
+                      ToolTip.Tip="Mostrar preview renderizado" />
+            </StackPanel>
+            <StackPanel Grid.Column="3"
                         Orientation="Horizontal"
                         Spacing="6"
                         HorizontalAlignment="Right"
@@ -546,7 +562,7 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="2" Padding="12,0">
+        <Border Grid.Row="2" Padding="12,0" IsVisible="{Binding IsEditorMode}">
           <Border Classes="card" Height="34" Padding="4,0">
             <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Center">
               <Button Classes="icon" Content="B" FontWeight="Bold" Width="27" Height="26" Click="OnBoldClick" />
@@ -568,7 +584,8 @@
           </Border>
         </Border>
 
-        <Border Grid.Row="3" Padding="10,4,10,10">
+        <Grid Grid.Row="3">
+        <Border Padding="10,4,10,10" IsVisible="{Binding IsEditorMode}">
           <Border Classes="card"
                   Background="{StaticResource Brush.Editor}"
                   Padding="0"
@@ -603,6 +620,17 @@
             </Grid>
           </Border>
         </Border>
+        <Border Padding="10,4,10,10" IsVisible="{Binding IsPreviewMode}">
+          <Border Classes="card"
+                  Background="{StaticResource Brush.Panel}"
+                  Padding="0"
+                  ClipToBounds="True">
+            <ScrollViewer Padding="24,18">
+              <ItemsControl ItemsSource="{Binding PreviewBlocks}" />
+            </ScrollViewer>
+          </Border>
+        </Border>
+        </Grid>
       </Grid>
 
       <Border Grid.Column="2"
@@ -614,28 +642,20 @@
           <Grid RowDefinitions="38,*">
             <Border BorderBrush="{StaticResource Brush.Divider}"
                     BorderThickness="0,0,0,1">
-              <Grid ColumnDefinitions="78,62,*" Margin="6,0">
-                <Border Grid.Column="0"
-                        BorderBrush="{StaticResource Brush.Accent}"
-                        BorderThickness="0,0,0,2"
-                        VerticalAlignment="Stretch">
-                  <TextBlock Text="Preview"
-                             FontWeight="SemiBold"
-                             VerticalAlignment="Center"
-                             HorizontalAlignment="Center" />
-                </Border>
-                <TextBlock Grid.Column="1"
-                           Text="Info"
-                           Foreground="{StaticResource Brush.TextMuted}"
+              <Grid ColumnDefinitions="*,Auto" Margin="12,0">
+                <TextBlock Text="Info"
                            FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           HorizontalAlignment="Center" />
+                           VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="Links"
+                           Foreground="{StaticResource Brush.TextMuted}"
+                           FontSize="12"
+                           VerticalAlignment="Center" />
               </Grid>
             </Border>
 
             <ScrollViewer Grid.Row="1" Padding="12">
               <StackPanel Spacing="10">
-                <ItemsControl ItemsSource="{Binding PreviewBlocks}" />
                 <Border Classes="card" Padding="10" IsVisible="{Binding HasInternalLinks}">
                   <StackPanel Spacing="7">
                     <TextBlock Text="Links internos" FontWeight="SemiBold" />

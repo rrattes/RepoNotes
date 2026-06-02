@@ -868,6 +868,36 @@
 
 **Proximo passo sugerido:** Fazer uma revisao visual humana do preview em uma nota real e, depois, avaliar se links externos/internos devem ficar clicaveis diretamente no texto do preview.
 
+## 2026-06-02 18:29:35 -03:00
+
+**Objetivo da rodada:** Tornar o preview Markdown claramente visivel e usavel na area central do app, criando alternancia real entre modo `Editor` e modo `Preview`.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MainWindowViewModelPreviewModeTests.cs`
+- `docs/UI_GUIDE.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O ViewModel ganhou estado de modo central com `IsEditorMode`, `IsPreviewMode`, `ShowEditorCommand` e `ShowPreviewCommand`, iniciando em Editor e preservando o modo atual ao trocar de nota. A area central ganhou toggle claro `Editor`/`Preview`: em Editor, o TextBox Markdown e a toolbar de formatacao continuam visiveis; em Preview, o TextBox e a toolbar sao escondidos e `PreviewBlocks` renderizados ocupam o workspace central. O painel direito deixou de exibir `PreviewBlocks` e agora fica focado em `Info`, `Links internos` e metadados, evitando a confusao entre preview lateral e preview central.
+
+**Resultado do restore:** `dotnet restore RepoNotes.sln` com `dotnet` global falhou porque nao ha SDK global instalado neste Windows. A restauracao equivalente com `.\.dotnet\dotnet.exe restore RepoNotes.sln` passou.
+
+**Resultado do build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` passou com 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` passou com 105 testes aprovados, 0 falhas.
+
+**Validacao manual:** O app foi aberto localmente. Uma nota foi selecionada e conteudo Markdown de teste foi inserido no editor por automacao. O toggle `Preview` exibiu o preview renderizado no centro com H1/H2/H3, bold/italic/bold italic, inline code, link visual, lista, checklist, quote e code block limpos. A toolbar Markdown ficou escondida em Preview. O painel direito nao mostrou mais cabecalho `Preview`, apenas `Info`/`Links` e metadados. Ao clicar `Editor`, a toolbar voltou a aparecer.
+
+**Pendencias:** O preview central ainda nao torna links clicaveis no proprio texto. O titulo da nota continua editavel mesmo em Preview porque fica na linha de titulo compartilhada; avaliar se deve virar somente leitura em rodada futura.
+
+**Riscos tecnicos:** Baixo; a mudanca e majoritariamente de layout e estado de ViewModel. O principal risco visual e ajustar densidade do preview central apos teste humano em telas menores.
+
+**Proximo passo sugerido:** Fazer uma revisao visual em 1366x768 e 1600x900 para calibrar padding/tipografia do Preview central e decidir se links devem abrir diretamente do texto renderizado.
+
 ## 2026-05-22 00:00:00 -03:00
 
 **Objetivo da rodada:** Conectar a toolbar de formatacao Markdown ao editor, corrigir o preview inline de enfase, remover mockup de notas recentes e adicionar testes de formatacao.
