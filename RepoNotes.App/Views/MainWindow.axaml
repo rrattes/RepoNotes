@@ -454,27 +454,59 @@
                 Background="#0D141E"
                 BorderBrush="{StaticResource Brush.Divider}"
                 BorderThickness="0,0,1,1">
-          <Grid ColumnDefinitions="212,*,148,176" Margin="8,0">
-            <Border Grid.Column="0"
-                    Background="{StaticResource Brush.Panel}"
-                    BorderBrush="{StaticResource Brush.Border}"
-                    BorderThickness="1,0,1,0"
-                    CornerRadius="7,7,0,0"
-                    Padding="8,0">
-              <Grid ColumnDefinitions="20,*,18" VerticalAlignment="Center">
-                <TextBlock Text="MD" FontSize="10" FontWeight="Bold" Foreground="#93C5FD" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1"
-                           Text="{Binding NotePath}"
-                           FontSize="11"
-                           TextTrimming="CharacterEllipsis"
-                           VerticalAlignment="Center" />
-                <TextBlock Grid.Column="2"
-                           Text="X"
-                           Foreground="{StaticResource Brush.TextWeak}"
-                           HorizontalAlignment="Right"
-                           VerticalAlignment="Center" />
-              </Grid>
-            </Border>
+          <Grid ColumnDefinitions="360,*,148,176" Margin="8,0">
+            <Grid Grid.Column="0">
+              <ScrollViewer HorizontalScrollBarVisibility="Disabled"
+                            VerticalScrollBarVisibility="Disabled">
+                <ItemsControl ItemsSource="{Binding OpenTabs}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Grid Width="168" Margin="0,0,4,0">
+                        <Button Classes="note-tab"
+                                Classes.active="{Binding IsActive}"
+                                Command="{Binding ActivateCommand}"
+                                ToolTip.Tip="{Binding Path}">
+                          <Grid ColumnDefinitions="18,*,12">
+                            <TextBlock Text="MD"
+                                       FontSize="9"
+                                       FontWeight="Bold"
+                                       Foreground="#93C5FD"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       FontSize="11"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding DirtyIndicator}"
+                                       Foreground="{StaticResource Brush.Warning}"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center" />
+                          </Grid>
+                        </Button>
+                        <Button Classes="tab-close"
+                                Content="x"
+                                Command="{Binding CloseCommand}"
+                                ToolTip.Tip="Fechar aba" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+              <TextBlock Text="Nenhuma nota aberta"
+                         IsVisible="{Binding !HasOpenTabs}"
+                         Foreground="{StaticResource Brush.TextWeak}"
+                         FontSize="11"
+                         VerticalAlignment="Center"
+                         Margin="8,0" />
+            </Grid>
             <Grid Grid.Column="1"
                   ColumnDefinitions="Auto,16,Auto,16,*"
                   Margin="14,0"

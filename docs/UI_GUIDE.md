@@ -32,7 +32,11 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Trash actions live in the lower-left sidebar area as a compact picker plus small action buttons for restore, permanent delete, and empty trash.
 - Permanent delete controls must remain visually secondary and should gain explicit confirmation UX in a future round.
 - The only persistent top area inside the main content is the document context bar above the editor.
-- The document context bar should show the active document tab, breadcrumb, and note-scoped actions.
+- The document context bar shows real open note tabs, breadcrumb, Editor/Preview mode, and note-scoped actions.
+- Note tabs are functional, not decorative: selecting a note opens a tab or activates the existing tab; duplicate tabs for the same note are not created.
+- Active tabs use a stronger panel background and open tabs with unsaved edits show a compact `*` dirty indicator.
+- Each tab has a small close action. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
+- Switching between tabs must preserve unsaved edits in each tab and must not auto-save just because focus changed.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.
 - The central document area has a clear `Editor` / `Preview` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar.
 - Context actions such as Save, Info, and Tags belong near the document tab/breadcrumb, while formatting commands stay in the editor toolbar.

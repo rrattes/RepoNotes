@@ -11,6 +11,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 - Replace static visual preview with a simple Markdown rendering path when requested.
 - Add focused UI tests or view model tests for selection/editing behavior.
 - Continue visual polish carefully; custom integrated window chrome is started/completed with real window controls.
+- Continue evolving document navigation; functional note tabs are started/completed for opening, switching, saving, and closing notes.
 
 ## Next Product Milestones
 
@@ -19,7 +20,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - YAML frontmatter support is started for title, type, tags, status, created, and updated metadata.
    - Initial compact UI for editing frontmatter metadata is started for `type`, `tags`, and `status`.
    - Save feedback now distinguishes saved, changed, saving, and save error states.
-   - Switching notes now auto-saves pending changes and blocks the switch if saving fails.
+   - Functional note tabs now preserve unsaved edits per tab. Switching notes/tabs does not auto-save; closing a dirty tab, renaming, or deleting saves first and blocks the action if saving fails.
    - Preserve folder structure in the loaded tree.
    - Keep changes explicit and recoverable.
 
@@ -30,6 +31,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Simple name prompts are started for creating and renaming notes/folders.
    - Trash restore, permanent delete, and empty-trash flows are started with `.reponotes-trash` kept out of the main tree/search.
    - Initial wiki-style internal links are started with `[[Nome da Nota]]`, title/file-name resolution, broken-link detection, and click-to-open from the preview/info panel.
+   - Opening a note from tree navigation or internal links opens a real tab or activates the existing tab without creating duplicates.
    - Add refresh and confirmation UX for destructive trash actions.
    - Keep mock data available for design/dev mode if useful.
 

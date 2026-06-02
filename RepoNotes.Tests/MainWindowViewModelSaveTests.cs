@@ -143,30 +143,32 @@ public sealed class MainWindowViewModelSaveTests
     }
 
     [Fact]
-    public void SelectingAnotherNoteSavesChangedCurrentNoteBeforeSwitching()
+    public void SelectingAnotherNoteKeepsChangedCurrentNoteInDirtyTabWithoutSaving()
     {
         var repository = new TestNoteRepository();
         var viewModel = new MainWindowViewModel(repository)
         {
-            Markdown = "# Conteudo salvo antes da troca"
+            Markdown = "# Conteudo preservado na aba"
         };
 
         viewModel.SelectedNode = viewModel.Nodes[1];
 
-        Assert.Equal(1, repository.SaveCount);
+        Assert.Equal(0, repository.SaveCount);
         Assert.Equal("Salvo", viewModel.Status);
         Assert.Equal(string.Empty, viewModel.LastErrorMessage);
         Assert.Equal("note-2", viewModel.SelectedNode?.NoteId);
         Assert.Equal("# Segunda nota", viewModel.Markdown);
-        Assert.Equal("# Conteudo salvo antes da troca", repository.FirstNote.Markdown);
+        Assert.Equal(2, viewModel.OpenTabs.Count);
+        Assert.Contains(viewModel.OpenTabs, tab => tab.NoteId == "note" && tab.IsDirty);
+        Assert.Equal("# Conteudo preservado na aba", repository.FirstNote.Markdown);
     }
 
     [Fact]
-    public void SelectingAnotherNoteKeepsCurrentNoteOpenWhenSaveFails()
+    public void SelectingAnotherNoteDoesNotAttemptSaveWhenCurrentTabIsDirty()
     {
         var repository = new TestNoteRepository
         {
-            SaveException = new IOException("Nao foi possivel salvar antes da troca.")
+            SaveException = new IOException("Nao deveria salvar ao trocar de aba.")
         };
         var viewModel = new MainWindowViewModel(repository)
         {
@@ -175,12 +177,12 @@ public sealed class MainWindowViewModelSaveTests
 
         viewModel.SelectedNode = viewModel.Nodes[1];
 
-        Assert.Equal(1, repository.SaveCount);
-        Assert.Equal("Erro ao salvar", viewModel.Status);
-        Assert.Equal("Nao foi possivel salvar antes da troca.", viewModel.LastErrorMessage);
-        Assert.Null(viewModel.SelectedNode);
-        Assert.Equal("note", repository.FirstNote.Id);
-        Assert.Equal("# Conteudo ainda aberto", viewModel.Markdown);
+        Assert.Equal(0, repository.SaveCount);
+        Assert.Equal("Salvo", viewModel.Status);
+        Assert.Equal(string.Empty, viewModel.LastErrorMessage);
+        Assert.Equal("note-2", viewModel.SelectedNode?.NoteId);
+        Assert.Equal("# Segunda nota", viewModel.Markdown);
+        Assert.Contains(viewModel.OpenTabs, tab => tab.NoteId == "note" && tab.IsDirty);
     }
 
     [Fact]

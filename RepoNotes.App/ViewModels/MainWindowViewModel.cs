@@ -18,6 +18,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private readonly Func<string?, INoteRepository> _noteRepositoryFactory;
     private readonly TimeSpan _searchDebounceDelay;
     private NoteItem? _selectedNote;
+    private NoteTabViewModel? _activeTab;
     private RepositoryNodeViewModel? _selectedNode;
     private TrashItem? _selectedTrashItem;
     private string _repositoryName;
@@ -61,6 +62,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         _repositoryName = noteRepository.CurrentRepository.Name;
         _repositoryPath = noteRepository.CurrentRepository.RootPath;
         Nodes = [];
+        OpenTabs = [];
         PreviewBlocks = [];
         InternalLinks = [];
         TrashItems = [];
@@ -80,6 +82,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         DeletePermanentlyCommand = new RelayCommand(DeletePermanently);
         EmptyTrashCommand = new RelayCommand(EmptyTrash);
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
+        CloseTabCommand = new RelayCommand(CloseActiveTab, () => ActiveTab is not null);
         ShowEditorCommand = new RelayCommand(ShowEditor);
         ShowPreviewCommand = new RelayCommand(ShowPreview);
 
@@ -101,6 +104,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     }
 
     public ObservableCollection<RepositoryNodeViewModel> Nodes { get; }
+
+    public ObservableCollection<NoteTabViewModel> OpenTabs { get; }
 
     public ObservableCollection<MarkdownPreviewBlock> PreviewBlocks { get; }
 
@@ -157,6 +162,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand SaveNoteCommand { get; }
 
+    public ICommand CloseTabCommand { get; }
+
     public ICommand ShowEditorCommand { get; }
 
     public ICommand ShowPreviewCommand { get; }
@@ -164,6 +171,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool IsEditorMode => !_isPreviewMode;
 
     public bool IsPreviewMode => _isPreviewMode;
+
+    public bool HasOpenTabs => OpenTabs.Count > 0;
 
     public string SearchText
     {
@@ -223,18 +232,12 @@ public sealed class MainWindowViewModel : ViewModelBase
                 return;
             }
 
-            if (value?.NoteId is not null && !TrySaveSelectedNote())
-            {
-                OnPropertyChanged();
-                return;
-            }
-
             if (!SetProperty(ref _selectedNode, value) || value?.NoteId is null)
             {
                 return;
             }
 
-            SelectedNote = _noteRepository.GetNoteById(value.NoteId);
+            OpenNoteInTab(value.NoteId);
         }
     }
 
@@ -267,9 +270,38 @@ public sealed class MainWindowViewModel : ViewModelBase
             OnPropertyChanged(nameof(MetadataTagsText));
             UpdatePreviewBlocks();
             RefreshTagFilters();
-            _hasUnsavedChanges = false;
-            LastErrorMessage = string.Empty;
-            Status = "Salvo";
+        }
+    }
+
+    public NoteTabViewModel? ActiveTab
+    {
+        get => _activeTab;
+        private set
+        {
+            if (ReferenceEquals(_activeTab, value))
+            {
+                return;
+            }
+
+            if (_activeTab is not null)
+            {
+                _activeTab.IsActive = false;
+            }
+
+            _activeTab = value;
+            if (_activeTab is not null)
+            {
+                _activeTab.IsActive = true;
+            }
+
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(HasOpenTabs));
+            SelectedNote = _activeTab?.Note;
+            _hasUnsavedChanges = _activeTab?.IsDirty ?? false;
+            LastErrorMessage = _activeTab?.LastErrorMessage ?? string.Empty;
+            Status = _activeTab?.Status ?? "Nenhuma aba aberta";
+            (SaveNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (CloseTabCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -389,13 +421,25 @@ public sealed class MainWindowViewModel : ViewModelBase
     public string Status
     {
         get => _status;
-        private set => SetProperty(ref _status, value);
+        private set
+        {
+            if (SetProperty(ref _status, value) && ActiveTab is not null)
+            {
+                ActiveTab.Status = value;
+            }
+        }
     }
 
     public string LastErrorMessage
     {
         get => _lastErrorMessage;
-        private set => SetProperty(ref _lastErrorMessage, value);
+        private set
+        {
+            if (SetProperty(ref _lastErrorMessage, value) && ActiveTab is not null)
+            {
+                ActiveTab.LastErrorMessage = value;
+            }
+        }
     }
 
     private void MarkNoteChanged()
@@ -408,12 +452,94 @@ public sealed class MainWindowViewModel : ViewModelBase
         Status = "Alterado";
         LastErrorMessage = string.Empty;
         _hasUnsavedChanges = true;
+        if (ActiveTab is not null)
+        {
+            ActiveTab.IsDirty = true;
+            ActiveTab.RefreshFromNote();
+        }
+
         OnPropertyChanged(nameof(UpdatedAtText));
     }
 
     private void SaveSelectedNote()
     {
         _ = TrySaveSelectedNote();
+    }
+
+    private void OpenNoteInTab(string noteId)
+    {
+        var existingTab = OpenTabs.FirstOrDefault(tab => tab.NoteId == noteId);
+        if (existingTab is not null)
+        {
+            ActiveTab = existingTab;
+            return;
+        }
+
+        var note = _noteRepository.GetNoteById(noteId);
+        if (note is null)
+        {
+            Status = "Nota nao encontrada";
+            return;
+        }
+
+        var tab = new NoteTabViewModel(note, ActivateTab, CloseTab);
+        OpenTabs.Add(tab);
+        OnPropertyChanged(nameof(HasOpenTabs));
+        ActiveTab = tab;
+    }
+
+    private void ActivateTab(NoteTabViewModel tab)
+    {
+        if (!OpenTabs.Contains(tab))
+        {
+            return;
+        }
+
+        ActiveTab = tab;
+        SelectNodeByNoteIdWithoutOpening(tab.NoteId);
+    }
+
+    private void CloseActiveTab()
+    {
+        if (ActiveTab is not null)
+        {
+            CloseTab(ActiveTab);
+        }
+    }
+
+    private void CloseTab(NoteTabViewModel tab)
+    {
+        if (!OpenTabs.Contains(tab))
+        {
+            return;
+        }
+
+        if (!TrySaveTab(tab))
+        {
+            ActiveTab = tab;
+            return;
+        }
+
+        var index = OpenTabs.IndexOf(tab);
+        var wasActive = ReferenceEquals(tab, ActiveTab);
+        OpenTabs.Remove(tab);
+        OnPropertyChanged(nameof(HasOpenTabs));
+
+        if (!wasActive)
+        {
+            return;
+        }
+
+        if (OpenTabs.Count == 0)
+        {
+            ActiveTab = null;
+            _selectedNode = null;
+            OnPropertyChanged(nameof(SelectedNode));
+            return;
+        }
+
+        ActiveTab = OpenTabs[Math.Min(index, OpenTabs.Count - 1)];
+        SelectNodeByNoteIdWithoutOpening(ActiveTab.NoteId);
     }
 
     private void ShowEditor()
@@ -472,11 +598,6 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (!link.IsResolved || string.IsNullOrWhiteSpace(link.NoteId))
         {
             Status = $"Link interno nao encontrado: {link.Target}";
-            return;
-        }
-
-        if (!TrySaveSelectedNote())
-        {
             return;
         }
 
@@ -565,11 +686,6 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (!TrySaveSelectedNote())
-        {
-            return;
-        }
-
         var defaultName = GetPromptNameForSelectedNode(SelectedNode);
         var newName = await PromptForNameAsync("Renomear item", "Novo nome", defaultName);
         if (newName is null)
@@ -580,10 +696,17 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         try
         {
+            var oldPath = SelectedNode.Path;
+            if (!TrySaveOpenTabsInsidePath(oldPath))
+            {
+                return;
+            }
+
             var wasNote = SelectedNode.IsNote;
-            var newPath = _noteRepository.RenameItem(SelectedNode.Path, newName);
+            var newPath = _noteRepository.RenameItem(oldPath, newName);
             RefreshTree();
             RefreshTagFilters();
+            RefreshOpenTabsAfterRepositoryChange(oldPath, newPath);
 
             if (wasNote)
             {
@@ -611,25 +734,33 @@ public sealed class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (!TrySaveSelectedNote())
-        {
-            return;
-        }
-
         var deletedPath = SelectedNode.Path;
 
         try
         {
+            if (!TrySaveOpenTabsInsidePath(deletedPath))
+            {
+                return;
+            }
+
             _noteRepository.MoveItemToTrash(deletedPath);
             RefreshTree();
             RefreshTagFilters();
             RefreshTrashItems();
-            _selectedNode = null;
-            OnPropertyChanged(nameof(SelectedNode));
+            CloseTabsInsidePath(deletedPath);
 
-            if (SelectedNote is null || IsPathInside(SelectedNote.Path, deletedPath))
+            if (ActiveTab is null)
             {
-                SelectedNote = _noteRepository.GetNotes().FirstOrDefault();
+                var nextNote = _noteRepository.GetNotes().FirstOrDefault();
+                if (nextNote is not null)
+                {
+                    SelectNodeByNoteId(nextNote.Id);
+                }
+                else
+                {
+                    _selectedNode = null;
+                    OnPropertyChanged(nameof(SelectedNode));
+                }
             }
 
             Status = $"Item movido para a lixeira: {deletedPath}";
@@ -766,13 +897,21 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         _selectedNode = null;
         OnPropertyChanged(nameof(SelectedNode));
-        SelectedNote = noteRepository.GetNotes().FirstOrDefault();
+        OpenTabs.Clear();
+        OnPropertyChanged(nameof(HasOpenTabs));
+        ActiveTab = null;
+
+        var firstNote = noteRepository.GetNotes().FirstOrDefault();
+        if (firstNote is not null)
+        {
+            OpenNoteInTab(firstNote.Id);
+        }
 
         if (!string.IsNullOrWhiteSpace(status))
         {
             Status = status;
         }
-        else if (SelectedNote is null)
+        else if (firstNote is null)
         {
             Status = "Repositorio aberto sem notas Markdown";
         }
@@ -1062,9 +1201,78 @@ public sealed class MainWindowViewModel : ViewModelBase
             : node.Name;
     }
 
-    private static bool IsPathInside(string path, string candidateParentPath) =>
-        path.Equals(candidateParentPath, StringComparison.OrdinalIgnoreCase)
-        || path.StartsWith(candidateParentPath + "\\", StringComparison.OrdinalIgnoreCase);
+    private static bool IsPathInside(string path, string candidateParentPath)
+    {
+        var normalizedPath = NormalizeForComparison(path);
+        var normalizedParentPath = NormalizeForComparison(candidateParentPath);
+
+        return normalizedPath.Equals(normalizedParentPath, StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.StartsWith(normalizedParentPath + "\\", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeForComparison(string value) => value.Replace('/', '\\').Trim('\\');
+
+    private bool TrySaveOpenTabsInsidePath(string path)
+    {
+        foreach (var tab in OpenTabs.Where(tab => IsPathInside(tab.Path, path)).ToList())
+        {
+            if (!TrySaveTab(tab))
+            {
+                ActiveTab = tab;
+                SelectNodeByNoteIdWithoutOpening(tab.NoteId);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void CloseTabsInsidePath(string path)
+    {
+        var tabsToClose = OpenTabs.Where(tab => IsPathInside(tab.Path, path)).ToList();
+        foreach (var tab in tabsToClose)
+        {
+            var wasActive = ReferenceEquals(tab, ActiveTab);
+            OpenTabs.Remove(tab);
+            if (wasActive)
+            {
+                ActiveTab = null;
+            }
+        }
+
+        OnPropertyChanged(nameof(HasOpenTabs));
+
+        if (ActiveTab is null && OpenTabs.Count > 0)
+        {
+            ActiveTab = OpenTabs[0];
+            SelectNodeByNoteIdWithoutOpening(ActiveTab.NoteId);
+        }
+        else if (ActiveTab is null)
+        {
+            _selectedNode = null;
+            OnPropertyChanged(nameof(SelectedNode));
+        }
+    }
+
+    private void RefreshOpenTabsAfterRepositoryChange(string oldPath, string newPath)
+    {
+        foreach (var tab in OpenTabs.ToList())
+        {
+            var nextPath = IsPathInside(tab.Path, oldPath)
+                ? newPath + tab.Path[oldPath.Length..]
+                : tab.Path;
+            var note = _noteRepository.GetNoteById(nextPath);
+            if (note is not null)
+            {
+                tab.UpdateNote(note);
+            }
+        }
+
+        if (ActiveTab is not null)
+        {
+            SelectedNote = ActiveTab.Note;
+        }
+    }
 
     private void SelectNodeByNoteId(string noteId)
     {
@@ -1072,6 +1280,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         if (node is not null)
         {
             SelectedNode = node;
+        }
+    }
+
+    private void SelectNodeByNoteIdWithoutOpening(string noteId)
+    {
+        var node = FindNode(Nodes, candidate => candidate.NoteId == noteId);
+        if (node is not null)
+        {
+            _selectedNode = node;
+            OnPropertyChanged(nameof(SelectedNode));
         }
     }
 
@@ -1096,7 +1314,8 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         if (SelectedNote?.Id != noteId)
         {
-            SelectedNote = _noteRepository.GetNoteById(noteId);
+            OpenNoteInTab(noteId);
+            SelectNodeByNoteIdWithoutOpening(noteId);
         }
     }
 
@@ -1132,27 +1351,60 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private bool TrySaveSelectedNote()
     {
-        if (SelectedNote is null || !_hasUnsavedChanges)
+        return ActiveTab is null || TrySaveTab(ActiveTab);
+    }
+
+    private bool TrySaveTab(NoteTabViewModel tab)
+    {
+        if (!tab.IsDirty)
         {
-            Status = "Salvo";
-            LastErrorMessage = string.Empty;
+            if (ReferenceEquals(tab, ActiveTab))
+            {
+                Status = "Salvo";
+                LastErrorMessage = string.Empty;
+            }
+
+            tab.Status = "Salvo";
+            tab.LastErrorMessage = string.Empty;
             return true;
         }
 
         try
         {
-            Status = "Salvando...";
-            LastErrorMessage = string.Empty;
-            _noteRepository.SaveNote(SelectedNote);
-            _hasUnsavedChanges = false;
-            Status = "Salvo";
-            OnPropertyChanged(nameof(UpdatedAtText));
+            if (ReferenceEquals(tab, ActiveTab))
+            {
+                Status = "Salvando...";
+                LastErrorMessage = string.Empty;
+            }
+
+            tab.Status = "Salvando...";
+            tab.LastErrorMessage = string.Empty;
+            _noteRepository.SaveNote(tab.Note);
+            tab.IsDirty = false;
+            tab.Status = "Salvo";
+            tab.LastErrorMessage = string.Empty;
+            tab.RefreshFromNote();
+
+            if (ReferenceEquals(tab, ActiveTab))
+            {
+                _hasUnsavedChanges = false;
+                Status = "Salvo";
+                LastErrorMessage = string.Empty;
+                OnPropertyChanged(nameof(UpdatedAtText));
+            }
+
             return true;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
-            LastErrorMessage = ex.Message;
-            Status = "Erro ao salvar";
+            tab.LastErrorMessage = ex.Message;
+            tab.Status = "Erro ao salvar";
+            if (ReferenceEquals(tab, ActiveTab))
+            {
+                LastErrorMessage = ex.Message;
+                Status = "Erro ao salvar";
+            }
+
             return false;
         }
     }

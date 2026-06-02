@@ -977,3 +977,37 @@
 **Riscos tecnicos:** Baixo-medio; builds Avalonia no Linux geralmente funcionam sem display para compilacao. Se o CI falhar por dependencias nativas do Avalonia, o fix e adicionar um step `apt-get` com os pacotes necessarios.
 
 **Proximo passo sugerido:** Monitorar o primeiro CI no GitHub Actions e corrigir se houver falha de dependencia nativa do Avalonia.
+
+## 2026-06-02 18:45:54 -03:00
+
+**Objetivo da rodada:** Implementar abas funcionais iniciais para notas abertas, preservando o editor Markdown puro, o modo central Editor/Preview e o layout dark atual.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/NoteTabViewModel.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MainWindowViewModelSaveTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Criado `NoteTabViewModel` e adicionada colecao `OpenTabs` no `MainWindowViewModel`, com `ActiveTab`, `HasOpenTabs`, comandos de ativar/fechar aba e fechamento seguro. A selecao de nota agora abre uma nova aba ou ativa a aba existente sem duplicar e sem salvar automaticamente apenas por trocar de nota. Alteracoes ficam isoladas na aba ativa, com indicador `*` por aba. `Ctrl+S`/Salvar salva apenas a aba ativa. Fechar aba suja tenta salvar antes; se falhar, a aba permanece aberta e o status mostra erro. Rename/delete salvam abas afetadas antes de agir, atualizam tabs abertas ou fecham as tabs movidas para lixeira. O XAML substituiu a aba mockada por uma lista compacta de tabs reais no document context bar. O painel central Editor/Preview e o painel direito Info/Links foram preservados.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 115 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a aplicacao abriu com o XAML novo e foi encerrada sem crash. A validacao fina de abrir, alternar, salvar, fechar, falha de save, rename/delete e preview/links por aba ficou coberta por testes automatizados.
+
+**Status do working tree:** Antes do commit permanecem modificacoes intencionais nos arquivos acima e tres arquivos nao rastreados preexistentes em `sample-repository` (`Nova nota.md`, `Novo server.md`, `Runbooks/Novo application.md`). Esses arquivos de exemplo nao foram alterados nem incluidos no commit.
+
+**Pendencias:** Ainda nao ha drag-and-drop, reorder, pin tabs, restauracao de sessao, menu de contexto ou confirmacao visual/modal para fechar aba com erro. A aba usa titulo vindo do frontmatter quando existir; renomear arquivo atualiza path/seleção, mas nao altera automaticamente o `title` do frontmatter.
+
+**Riscos tecnicos:** Medio-baixo; o estado por aba fica em memoria e depende dos mesmos objetos `NoteItem` carregados pelo repositorio. Fluxos futuros de reload profundo, sessao persistida ou multiplas janelas podem exigir uma camada de documento aberto mais robusta.
+
+**Proximo passo sugerido:** Validar visualmente as tabs em 1366x768 e 1600x900 e, depois, adicionar confirmacao/UX mais clara para fechamento de aba suja com falha de salvamento.
