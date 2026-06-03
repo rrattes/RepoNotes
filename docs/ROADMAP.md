@@ -12,6 +12,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 - Add focused UI tests or view model tests for selection/editing behavior.
 - Continue visual polish carefully; custom integrated window chrome is started/completed with real window controls.
 - Continue evolving document navigation; functional note tabs are started/completed for opening, switching, saving, and closing notes.
+- Continue the Markdown Power Editor path before WYSIWYG work; Split View is started/completed as the first step.
 - Plan Visual Markdown Mode / WYSIWYG-lite only after rich preview, toolbar, tabs, and editor stability are validated.
 
 ## Next Product Milestones
@@ -67,15 +68,16 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Fast filtering in the sidebar and search box.
    - Future encrypted/locked content must not be indexed or searched while locked.
 
-7. Markdown preview
+7. Markdown Power Editor
    - Render headings, paragraphs, lists, simple checklists, links, code blocks, blockquotes, and simple pipe tables from the current note Markdown.
    - Rich inline preview is started/completed for bold, italic, bold+italic, inline code, and visual links using native Avalonia inline runs.
    - Preview markers are cleaned up for headings, quotes, code fences, bullets, and checklists so the preview reads as rendered Markdown while the editor remains plain Markdown.
-   - Central Editor/Preview mode toggle is started/completed so users can switch the main workspace between raw Markdown editing and rendered Markdown preview.
+   - Central Editor/Preview/Split mode toggle is started/completed so users can switch the main workspace between raw Markdown editing, rendered Markdown preview, and side-by-side editing/preview.
+   - Split View shows the Markdown source editor on the left and the native visual preview on the right, using the same `MarkdownPreviewService` output as Preview mode.
    - Keep preview visually consistent with the dark UI guide.
 
 8. Visual Markdown Mode / WYSIWYG-lite
-   - Future milestone after rich preview, toolbar Markdown, functional tabs, and editor save-state stability.
+   - Future milestone after the Markdown Power Editor path, including rich preview, toolbar Markdown, functional tabs, Split View, and editor save-state stability.
    - Markdown remains the source of truth saved to local `.md` files.
    - Markdown Mode must remain available; Visual Mode must not replace manual Markdown editing.
    - Evaluate WebView2/editor-web as the preferred path for real WYSIWYG quality through an isolated technical spike before adding packages or runtime dependencies.

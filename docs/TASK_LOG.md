@@ -1032,3 +1032,35 @@
 **Riscos tecnicos:** WebView2 pode impactar empacotamento self-contained, CI, bridge JS/.NET, foco/atalhos, tema e sincronizacao de dirty state por aba. Editor nativo Avalonia pode virar um projeto grande de text editor. Abordagem hibrida e mais segura, mas nao entrega WYSIWYG real.
 
 **Proximo passo sugerido:** Criar uma branch/spike pequena para testar WebView2 com um editor Markdown visual carregando e emitindo Markdown de uma nota ativa, sem tocar em storage nem substituir o editor Markdown atual.
+
+## 2026-06-02 23:09:58 -03:00
+
+**Objetivo da rodada:** Implementar o primeiro passo do Markdown Power Editor com modo Split View, exibindo Editor Markdown e Preview visual lado a lado.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/DocumentViewMode.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/WYSIWYG_EDITOR_PLAN.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O estado central de visualizacao foi expandido de Editor/Preview para `DocumentViewMode` com `Editor`, `Preview` e `Split`. O ViewModel agora expoe `ShowSplitCommand`, `IsSplitMode`, `HasEditorVisible` e `HasPreviewVisible`. O document context bar ganhou o botao compacto `Split`. No modo Split, a area central mostra o TextBox Markdown a esquerda e o preview visual nativo a direita, reutilizando `PreviewBlocks` e o mesmo `MarkdownPreviewService`. A toolbar Markdown permanece visivel em Editor e Split. O code-behind aplica a toolbar no editor visivel, seja o editor normal ou o editor do Split. Testes foram adicionados para modo padrao, alternancia Preview/Split, visibilidades derivadas, preservacao do modo ao trocar de aba e atualizacao de preview ao editar Markdown.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 119 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu visivelmente com o novo layout e foi encerrada sem crash. A validacao fina dos modos Editor/Preview/Split, troca de abas e atualizacao do preview ficou coberta por testes automatizados.
+
+**Pendencias:** Conferir visualmente em uso real os tamanhos do Split em 1366x768 e 1600x900. Ainda nao ha sincronizacao de scroll entre editor e preview, nem divisoria redimensionavel entre os paineis do Split.
+
+**Riscos tecnicos:** Baixo-medio; o Split duplica o TextBox no XAML para manter layouts simples de Editor e Split, entao futuras melhorias de editor devem lembrar de manter ambos os TextBoxes coerentes. A renderizacao do preview continua centralizada em `MarkdownPreviewService`, reduzindo risco de divergencia visual.
+
+**Proximo passo sugerido:** Adicionar sincronizacao leve de scroll ou uma divisoria ajustavel para o Split, depois validar densidade visual em telas menores.

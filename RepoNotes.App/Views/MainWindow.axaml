@@ -454,7 +454,7 @@
                 Background="#0D141E"
                 BorderBrush="{StaticResource Brush.Divider}"
                 BorderThickness="0,0,1,1">
-          <Grid ColumnDefinitions="360,*,148,176" Margin="8,0">
+          <Grid ColumnDefinitions="360,*,216,176" Margin="8,0">
             <Grid Grid.Column="0">
               <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                             VerticalScrollBarVisibility="Disabled">
@@ -543,6 +543,11 @@
                       Content="Preview"
                       Command="{Binding ShowPreviewCommand}"
                       ToolTip.Tip="Mostrar preview renderizado" />
+              <Button Classes.mode-toggle="True"
+                      Classes.active="{Binding IsSplitMode}"
+                      Content="Split"
+                      Command="{Binding ShowSplitCommand}"
+                      ToolTip.Tip="Mostrar editor e preview lado a lado" />
             </StackPanel>
             <StackPanel Grid.Column="3"
                         Orientation="Horizontal"
@@ -594,7 +599,7 @@
           </Grid>
         </Border>
 
-        <Border Grid.Row="2" Padding="12,0" IsVisible="{Binding IsEditorMode}">
+        <Border Grid.Row="2" Padding="12,0" IsVisible="{Binding HasEditorVisible}">
           <Border Classes="card" Height="34" Padding="4,0">
             <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Center">
               <Button Classes="icon" Content="B" FontWeight="Bold" Width="27" Height="26" Click="OnBoldClick" />
@@ -662,6 +667,54 @@
             </ScrollViewer>
           </Border>
         </Border>
+        <Grid IsVisible="{Binding IsSplitMode}"
+              ColumnDefinitions="*,8,*"
+              Margin="10,4,10,10">
+          <Border Grid.Column="0"
+                  Classes="card"
+                  Background="{StaticResource Brush.Editor}"
+                  Padding="0"
+                  ClipToBounds="True">
+            <Grid ColumnDefinitions="32,*">
+              <Border Grid.Column="0"
+                      Background="#090E15"
+                      BorderBrush="{StaticResource Brush.Divider}"
+                      BorderThickness="0,0,1,0"
+                      Padding="0,10">
+                <TextBlock Text="1&#x0a;2&#x0a;3&#x0a;4&#x0a;5&#x0a;6&#x0a;7&#x0a;8&#x0a;9&#x0a;10&#x0a;11"
+                           FontFamily="Cascadia Mono, Consolas"
+                           FontSize="12"
+                           LineHeight="22"
+                           Foreground="{StaticResource Brush.TextWeak}"
+                           TextAlignment="Right"
+                           Margin="0,0,6,0" />
+              </Border>
+              <TextBox Grid.Column="1"
+                       x:Name="MarkdownEditorSplit"
+                       Text="{Binding Markdown}"
+                       AcceptsReturn="True"
+                       TextWrapping="Wrap"
+                       FontFamily="Cascadia Mono, Consolas"
+                       FontSize="15"
+                       LineHeight="22"
+                       Background="{StaticResource Brush.Editor}"
+                       BorderThickness="0"
+                       Padding="10"
+                       Foreground="{StaticResource Brush.Text}"
+                       ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </Grid>
+          </Border>
+
+          <Border Grid.Column="2"
+                  Classes="card"
+                  Background="{StaticResource Brush.Panel}"
+                  Padding="0"
+                  ClipToBounds="True">
+            <ScrollViewer Padding="20,16">
+              <ItemsControl ItemsSource="{Binding PreviewBlocks}" />
+            </ScrollViewer>
+          </Border>
+        </Grid>
         </Grid>
       </Grid>
 

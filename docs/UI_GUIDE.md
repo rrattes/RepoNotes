@@ -38,7 +38,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Each tab has a small close action. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
 - Switching between tabs must preserve unsaved edits in each tab and must not auto-save just because focus changed.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.
-- The central document area has a clear `Editor` / `Preview` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar.
+- The central document area has a clear `Editor` / `Preview` / `Split` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar; `Split` shows the Markdown editor and rendered preview side by side.
 - Context actions such as Save, Info, and Tags belong near the document tab/breadcrumb, while formatting commands stay in the editor toolbar.
 - The app must not draw fake window controls. When custom chrome is used, minimize, maximize/restore, close, drag, and resize behavior must be real and validated.
 - The integrated window bar should stay around `34px` high, dark, quiet, and visually secondary to the editor.
@@ -84,6 +84,10 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 
 - The preview renders Markdown through native Avalonia controls, not WebView.
 - The primary rendered preview belongs in the central document area behind the `Preview` mode, not as the main content of the right sidebar.
+- Split View belongs to the Markdown Power Editor path: it keeps Markdown source editing on the left and native rendered preview on the right.
+- Split View must use the same preview block pipeline as Preview mode; do not duplicate Markdown rendering logic in XAML or ViewModel.
+- In Split View, the formatting toolbar remains visible because the Markdown TextBox is still editable.
+- Split View should remain compact enough for 1366x768, but the center editor/preview workspace takes priority over decorative chrome.
 - The right sidebar focuses on note info, internal links, and metadata; it must not present a confusing fake `Preview` tab when preview mode is handled centrally.
 - Paragraphs, headings, and list items use inline runs so Markdown markers are removed from the visual preview.
 - `**bold**` must render with real bold weight.

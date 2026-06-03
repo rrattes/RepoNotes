@@ -6,6 +6,12 @@ This document plans a future Visual Markdown Mode / Visual Editor Mode for RepoN
 
 RepoNotes remains Markdown-first and local-first. Markdown files on disk stay the source of truth. The existing Markdown Mode must continue to exist and must not be replaced by a visual editor.
 
+## Current Product Direction Update
+
+Before any WebView2 or WYSIWYG implementation, RepoNotes is prioritizing a lower-risk Markdown Power Editor path. The first implemented step in that path is Split View: the Markdown source editor and native rendered preview are shown side by side while Markdown remains the source of truth.
+
+Split View is not WYSIWYG. It is an incremental alternative that improves writing feedback without adding a browser runtime, replacing the Avalonia `TextBox`, or changing storage. The WebView2 spike remains a future option for real Visual Markdown Mode, but it is not the immediate priority.
+
 ## Product Decision
 
 - Markdown remains the saved file format.

@@ -30,7 +30,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
     private bool _hasUnsavedChanges;
-    private bool _isPreviewMode;
+    private DocumentViewMode _documentViewMode = DocumentViewMode.Editor;
     private int _searchResultCount;
     private CancellationTokenSource? _searchDebounceCancellation;
     private NoteTemplate _selectedTemplate;
@@ -85,6 +85,7 @@ public sealed class MainWindowViewModel : ViewModelBase
         CloseTabCommand = new RelayCommand(CloseActiveTab, () => ActiveTab is not null);
         ShowEditorCommand = new RelayCommand(ShowEditor);
         ShowPreviewCommand = new RelayCommand(ShowPreview);
+        ShowSplitCommand = new RelayCommand(ShowSplit);
 
         ReloadRepository(noteRepository, initialStatus);
     }
@@ -168,9 +169,19 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand ShowPreviewCommand { get; }
 
-    public bool IsEditorMode => !_isPreviewMode;
+    public ICommand ShowSplitCommand { get; }
 
-    public bool IsPreviewMode => _isPreviewMode;
+    public DocumentViewMode DocumentViewMode => _documentViewMode;
+
+    public bool IsEditorMode => _documentViewMode == DocumentViewMode.Editor;
+
+    public bool IsPreviewMode => _documentViewMode == DocumentViewMode.Preview;
+
+    public bool IsSplitMode => _documentViewMode == DocumentViewMode.Split;
+
+    public bool HasEditorVisible => _documentViewMode is DocumentViewMode.Editor or DocumentViewMode.Split;
+
+    public bool HasPreviewVisible => _documentViewMode is DocumentViewMode.Preview or DocumentViewMode.Split;
 
     public bool HasOpenTabs => OpenTabs.Count > 0;
 
@@ -544,26 +555,33 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     private void ShowEditor()
     {
-        if (!_isPreviewMode)
-        {
-            return;
-        }
-
-        _isPreviewMode = false;
-        OnPropertyChanged(nameof(IsEditorMode));
-        OnPropertyChanged(nameof(IsPreviewMode));
+        SetDocumentViewMode(DocumentViewMode.Editor);
     }
 
     private void ShowPreview()
     {
-        if (_isPreviewMode)
+        SetDocumentViewMode(DocumentViewMode.Preview);
+    }
+
+    private void ShowSplit()
+    {
+        SetDocumentViewMode(DocumentViewMode.Split);
+    }
+
+    private void SetDocumentViewMode(DocumentViewMode mode)
+    {
+        if (_documentViewMode == mode)
         {
             return;
         }
 
-        _isPreviewMode = true;
+        _documentViewMode = mode;
+        OnPropertyChanged(nameof(DocumentViewMode));
         OnPropertyChanged(nameof(IsEditorMode));
         OnPropertyChanged(nameof(IsPreviewMode));
+        OnPropertyChanged(nameof(IsSplitMode));
+        OnPropertyChanged(nameof(HasEditorVisible));
+        OnPropertyChanged(nameof(HasPreviewVisible));
     }
 
     private void UpdatePreviewBlocks()

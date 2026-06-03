@@ -48,7 +48,72 @@ public sealed class MainWindowViewModelTabsTests : IDisposable
         Assert.Single(viewModel.OpenTabs);
         Assert.True(viewModel.HasOpenTabs);
         Assert.Equal("Alpha", viewModel.ActiveTab?.Title);
+        Assert.Equal(DocumentViewMode.Editor, viewModel.DocumentViewMode);
         Assert.True(viewModel.IsEditorMode);
+        Assert.True(viewModel.HasEditorVisible);
+        Assert.False(viewModel.HasPreviewVisible);
+    }
+
+    [Fact]
+    public void DocumentViewModeCanSwitchToPreview()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.ShowPreviewCommand.Execute(null);
+
+        Assert.Equal(DocumentViewMode.Preview, viewModel.DocumentViewMode);
+        Assert.False(viewModel.IsEditorMode);
+        Assert.True(viewModel.IsPreviewMode);
+        Assert.False(viewModel.IsSplitMode);
+        Assert.False(viewModel.HasEditorVisible);
+        Assert.True(viewModel.HasPreviewVisible);
+    }
+
+    [Fact]
+    public void DocumentViewModeCanSwitchToSplit()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.ShowSplitCommand.Execute(null);
+
+        Assert.Equal(DocumentViewMode.Split, viewModel.DocumentViewMode);
+        Assert.False(viewModel.IsEditorMode);
+        Assert.False(viewModel.IsPreviewMode);
+        Assert.True(viewModel.IsSplitMode);
+        Assert.True(viewModel.HasEditorVisible);
+        Assert.True(viewModel.HasPreviewVisible);
+    }
+
+    [Fact]
+    public void SwitchingTabsPreservesDocumentViewMode()
+    {
+        var viewModel = CreateViewModel();
+        viewModel.ShowSplitCommand.Execute(null);
+
+        SelectNode(viewModel, "B.md");
+
+        Assert.Equal("Beta", viewModel.ActiveTab?.Title);
+        Assert.Equal(DocumentViewMode.Split, viewModel.DocumentViewMode);
+        Assert.True(viewModel.HasEditorVisible);
+        Assert.True(viewModel.HasPreviewVisible);
+    }
+
+    [Fact]
+    public void EditingActiveTabKeepsPreviewBlocksUpdatedForSplitMode()
+    {
+        var viewModel = CreateViewModel();
+        viewModel.ShowSplitCommand.Execute(null);
+
+        viewModel.Markdown = """
+        ### Teste
+
+        Texto com **bold** e *italic*
+        """;
+
+        Assert.Contains(viewModel.PreviewBlocks, block => block is MarkdownHeadingBlock { Level: 3, Text: "Teste" });
+        Assert.Contains(viewModel.PreviewBlocks, block => block is MarkdownParagraphBlock paragraph
+            && paragraph.Inlines.Any(run => run is { Text: "bold", IsBold: true })
+            && paragraph.Inlines.Any(run => run is { Text: "italic", IsItalic: true }));
     }
 
     [Fact]

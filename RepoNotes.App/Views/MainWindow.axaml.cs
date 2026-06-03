@@ -46,7 +46,7 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        var editor = MarkdownEditor;
+        var editor = MarkdownEditorSplit.IsVisible ? MarkdownEditorSplit : MarkdownEditor;
         var text = editor.Text ?? string.Empty;
         var selStart = editor.SelectionStart;
         var selEnd = editor.SelectionEnd;
