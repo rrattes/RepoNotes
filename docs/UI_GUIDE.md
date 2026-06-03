@@ -95,6 +95,16 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Checklists render with visual checked/unchecked markers instead of exposing raw `- [ ]` or `- [x]` text.
 - Code blocks, blockquotes, checklists, lists, and simple tables remain block-level preview elements.
 
+## Future Visual Markdown Mode
+
+- RepoNotes may add a future `Visual Mode` alongside the existing Markdown source editor.
+- `Markdown Mode` remains the explicit source-editing mode and must not be removed.
+- `Visual Mode` should present headings, emphasis, lists, checklists, quotes, inline code, code blocks, and links as editable visual content while saving back to Markdown.
+- The UI should make mode switching clear without implying that Markdown files are converted to another source format.
+- Visual Mode must work with functional note tabs and preserve dirty/saved state per tab.
+- Frontmatter should not appear as rich editable document content; it stays in the Info panel and storage/frontmatter parser flow.
+- WebView2/editor-web is acceptable only after a technical spike proves packaging, theme integration, Markdown round-trip, and MVVM/tab synchronization are practical.
+
 ## Simple Name Dialog
 
 - File and folder creation/rename flows use a compact dark text prompt instead of relying only on automatic names.

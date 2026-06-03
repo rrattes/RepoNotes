@@ -1011,3 +1011,24 @@
 **Riscos tecnicos:** Medio-baixo; o estado por aba fica em memoria e depende dos mesmos objetos `NoteItem` carregados pelo repositorio. Fluxos futuros de reload profundo, sessao persistida ou multiplas janelas podem exigir uma camada de documento aberto mais robusta.
 
 **Proximo passo sugerido:** Validar visualmente as tabs em 1366x768 e 1600x900 e, depois, adicionar confirmacao/UX mais clara para fechamento de aba suja com falha de salvamento.
+
+## 2026-06-02 22:48:46 -03:00
+
+**Objetivo da rodada:** Planejar tecnicamente a implementacao futura de Visual Markdown Mode / WYSIWYG-lite sem implementar codigo.
+
+**Arquivos alterados:**
+
+- `docs/WYSIWYG_EDITOR_PLAN.md`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo da decisao:** Criado documento tecnico comparando tres caminhos para edicao visual: editor nativo Avalonia, WebView2/editor web embutido e abordagem hibrida incremental mantendo Markdown editor + preview. A recomendacao registrada e manter Markdown Mode/Preview como baseline, executar uma spike tecnica isolada com WebView2 antes de adicionar qualquer pacote ou dependencia, e seguir com WebView2 apenas se a spike provar viabilidade de runtime, empacotamento, round-trip Markdown, tema dark, MVVM e sincronizacao com abas. Se WebView2 for pesado demais, o caminho alternativo recomendado e WYSIWYG-lite nativo/hibrido, sem prometer WYSIWYG completo.
+
+**Resultado do build:** Not run, documentation-only change.
+
+**Pendencias:** Executar spike isolada para WebView2/editor web antes de qualquer implementacao. Definir como `Markdown Mode`, `Preview` e futuro `Visual Mode` convivem no toggle central. Definir criterio de round-trip Markdown aceitavel, especialmente para frontmatter, links internos, checklists, code blocks e tabelas.
+
+**Riscos tecnicos:** WebView2 pode impactar empacotamento self-contained, CI, bridge JS/.NET, foco/atalhos, tema e sincronizacao de dirty state por aba. Editor nativo Avalonia pode virar um projeto grande de text editor. Abordagem hibrida e mais segura, mas nao entrega WYSIWYG real.
+
+**Proximo passo sugerido:** Criar uma branch/spike pequena para testar WebView2 com um editor Markdown visual carregando e emitindo Markdown de uma nota ativa, sem tocar em storage nem substituir o editor Markdown atual.

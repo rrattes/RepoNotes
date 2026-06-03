@@ -12,6 +12,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 - Add focused UI tests or view model tests for selection/editing behavior.
 - Continue visual polish carefully; custom integrated window chrome is started/completed with real window controls.
 - Continue evolving document navigation; functional note tabs are started/completed for opening, switching, saving, and closing notes.
+- Plan Visual Markdown Mode / WYSIWYG-lite only after rich preview, toolbar, tabs, and editor stability are validated.
 
 ## Next Product Milestones
 
@@ -72,6 +73,15 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Preview markers are cleaned up for headings, quotes, code fences, bullets, and checklists so the preview reads as rendered Markdown while the editor remains plain Markdown.
    - Central Editor/Preview mode toggle is started/completed so users can switch the main workspace between raw Markdown editing and rendered Markdown preview.
    - Keep preview visually consistent with the dark UI guide.
+
+8. Visual Markdown Mode / WYSIWYG-lite
+   - Future milestone after rich preview, toolbar Markdown, functional tabs, and editor save-state stability.
+   - Markdown remains the source of truth saved to local `.md` files.
+   - Markdown Mode must remain available; Visual Mode must not replace manual Markdown editing.
+   - Evaluate WebView2/editor-web as the preferred path for real WYSIWYG quality through an isolated technical spike before adding packages or runtime dependencies.
+   - If WebView2 proves too heavy for packaging or architecture, continue with native Avalonia or hybrid WYSIWYG-lite improvements.
+   - Initial scope should cover H1/H2/H3, bold, italic, bold italic, lists, checklist, quote, inline code, code block, and visual links.
+   - Frontmatter remains managed by parsing/storage and the Info panel, not edited as rich visual content.
 
 ## Guardrails
 
