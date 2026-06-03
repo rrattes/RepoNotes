@@ -4,6 +4,7 @@
         xmlns:controls="using:RepoNotes.App.Controls"
         xmlns:vm="using:RepoNotes.App.ViewModels"
         x:Class="RepoNotes.App.Views.MainWindow"
+        x:Name="Root"
         Width="1600"
         Height="900"
         MinWidth="1366"
@@ -19,7 +20,38 @@
 
   <Window.DataTemplates>
     <TreeDataTemplate DataType="{x:Type vm:RepositoryNodeViewModel}" ItemsSource="{Binding Children}">
-      <Grid ColumnDefinitions="4,22,*" Height="23" VerticalAlignment="Center">
+      <Grid ColumnDefinitions="4,22,*"
+            Height="23"
+            VerticalAlignment="Center"
+            PointerPressed="OnExplorerNodePointerPressed">
+        <Grid.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Open"
+                      Command="{Binding #Root.DataContext.OpenExplorerItemCommand}"
+                      CommandParameter="{Binding}" />
+            <MenuItem Header="Open in Tab"
+                      IsVisible="{Binding IsNote}"
+                      Command="{Binding #Root.DataContext.OpenExplorerItemCommand}"
+                      CommandParameter="{Binding}" />
+            <Separator />
+            <MenuItem Header="New Note"
+                      Command="{Binding #Root.DataContext.NewNoteAtExplorerItemCommand}"
+                      CommandParameter="{Binding}" />
+            <MenuItem Header="New Folder"
+                      Command="{Binding #Root.DataContext.NewFolderAtExplorerItemCommand}"
+                      CommandParameter="{Binding}" />
+            <Separator />
+            <MenuItem Header="Rename"
+                      Command="{Binding #Root.DataContext.RenameExplorerItemCommand}"
+                      CommandParameter="{Binding}" />
+            <MenuItem Header="Move to Trash"
+                      Command="{Binding #Root.DataContext.MoveExplorerItemToTrashCommand}"
+                      CommandParameter="{Binding}" />
+            <Separator />
+            <MenuItem Header="Copy Path"
+                      Click="OnCopyExplorerPathClick" />
+          </ContextMenu>
+        </Grid.ContextMenu>
         <Border Grid.Column="0"
                 Width="3"
                 Height="16"
@@ -429,6 +461,19 @@
                           ItemsSource="{Binding TrashItems}"
                           SelectedItem="{Binding SelectedTrashItem}"
                           ToolTip.Tip="Itens na lixeira">
+                  <ComboBox.ContextMenu>
+                    <ContextMenu>
+                      <MenuItem Header="Restore"
+                                Command="{Binding RestoreTrashItemCommand}"
+                                CommandParameter="{Binding SelectedTrashItem}" />
+                      <MenuItem Header="Delete Permanently"
+                                Command="{Binding DeleteTrashItemPermanentlyCommand}"
+                                CommandParameter="{Binding SelectedTrashItem}" />
+                      <Separator />
+                      <MenuItem Header="Empty Trash"
+                                Command="{Binding EmptyTrashCommand}" />
+                    </ContextMenu>
+                  </ComboBox.ContextMenu>
                   <ComboBox.ItemTemplate>
                     <DataTemplate>
                       <TextBlock Text="{Binding Name}"
@@ -499,7 +544,25 @@
                         <Button Classes="note-tab"
                                 Classes.active="{Binding IsActive}"
                                 Command="{Binding ActivateCommand}"
-                                ToolTip.Tip="{Binding Path}">
+                                ToolTip.Tip="{Binding Path}"
+                                PointerPressed="OnTabPointerPressed">
+                          <Button.ContextMenu>
+                            <ContextMenu>
+                              <MenuItem Header="Close"
+                                        Command="{Binding #Root.DataContext.CloseTabItemCommand}"
+                                        CommandParameter="{Binding}" />
+                              <MenuItem Header="Close Others"
+                                        Command="{Binding #Root.DataContext.CloseOtherTabsCommand}"
+                                        CommandParameter="{Binding}" />
+                              <MenuItem Header="Close All"
+                                        Command="{Binding #Root.DataContext.CloseAllTabsCommand}" />
+                              <Separator />
+                              <MenuItem Header="Reveal in Explorer"
+                                        Command="{Binding ActivateCommand}" />
+                              <MenuItem Header="Copy Path"
+                                        Click="OnCopyTabPathClick" />
+                            </ContextMenu>
+                          </Button.ContextMenu>
                           <Grid ColumnDefinitions="18,*,12">
                             <TextBlock Text="MD"
                                        FontSize="9"

@@ -179,6 +179,25 @@
     <Setter Property="BorderBrush" Value="{StaticResource Brush.Accent}" />
   </Style>
 
+  <Style Selector="ContextMenu">
+    <Setter Property="Background" Value="#101823" />
+    <Setter Property="BorderBrush" Value="{StaticResource Brush.Border}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="4" />
+  </Style>
+
+  <Style Selector="MenuItem">
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <Style Selector="MenuItem:pointerover">
+    <Setter Property="Background" Value="#17213A" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
+  </Style>
+
   <Style Selector="Button.mode-toggle">
     <Setter Property="Height" Value="26" />
     <Setter Property="MinWidth" Value="62" />

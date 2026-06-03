@@ -26,6 +26,8 @@ public sealed class RepositoryNodeViewModel
 
     public bool IsNote => Type == RepositoryNodeType.Note;
 
+    public bool IsFolder => Type == RepositoryNodeType.Folder;
+
     public bool IsSearchMatch { get; }
 
     public ObservableCollection<RepositoryNodeViewModel> Children { get; }

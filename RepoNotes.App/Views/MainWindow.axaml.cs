@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using RepoNotes.App.ViewModels;
@@ -101,6 +102,49 @@ public sealed partial class MainWindow : Window
             && DataContext is MainWindowViewModel viewModel)
         {
             ExecuteCommandPaletteItem(viewModel, item);
+        }
+    }
+
+    private void OnExplorerNodePointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Control { DataContext: RepositoryNodeViewModel node }
+            && DataContext is MainWindowViewModel viewModel
+            && e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            viewModel.SelectedNode = node;
+        }
+    }
+
+    private void OnTabPointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is Control { DataContext: NoteTabViewModel tab }
+            && e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            tab.ActivateCommand.Execute(null);
+        }
+    }
+
+    private async void OnCopyExplorerPathClick(object? sender, RoutedEventArgs e)
+    {
+        var path = sender is Control { DataContext: RepositoryNodeViewModel node }
+            ? node.Path
+            : (DataContext as MainWindowViewModel)?.SelectedNode?.Path;
+
+        if (!string.IsNullOrWhiteSpace(path) && Clipboard is not null)
+        {
+            await Clipboard.SetTextAsync(path);
+        }
+    }
+
+    private async void OnCopyTabPathClick(object? sender, RoutedEventArgs e)
+    {
+        var path = sender is Control { DataContext: NoteTabViewModel tab }
+            ? tab.Path
+            : (DataContext as MainWindowViewModel)?.ActiveTab?.Path;
+
+        if (!string.IsNullOrWhiteSpace(path) && Clipboard is not null)
+        {
+            await Clipboard.SetTextAsync(path);
         }
     }
 

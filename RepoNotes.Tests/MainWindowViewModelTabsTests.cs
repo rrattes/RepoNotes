@@ -275,6 +275,47 @@ public sealed class MainWindowViewModelTabsTests : IDisposable
     }
 
     [Fact]
+    public void CloseOtherTabsCommandKeepsTargetTabOpen()
+    {
+        var viewModel = CreateViewModel();
+        SelectNode(viewModel, "B.md");
+        var alphaTab = viewModel.OpenTabs.First(tab => tab.Title == "Alpha");
+
+        viewModel.CloseOtherTabsCommand.Execute(alphaTab);
+
+        Assert.Single(viewModel.OpenTabs);
+        Assert.Equal("Alpha", viewModel.ActiveTab?.Title);
+        Assert.Same(alphaTab, viewModel.ActiveTab);
+    }
+
+    [Fact]
+    public void CloseAllTabsCommandClosesEveryOpenTab()
+    {
+        var viewModel = CreateViewModel();
+        SelectNode(viewModel, "B.md");
+
+        viewModel.CloseAllTabsCommand.Execute(null);
+
+        Assert.Empty(viewModel.OpenTabs);
+        Assert.Null(viewModel.ActiveTab);
+        Assert.Null(viewModel.SelectedNote);
+        Assert.Equal("Todas as abas fechadas", viewModel.Status);
+    }
+
+    [Fact]
+    public void ExplorerOpenCommandSelectsTargetNode()
+    {
+        var viewModel = CreateViewModel();
+        var betaNode = FindNode(viewModel.Nodes, "B.md");
+        Assert.NotNull(betaNode);
+
+        viewModel.OpenExplorerItemCommand.Execute(betaNode);
+
+        Assert.Same(betaNode, viewModel.SelectedNode);
+        Assert.Equal("Beta", viewModel.ActiveTab?.Title);
+    }
+
+    [Fact]
     public void SwitchingTabsPreservesDirtyMarkdownWithoutSaving()
     {
         var viewModel = CreateViewModel();

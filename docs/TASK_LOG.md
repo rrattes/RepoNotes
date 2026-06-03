@@ -1186,3 +1186,37 @@
 **Riscos tecnicos:** Baixo; a mudanca e concentrada em layout e estado simples de ViewModel. O risco residual e ajuste fino de largura/descoberta visual dos rails em telas pequenas.
 
 **Proximo passo sugerido:** Fazer QA manual dos paineis colapsaveis em Editor, Preview e Split, depois avaliar persistencia simples do estado visual ou scroll sync do Split.
+
+## 2026-06-03 14:46:07 -03:00
+
+**Objetivo da rodada:** Implementar menus de botao direito para acoes naturais no explorer, nas abas abertas e na lixeira.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/ParameterizedRelayCommand.cs`
+- `RepoNotes.App/ViewModels/ParameterizedAsyncRelayCommand.cs`
+- `RepoNotes.App/ViewModels/RepositoryNodeViewModel.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foram adicionados comandos parametrizados reutilizaveis para acoes que dependem do item clicado. O explorer agora expoe menu contextual com abrir, abrir em aba, nova nota, nova pasta, renomear, mover para lixeira e copiar caminho. As abas abertas ganharam menu com fechar, fechar outras, fechar todas, revelar no explorer e copiar caminho. A lixeira ganhou menu contextual no seletor com restaurar, excluir permanentemente e esvaziar lixeira. O code-behind ficou restrito a selecao por botao direito e integracao com clipboard para `Copy Path`. O tema recebeu estilos dark para `ContextMenu` e `MenuItem`. Testes foram adicionados para fechar outras abas, fechar todas as abas e abrir item do explorer via comando parametrizado.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 137 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu e foi encerrada sem crash observado. Menus visuais nao receberam teste automatizado de UI, entao a abertura real por botao direito ainda deve ser conferida diretamente no app Windows.
+
+**Pendencias:** Confirmar manualmente a abertura dos menus por botao direito no Windows. Confirmacao visual explicita para `Delete Permanently` e `Empty Trash` ainda precisa de uma rodada propria.
+
+**Riscos tecnicos:** Medio-baixo; menus em DataTemplates dependem de bindings para o `DataContext` raiz e devem ser validados no app real. As operacoes destrutivas continuam reaproveitando o fluxo atual da lixeira.
+
+**Proximo passo sugerido:** Fazer QA manual dos context menus e, em seguida, implementar confirmacoes visuais dedicadas para exclusao permanente e esvaziar lixeira.

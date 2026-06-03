@@ -90,6 +90,16 @@ public sealed class MainWindowViewModel : ViewModelBase
         EmptyTrashCommand = new RelayCommand(EmptyTrash);
         SaveNoteCommand = new RelayCommand(SaveSelectedNote, () => SelectedNote is not null);
         CloseTabCommand = new RelayCommand(CloseActiveTab, () => ActiveTab is not null);
+        OpenExplorerItemCommand = new ParameterizedRelayCommand<RepositoryNodeViewModel>(OpenExplorerItem);
+        RenameExplorerItemCommand = new ParameterizedAsyncRelayCommand<RepositoryNodeViewModel>(RenameExplorerItemAsync);
+        MoveExplorerItemToTrashCommand = new ParameterizedRelayCommand<RepositoryNodeViewModel>(MoveExplorerItemToTrash);
+        NewNoteAtExplorerItemCommand = new ParameterizedAsyncRelayCommand<RepositoryNodeViewModel>(CreateNewNoteAtExplorerItemAsync);
+        NewFolderAtExplorerItemCommand = new ParameterizedAsyncRelayCommand<RepositoryNodeViewModel>(CreateNewFolderAtExplorerItemAsync);
+        CloseTabItemCommand = new ParameterizedRelayCommand<NoteTabViewModel>(CloseTabItem);
+        CloseOtherTabsCommand = new ParameterizedRelayCommand<NoteTabViewModel>(CloseOtherTabs);
+        CloseAllTabsCommand = new RelayCommand(CloseAllTabs, () => OpenTabs.Count > 0);
+        RestoreTrashItemCommand = new ParameterizedRelayCommand<TrashItem>(RestoreTrashItem);
+        DeleteTrashItemPermanentlyCommand = new ParameterizedRelayCommand<TrashItem>(DeleteTrashItemPermanently);
         ShowEditorCommand = new RelayCommand(ShowEditor);
         ShowPreviewCommand = new RelayCommand(ShowPreview);
         ShowSplitCommand = new RelayCommand(ShowSplit);
@@ -181,6 +191,26 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ICommand SaveNoteCommand { get; }
 
     public ICommand CloseTabCommand { get; }
+
+    public ICommand OpenExplorerItemCommand { get; }
+
+    public ICommand RenameExplorerItemCommand { get; }
+
+    public ICommand MoveExplorerItemToTrashCommand { get; }
+
+    public ICommand NewNoteAtExplorerItemCommand { get; }
+
+    public ICommand NewFolderAtExplorerItemCommand { get; }
+
+    public ICommand CloseTabItemCommand { get; }
+
+    public ICommand CloseOtherTabsCommand { get; }
+
+    public ICommand CloseAllTabsCommand { get; }
+
+    public ICommand RestoreTrashItemCommand { get; }
+
+    public ICommand DeleteTrashItemPermanentlyCommand { get; }
 
     public ICommand ShowEditorCommand { get; }
 
@@ -400,6 +430,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             Status = _activeTab?.Status ?? "Nenhuma aba aberta";
             (SaveNoteCommand as RelayCommand)?.RaiseCanExecuteChanged();
             (CloseTabCommand as RelayCommand)?.RaiseCanExecuteChanged();
+            (CloseAllTabsCommand as RelayCommand)?.RaiseCanExecuteChanged();
         }
     }
 
@@ -640,6 +671,47 @@ public sealed class MainWindowViewModel : ViewModelBase
         SelectNodeByNoteIdWithoutOpening(ActiveTab.NoteId);
     }
 
+    private void CloseTabItem(NoteTabViewModel? tab)
+    {
+        if (tab is not null)
+        {
+            CloseTab(tab);
+        }
+    }
+
+    private void CloseOtherTabs(NoteTabViewModel? tab)
+    {
+        if (tab is null || !OpenTabs.Contains(tab))
+        {
+            return;
+        }
+
+        foreach (var openTab in OpenTabs.Where(openTab => !ReferenceEquals(openTab, tab)).ToList())
+        {
+            CloseTab(openTab);
+        }
+
+        if (OpenTabs.Contains(tab))
+        {
+            ActiveTab = tab;
+            SelectNodeByNoteIdWithoutOpening(tab.NoteId);
+            Status = "Outras abas fechadas";
+        }
+    }
+
+    private void CloseAllTabs()
+    {
+        foreach (var tab in OpenTabs.ToList())
+        {
+            CloseTab(tab);
+        }
+
+        if (OpenTabs.Count == 0)
+        {
+            Status = "Todas as abas fechadas";
+        }
+    }
+
     private void ShowEditor()
     {
         SetDocumentViewMode(DocumentViewMode.Editor);
@@ -834,6 +906,81 @@ public sealed class MainWindowViewModel : ViewModelBase
 
         OpenNoteById(link.NoteId);
         Status = $"Link interno aberto: {link.DisplayText}";
+    }
+
+    private void OpenExplorerItem(RepositoryNodeViewModel? node)
+    {
+        if (node is null)
+        {
+            return;
+        }
+
+        SelectedNode = node;
+        Status = node.IsNote ? $"Nota aberta: {node.Path}" : $"Pasta selecionada: {node.Path}";
+    }
+
+    private async Task RenameExplorerItemAsync(RepositoryNodeViewModel? node)
+    {
+        if (node is null)
+        {
+            return;
+        }
+
+        SelectedNode = node;
+        await RenameSelectedItemAsync();
+    }
+
+    private void MoveExplorerItemToTrash(RepositoryNodeViewModel? node)
+    {
+        if (node is null)
+        {
+            return;
+        }
+
+        SelectedNode = node;
+        DeleteSelectedItem();
+    }
+
+    private async Task CreateNewNoteAtExplorerItemAsync(RepositoryNodeViewModel? node)
+    {
+        if (node is not null)
+        {
+            SelectedNode = node;
+        }
+
+        await CreateNewNoteAsync();
+    }
+
+    private async Task CreateNewFolderAtExplorerItemAsync(RepositoryNodeViewModel? node)
+    {
+        if (node is not null)
+        {
+            SelectedNode = node;
+        }
+
+        await CreateNewFolderAsync();
+    }
+
+    private void RestoreTrashItem(TrashItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        SelectedTrashItem = item;
+        RestoreFromTrash();
+    }
+
+    private void DeleteTrashItemPermanently(TrashItem? item)
+    {
+        if (item is null)
+        {
+            return;
+        }
+
+        SelectedTrashItem = item;
+        DeletePermanently();
     }
 
     private async Task CreateNewNoteAsync()

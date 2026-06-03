@@ -30,7 +30,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - The template picker should stay visually secondary to repository navigation: compact combo box, short selected-template description, and one small action button.
 - Global actions such as settings live in the lower-left sidebar toolbar.
 - Lower-left global actions should use clear compact labels and tooltips. Avoid cryptic placeholder labels such as `N`, `*`, or `Cfg`.
-- Sidebar item actions such as rename and delete may live in the lower-left toolbar as compact controls while the app has no context menu; labels and tooltips must remain explicit.
+- Sidebar item actions such as rename and delete may remain in the lower-left toolbar, but the primary explorer ergonomics should use context menus on notes and folders.
 - Trash actions live in the lower-left sidebar area as a compact picker plus small action buttons for restore, permanent delete, and empty trash.
 - Permanent delete controls must remain visually secondary and should gain explicit confirmation UX in a future round.
 - The only persistent top area inside the main content is the document context bar above the editor.
@@ -38,6 +38,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Note tabs are functional, not decorative: selecting a note opens a tab or activates the existing tab; duplicate tabs for the same note are not created.
 - Active tabs use a stronger panel background and open tabs with unsaved edits show a compact `*` dirty indicator.
 - Each tab has a small close action. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
+- Open note tabs expose a compact context menu for close, close others, close all, reveal in explorer, and copy path.
 - Switching between tabs must preserve unsaved edits in each tab and must not auto-save just because focus changed.
 - Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.
 - The central document area has a clear `Editor` / `Preview` / `Split` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar; `Split` shows the Markdown editor and rendered preview side by side.
@@ -62,6 +63,15 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - The active tag needs a subtle visual indicator while preserving the dark compact sidebar rhythm.
 - Notes inside `.reponotes-trash` must not contribute tags or counts.
 - Future encrypted or locked content must not expose tag counts or searchable metadata while locked.
+
+## Context Menus
+
+- Explorer nodes expose a compact dark context menu with `Open`, `Open in Tab` for notes, `New Note`, `New Folder`, `Rename`, `Move to Trash`, and `Copy Path`.
+- Right-clicking an explorer node should select that node before executing an action so rename, delete, and create-here actions use the expected target.
+- Note tab context menus provide `Close`, `Close Others`, `Close All`, `Reveal in Explorer`, and `Copy Path`.
+- Trash controls provide context actions for `Restore`, `Delete Permanently`, and `Empty Trash` while keeping `.reponotes-trash` out of the main tree/search.
+- Context menus should use the same dark surface, subtle border, compact spacing, and clear labels as the rest of the app.
+- Future rounds should add explicit confirmation UI for permanent trash deletion and empty-trash actions.
 
 ## Search Feedback
 

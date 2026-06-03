@@ -14,6 +14,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 - Continue evolving document navigation; functional note tabs are started/completed for opening, switching, saving, and closing notes.
 - Continue the Markdown Power Editor path before WYSIWYG work; Split View is started/completed as the first step.
 - Improve workspace layout for smaller screens; collapsible left/right side panels are started/completed.
+- Improve technical-user ergonomics; context menus for explorer, tabs, and trash are started/completed.
 - Plan Visual Markdown Mode / WYSIWYG-lite only after rich preview, toolbar, tabs, and editor stability are validated.
 
 ## Next Product Milestones
@@ -35,6 +36,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Trash restore, permanent delete, and empty-trash flows are started with `.reponotes-trash` kept out of the main tree/search.
    - Initial wiki-style internal links are started with `[[Nome da Nota]]`, title/file-name resolution, broken-link detection, and click-to-open from the preview/info panel.
    - Opening a note from tree navigation or internal links opens a real tab or activates the existing tab without creating duplicates.
+   - Explorer, tab, and trash context menus are started/completed for common open, create, rename, close, restore, and delete workflows.
    - Add refresh and confirmation UX for destructive trash actions.
    - Keep mock data available for design/dev mode if useful.
 
