@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Avalonia.Controls;
 using RepoNotes.App.Services;
 using RepoNotes.Core.Models;
 using RepoNotes.Core.Services;
@@ -36,6 +37,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     private bool _isLeftSidebarCollapsed;
     private bool _isRightSidebarCollapsed;
     private DocumentViewMode _documentViewMode = DocumentViewMode.Editor;
+    private int _splitEditorWeight = 1;
+    private int _splitPreviewWeight = 1;
     private int _searchResultCount;
     private CancellationTokenSource? _searchDebounceCancellation;
     private NoteTemplate _selectedTemplate;
@@ -103,6 +106,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowEditorCommand = new RelayCommand(ShowEditor);
         ShowPreviewCommand = new RelayCommand(ShowPreview);
         ShowSplitCommand = new RelayCommand(ShowSplit);
+        SetSplitPreset50Command = new RelayCommand(() => SetSplitPreset(1, 1));
+        SetSplitPreset60Command = new RelayCommand(() => SetSplitPreset(3, 2));
+        SetSplitPreset70Command = new RelayCommand(() => SetSplitPreset(7, 3));
         ToggleLeftSidebarCommand = new RelayCommand(ToggleLeftSidebar);
         ToggleRightSidebarCommand = new RelayCommand(ToggleRightSidebar);
         OpenCommandPaletteCommand = new RelayCommand(OpenCommandPalette);
@@ -218,6 +224,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand ShowSplitCommand { get; }
 
+    public ICommand SetSplitPreset50Command { get; }
+
+    public ICommand SetSplitPreset60Command { get; }
+
+    public ICommand SetSplitPreset70Command { get; }
+
     public ICommand ToggleLeftSidebarCommand { get; }
 
     public ICommand ToggleRightSidebarCommand { get; }
@@ -239,6 +251,18 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasEditorVisible => _documentViewMode is DocumentViewMode.Editor or DocumentViewMode.Split;
 
     public bool HasPreviewVisible => _documentViewMode is DocumentViewMode.Preview or DocumentViewMode.Split;
+
+    public string SplitColumnDefinitions => $"{_splitEditorWeight}*,10,{_splitPreviewWeight}*";
+
+    public GridLength SplitEditorColumnWidth => new(_splitEditorWeight, GridUnitType.Star);
+
+    public GridLength SplitPreviewColumnWidth => new(_splitPreviewWeight, GridUnitType.Star);
+
+    public bool IsSplitPreset50 => _splitEditorWeight == 1 && _splitPreviewWeight == 1;
+
+    public bool IsSplitPreset60 => _splitEditorWeight == 3 && _splitPreviewWeight == 2;
+
+    public bool IsSplitPreset70 => _splitEditorWeight == 7 && _splitPreviewWeight == 3;
 
     public bool HasOpenTabs => OpenTabs.Count > 0;
 
@@ -725,6 +749,23 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ShowSplit()
     {
         SetDocumentViewMode(DocumentViewMode.Split);
+    }
+
+    private void SetSplitPreset(int editorWeight, int previewWeight)
+    {
+        if (_splitEditorWeight == editorWeight && _splitPreviewWeight == previewWeight)
+        {
+            return;
+        }
+
+        _splitEditorWeight = editorWeight;
+        _splitPreviewWeight = previewWeight;
+        OnPropertyChanged(nameof(SplitColumnDefinitions));
+        OnPropertyChanged(nameof(SplitEditorColumnWidth));
+        OnPropertyChanged(nameof(SplitPreviewColumnWidth));
+        OnPropertyChanged(nameof(IsSplitPreset50));
+        OnPropertyChanged(nameof(IsSplitPreset60));
+        OnPropertyChanged(nameof(IsSplitPreset70));
     }
 
     private void ToggleLeftSidebar()

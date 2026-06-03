@@ -1276,3 +1276,35 @@
 **Riscos tecnicos:** Baixo; a correcao e concentrada no GridSplitter e nos limites minimos dos paineis. O risco residual e ajuste visual fino da largura da hit area.
 
 **Proximo passo sugerido:** Fazer QA manual do Split em 1366x768 e 1600x900; se o divisor estiver estavel, seguir para scroll sync ou confirmacoes de lixeira.
+
+## 2026-06-03 19:56:09 -03:00
+
+**Objetivo da rodada:** Corrigir definitivamente o problema do divisor entre editor e preview no modo Split.
+
+**Diagnostico do divisor:** O `GridSplitter` estava na coluna correta entre editor e preview (`Grid.Column="1"`) e usava `ResizeBehavior="PreviousAndNext"`, `ResizeDirection="Columns"`, `HorizontalAlignment="Stretch"` e `VerticalAlignment="Stretch"`. A rodada anterior ja havia aumentado a coluna para `10px`, aplicado background para hit-test, usado cursor horizontal, reduzido `MinWidth` dos paineis e desligado `ShowsPreview`. Nao havia sobreposicao intencional de `Border`, `TextBox` ou `ScrollViewer` sobre a coluna do splitter, mas o comportamento continuou reportado como instavel apos resize. O risco residual estava no proprio comportamento do `GridSplitter` com colunas star, minimos dos paineis e compressao do grid externo em resolucoes menores. Pela regra de decisao desta rodada, a solucao escolhida foi remover o drag livre visual e substituir por presets estaveis.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O modo Split deixou de usar `GridSplitter` arrastavel e passou a expor presets compactos `50/50`, `60/40` e `70/30`. O ViewModel agora fornece `SplitColumnDefinitions`, comandos de preset e estados ativos para a UI. A area central mostra os presets apenas quando Split esta ativo, e o separador central virou uma linha visual estatica com tooltip, evitando parecer uma alca quebrada. Os paineis do Split usam `MinWidth` mais realista (`200px`) para manter usabilidade em 1366x768. Foram adicionados testes para estado inicial dos presets, alternancia entre presets e preservacao do preset ao alternar modos.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros. A primeira tentativa de build falhou porque Avalonia nao aceita binding direto em `Grid.ColumnDefinitions`; a correcao final usa binding em `ColumnDefinition.Width`.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 140 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu e foi encerrada sem crash observado. O fluxo interativo esperado e ativar Split e alternar `50/50`, `60/40` e `70/30` repetidas vezes em 1366x768 e 1600x900, confirmando que editor e preview mudam de largura sem depender de drag.
+
+**Pendencias:** Revalidar visualmente os presets no app Windows. Free-drag pode ser reavaliado no futuro somente se for implementado de forma comprovadamente estavel ou com manipulacao manual controlada.
+
+**Riscos tecnicos:** Baixo; a solucao reduz risco ao remover dependencia do `GridSplitter` instavel. O binding direto de `ColumnDefinitions` foi descartado apos erro de build; a versao final usa `ColumnDefinition.Width` com `GridLength` exposto pela camada App.
+
+**Proximo passo sugerido:** Validar presets do Split em 1366x768 e 1600x900 e, depois, seguir para scroll sync entre editor e preview.

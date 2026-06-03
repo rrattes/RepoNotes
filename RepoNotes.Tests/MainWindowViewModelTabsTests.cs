@@ -85,6 +85,59 @@ public sealed class MainWindowViewModelTabsTests : IDisposable
     }
 
     [Fact]
+    public void SplitPresetStartsBalanced()
+    {
+        var viewModel = CreateViewModel();
+
+        Assert.Equal("1*,10,1*", viewModel.SplitColumnDefinitions);
+        Assert.True(viewModel.IsSplitPreset50);
+        Assert.False(viewModel.IsSplitPreset60);
+        Assert.False(viewModel.IsSplitPreset70);
+    }
+
+    [Fact]
+    public void SplitPresetCommandsUpdateColumnDefinitions()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.SetSplitPreset60Command.Execute(null);
+
+        Assert.Equal("3*,10,2*", viewModel.SplitColumnDefinitions);
+        Assert.False(viewModel.IsSplitPreset50);
+        Assert.True(viewModel.IsSplitPreset60);
+        Assert.False(viewModel.IsSplitPreset70);
+
+        viewModel.SetSplitPreset70Command.Execute(null);
+
+        Assert.Equal("7*,10,3*", viewModel.SplitColumnDefinitions);
+        Assert.False(viewModel.IsSplitPreset50);
+        Assert.False(viewModel.IsSplitPreset60);
+        Assert.True(viewModel.IsSplitPreset70);
+
+        viewModel.SetSplitPreset50Command.Execute(null);
+
+        Assert.Equal("1*,10,1*", viewModel.SplitColumnDefinitions);
+        Assert.True(viewModel.IsSplitPreset50);
+        Assert.False(viewModel.IsSplitPreset60);
+        Assert.False(viewModel.IsSplitPreset70);
+    }
+
+    [Fact]
+    public void SplitPresetSurvivesDocumentModeChanges()
+    {
+        var viewModel = CreateViewModel();
+        viewModel.ShowSplitCommand.Execute(null);
+        viewModel.SetSplitPreset70Command.Execute(null);
+
+        viewModel.ShowEditorCommand.Execute(null);
+        viewModel.ShowSplitCommand.Execute(null);
+
+        Assert.Equal(DocumentViewMode.Split, viewModel.DocumentViewMode);
+        Assert.Equal("7*,10,3*", viewModel.SplitColumnDefinitions);
+        Assert.True(viewModel.IsSplitPreset70);
+    }
+
+    [Fact]
     public void SidePanelsStartExpanded()
     {
         var viewModel = CreateViewModel();

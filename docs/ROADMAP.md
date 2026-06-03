@@ -77,11 +77,11 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Preview markers are cleaned up for headings, quotes, code fences, bullets, and checklists so the preview reads as rendered Markdown while the editor remains plain Markdown.
    - Central Editor/Preview/Split mode toggle is started/completed so users can switch the main workspace between raw Markdown editing, rendered Markdown preview, and side-by-side editing/preview.
    - Split View shows the Markdown source editor on the left and the native visual preview on the right, using the same `MarkdownPreviewService` output as Preview mode.
-   - Split View now includes a resizable divider between editor and preview.
+   - Split View resizing is stabilized with compact layout presets (`50/50`, `60/40`, `70/30`) instead of unreliable free drag.
    - Workspace side panels are collapsible so the central editor/preview area can gain space on smaller screens.
    - Markdown formatting keyboard shortcuts are started/completed for bold, italic, headings, lists, checklist, code, quote, and contextual link/search behavior.
    - A compact Command Palette is started/completed for editor modes, Markdown formatting, basic insertions, save, and safe note/folder actions.
-   - Future Split View improvements may include scroll synchronization between editor and preview.
+   - Future Split View improvements may include scroll synchronization between editor and preview and a revalidated free-drag splitter.
    - Keep preview visually consistent with the dark UI guide.
 
 8. Visual Markdown Mode / WYSIWYG-lite
