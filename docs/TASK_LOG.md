@@ -1413,3 +1413,40 @@
 **Riscos tecnicos:** Baixo-medio; a protecao contra caminhos fora da lixeira foi reforcada, mas operacoes destrutivas ainda sao sincronas e dependem de permissoes do filesystem. A lixeira usa metadado JSON simples e pode precisar de migracao se ganhar historico mais rico.
 
 **Proximo passo sugerido:** Implementar confirmacoes visuais compactas para exclusao permanente/esvaziar lixeira e limpar ou restaurar conscientemente os artefatos locais atuais do `sample-repository`.
+
+## 2026-06-03 20:50:00 -03:00
+
+**Objetivo da rodada:** Criar uma spike visual isolada em React + TypeScript + Vite para avaliar uma possivel interface desktop web/Tauri para o RepoNotes, sem migrar o app Avalonia e sem tocar em storage/logica real.
+
+**Pasta criada:** `spikes/tauri-react-visual/`
+
+**Stack usada:** React 19, TypeScript, Vite e CSS moderno. Tauri nao foi inicializado nesta rodada; a spike ficou como React/Vite exibivel e preparada para uma rodada posterior de empacotamento Tauri.
+
+**Comandos executados:**
+
+- `npm install`
+- `npm run build`
+- `npm run dev -- --port 5173`
+- Validacao no navegador em `http://127.0.0.1:5173/`
+- `git status --short`
+- `git diff --stat`
+
+**Comandos para rodar:** `cd spikes/tauri-react-visual`, depois `npm install` e `npm run dev`. URL local validada: `http://127.0.0.1:5173/`.
+
+**Resumo visual:** A spike implementa um shell dark premium com barra superior compacta, sidebar de repositorio/busca/explorer/tags/lixeira, abas compactas, controles `Editor`/`Preview`/`Split`, botao `Save`, presets Split `50/50`, `60/40` e `70/30`, editor Markdown mockado com numeros de linha, toolbar Markdown compacta, preview visual renderizado manualmente e painel direito `Info`/`Links`.
+
+**O que ficou mockado:** Dados do repositorio `infra-docs`, arvore IBX/LA4/Applications/LibreNMS, abas, conteudo Markdown, preview, metadados, links internos, tags, lixeira, status salvo, controles de janela e acoes de salvar/criar/buscar. Nao ha filesystem real, backend, persistencia, parser Markdown real ou comandos Tauri.
+
+**Resultado do build/dev server:** `npm install` executado com sucesso, 0 vulnerabilidades. `npm run build` executado com sucesso apos adicionar `@types/react` e `@types/react-dom`. `npm run dev -- --port 5173` iniciou Vite em `http://127.0.0.1:5173/`.
+
+**Validacao visual:** A pagina abriu no navegador embutido e o DOM confirmou presenca de `RepoNotes`, `infra-docs`, aba ativa `00-Overview.md`, controles `Editor`/`Preview`/`Split`/`Save`, presets Split, sidebar/lixeira, painel Info/Links e conteudo de editor/preview. A validacao efetiva ocorreu em viewport reportado como 1366x768 sem overflow horizontal/vertical. O pedido de viewport 1600x900 no navegador embutido nao foi refletido pela sessao, que permaneceu em 1366px de largura; screenshots tambem falharam por timeout no comando de captura do navegador.
+
+**Status do working tree:** Permanecem alteracoes locais fora do escopo em `sample-repository` (`Projetos/Roadmap.md` deletado, `.reponotes-trash/` nao rastreado e `Nova nota.md` nao rastreado). A spike nao alterou codigo Avalonia nem storage real.
+
+**Pendencias:** Rodar a spike em uma janela real de navegador a 1600x900 para captura visual, criar wrapper Tauri se a direcao for aprovada, medir startup/memoria, e comparar empacotamento Windows contra o app Avalonia.
+
+**Riscos:** Baixo para a spike por ser isolada. Medio para qualquer decisao futura de migracao: Tauri exigiria ponte de filesystem/backend, nova estrategia de testes, empacotamento Windows e revalidacao de atalhos/editor/local-first.
+
+**Recomendacao preliminar:** React/Vite facilita iteracao visual, densidade e responsividade mais rapidamente que XAML para prototipagem. Ainda nao justifica migracao; a melhor leitura e usar a spike como laboratorio visual e so avaliar Tauri apos uma spike tecnica de empacotamento e acesso local a arquivos.
+
+**Proximo passo sugerido:** Validar a spike manualmente em 1600x900 e 1366x768 em navegador visivel, depois decidir se vale uma segunda spike Tauri minima com janela nativa e bridge read-only para repositorio local.
