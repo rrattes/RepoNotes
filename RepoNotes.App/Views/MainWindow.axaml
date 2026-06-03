@@ -668,11 +668,12 @@
           </Border>
         </Border>
         <Grid IsVisible="{Binding IsSplitMode}"
-              ColumnDefinitions="*,8,*"
+              ColumnDefinitions="*,6,*"
               Margin="10,4,10,10">
           <Border Grid.Column="0"
                   Classes="card"
                   Background="{StaticResource Brush.Editor}"
+                  MinWidth="300"
                   Padding="0"
                   ClipToBounds="True">
             <Grid ColumnDefinitions="32,*">
@@ -705,9 +706,18 @@
             </Grid>
           </Border>
 
+          <GridSplitter Grid.Column="1"
+                        Classes="split-divider"
+                        ResizeDirection="Columns"
+                        ResizeBehavior="PreviousAndNext"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        ShowsPreview="True" />
+
           <Border Grid.Column="2"
                   Classes="card"
                   Background="{StaticResource Brush.Panel}"
+                  MinWidth="280"
                   Padding="0"
                   ClipToBounds="True">
             <ScrollViewer Padding="20,16">

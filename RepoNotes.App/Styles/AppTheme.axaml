@@ -134,6 +134,17 @@
     <Setter Property="Foreground" Value="{StaticResource Brush.Text}" />
   </Style>
 
+  <Style Selector="GridSplitter.split-divider">
+    <Setter Property="Background" Value="{StaticResource Brush.Divider}" />
+    <Setter Property="Opacity" Value="0.65" />
+    <Setter Property="Margin" Value="1,0" />
+  </Style>
+
+  <Style Selector="GridSplitter.split-divider:pointerover">
+    <Setter Property="Background" Value="{StaticResource Brush.Accent}" />
+    <Setter Property="Opacity" Value="0.85" />
+  </Style>
+
   <Style Selector="Button.mode-toggle">
     <Setter Property="Height" Value="26" />
     <Setter Property="MinWidth" Value="62" />

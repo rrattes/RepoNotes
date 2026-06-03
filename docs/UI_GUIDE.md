@@ -87,6 +87,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Split View belongs to the Markdown Power Editor path: it keeps Markdown source editing on the left and native rendered preview on the right.
 - Split View must use the same preview block pipeline as Preview mode; do not duplicate Markdown rendering logic in XAML or ViewModel.
 - In Split View, the formatting toolbar remains visible because the Markdown TextBox is still editable.
+- Split View uses a subtle resizable divider between editor and preview so the user can prioritize writing or reading space.
+- Split View does not yet synchronize scroll between editor and preview.
 - Split View should remain compact enough for 1366x768, but the center editor/preview workspace takes priority over decorative chrome.
 - The right sidebar focuses on note info, internal links, and metadata; it must not present a confusing fake `Preview` tab when preview mode is handled centrally.
 - Paragraphs, headings, and list items use inline runs so Markdown markers are removed from the visual preview.

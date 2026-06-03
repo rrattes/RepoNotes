@@ -1064,3 +1064,33 @@
 **Riscos tecnicos:** Baixo-medio; o Split duplica o TextBox no XAML para manter layouts simples de Editor e Split, entao futuras melhorias de editor devem lembrar de manter ambos os TextBoxes coerentes. A renderizacao do preview continua centralizada em `MarkdownPreviewService`, reduzindo risco de divergencia visual.
 
 **Proximo passo sugerido:** Adicionar sincronizacao leve de scroll ou uma divisoria ajustavel para o Split, depois validar densidade visual em telas menores.
+
+## 2026-06-02 23:25:24 -03:00
+
+**Objetivo da rodada:** Remover sobras locais nao rastreadas antigas do `sample-repository` e adicionar uma divisoria redimensionavel entre editor e preview no modo Split.
+
+**Arquivos untracked encontrados/removidos:** Foram encontrados e removidos somente os tres arquivos especificados: `sample-repository/Nova nota.md`, `sample-repository/Novo server.md` e `sample-repository/Runbooks/Novo application.md`. Nenhum outro arquivo do `sample-repository` foi removido ou alterado.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O modo Split agora usa `GridSplitter` entre o editor Markdown e o preview visual, com colunas editor/splitter/preview e larguras minimas para preservar usabilidade. O splitter recebeu estilo dark discreto com hover em accent. A toolbar continua usando o editor visivel do Split e o preview segue reutilizando `PreviewBlocks` e `MarkdownPreviewService`. A documentacao foi atualizada para registrar o divisor redimensionavel e manter scroll sync como melhoria futura.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 119 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** A aplicacao foi iniciada para validacao interativa, mas a automacao de janela via Computer Use falhou ao capturar a janela com `GetCursorPos failed: Acesso negado. (0x80070005)`. Por isso, nao foi possivel confirmar o drag do splitter via automacao nesta rodada. A compatibilidade XAML do `GridSplitter` foi validada por build e os fluxos de modo Split continuam cobertos pelos testes existentes.
+
+**Pendencias:** Validar manualmente em uso real o arrasto do divisor no Windows. Scroll sync entre editor e preview permanece fora desta rodada.
+
+**Riscos tecnicos:** Baixo; a implementacao usa `GridSplitter` nativo do Avalonia e nao altera ViewModel, storage, tabs ou preview service. O risco residual e apenas ajuste fino visual/min-width em telas menores.
+
+**Proximo passo sugerido:** Fazer validacao manual direta no app em 1366x768 e 1600x900 e, depois, avaliar sincronizacao leve de scroll no Split.
