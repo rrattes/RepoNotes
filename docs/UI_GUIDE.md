@@ -36,13 +36,15 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - The only persistent top area inside the main content is the document context bar above the editor.
 - The document context bar shows real open note tabs, breadcrumb, Editor/Preview mode, and note-scoped actions.
 - Note tabs are functional, not decorative: selecting a note opens a tab or activates the existing tab; duplicate tabs for the same note are not created.
+- Note tabs should remain compact, around `30px` high, with trimmed titles and a restrained close button. Long titles must not push editor mode controls or save actions out of view.
 - Active tabs use a stronger panel background and open tabs with unsaved edits show a compact `*` dirty indicator.
-- Each tab has a small close action. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
+- Each tab has a small close action aligned inside the tab. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
 - Open note tabs expose a compact context menu for close, close others, close all, reveal in explorer, and copy path.
 - Switching between tabs must preserve unsaved edits in each tab and must not auto-save just because focus changed.
-- Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`.
+- Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`; repository and path labels should truncate before competing with tabs or actions.
 - The central document area has a clear `Editor` / `Preview` / `Split` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar; `Split` shows the Markdown editor and rendered preview side by side.
-- Context actions such as Save, Info, and Tags belong near the document tab/breadcrumb, while formatting commands stay in the editor toolbar.
+- The top editor row should use compact tabs on the left, truncated breadcrumb/context in the middle, and fixed-width actions on the right. `Editor`, `Preview`, `Split`, and `Salvar` must remain aligned and must not overlap tabs.
+- Disabled future actions should not pollute the editor top row. Remove inactive `Info`/`Tags` style actions until they have real behavior; formatting commands stay in the editor toolbar.
 - The app must not draw fake window controls. When custom chrome is used, minimize, maximize/restore, close, drag, and resize behavior must be real and validated.
 - The integrated window bar should stay around `34px` high, dark, quiet, and visually secondary to the editor.
 

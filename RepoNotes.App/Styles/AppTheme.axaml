@@ -85,8 +85,8 @@
   </Style>
 
   <Style Selector="Button.context-action">
-    <Setter Property="Height" Value="26" />
-    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="Padding" Value="9,0" />
     <Setter Property="FontSize" Value="11" />
     <Setter Property="CornerRadius" Value="7" />
     <Setter Property="Background" Value="#121C29" />
@@ -94,9 +94,9 @@
   </Style>
 
   <Style Selector="Button.note-tab">
-    <Setter Property="Height" Value="38" />
-    <Setter Property="Padding" Value="8,0,22,0" />
-    <Setter Property="CornerRadius" Value="7,7,0,0" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Padding" Value="7,0,19,0" />
+    <Setter Property="CornerRadius" Value="6,6,0,0" />
     <Setter Property="Background" Value="#0F1824" />
     <Setter Property="BorderBrush" Value="{StaticResource Brush.Divider}" />
     <Setter Property="BorderThickness" Value="1,0,1,1" />
@@ -116,17 +116,17 @@
   </Style>
 
   <Style Selector="Button.tab-close">
-    <Setter Property="Width" Value="20" />
-    <Setter Property="Height" Value="20" />
+    <Setter Property="Width" Value="17" />
+    <Setter Property="Height" Value="17" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="CornerRadius" Value="6" />
+    <Setter Property="CornerRadius" Value="5" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderBrush" Value="Transparent" />
     <Setter Property="Foreground" Value="{StaticResource Brush.TextWeak}" />
     <Setter Property="HorizontalAlignment" Value="Right" />
     <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="Margin" Value="0,0,3,0" />
-    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Margin" Value="0,0,2,0" />
+    <Setter Property="FontSize" Value="10" />
   </Style>
 
   <Style Selector="Button.tab-close:pointerover">
@@ -199,9 +199,9 @@
   </Style>
 
   <Style Selector="Button.mode-toggle">
-    <Setter Property="Height" Value="26" />
-    <Setter Property="MinWidth" Value="62" />
-    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="Height" Value="24" />
+    <Setter Property="MinWidth" Value="56" />
+    <Setter Property="Padding" Value="8,0" />
     <Setter Property="FontSize" Value="11" />
     <Setter Property="CornerRadius" Value="7" />
     <Setter Property="Background" Value="#0D141E" />
@@ -225,6 +225,13 @@
     <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="0" />
     <Setter Property="CornerRadius" Value="7" />
+  </Style>
+
+  <Style Selector="Button.icon:disabled">
+    <Setter Property="Opacity" Value="0.42" />
+    <Setter Property="Background" Value="#0D141E" />
+    <Setter Property="BorderBrush" Value="#1C2635" />
+    <Setter Property="Foreground" Value="{StaticResource Brush.TextWeak}" />
   </Style>
 
   <Style Selector="Border.window-bar">

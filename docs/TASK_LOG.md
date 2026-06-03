@@ -1220,3 +1220,32 @@
 **Riscos tecnicos:** Medio-baixo; menus em DataTemplates dependem de bindings para o `DataContext` raiz e devem ser validados no app real. As operacoes destrutivas continuam reaproveitando o fluxo atual da lixeira.
 
 **Proximo passo sugerido:** Fazer QA manual dos context menus e, em seguida, implementar confirmacoes visuais dedicadas para exclusao permanente e esvaziar lixeira.
+
+## 2026-06-03 19:43:19 -03:00
+
+**Objetivo da rodada:** Refinar visualmente as abas de notas e a area superior do editor para reduzir sobreposicao, poluicao e competicao entre abas, breadcrumb e acoes.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A area superior central foi reorganizada em uma grade mais elastica: abas compactas ocupam a esquerda, breadcrumb truncado fica no centro e os controles `Editor`, `Preview`, `Split` e `Salvar` ficam fixos a direita. Os botoes desabilitados `Info` e `Tags` foram removidos da barra superior para reduzir ruido visual. As abas ficaram mais baixas, com largura menor, padding reduzido, titulo truncado, indicador de alteracao discreto e botao de fechar menor/alinhado. O cabecalho do painel direito foi compactado para alinhar `Info`, `Links`, `Previa` e o botao de colapso sem esmagar os textos. Botoes desabilitados da toolbar Markdown receberam estado visual mais apagado.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 137 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual em 1600x900:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu e foi encerrada sem crash observado. A validacao visual interativa com 3 notas abertas nao foi automatizada nesta maquina.
+
+**Validacao manual em 1366x768:** Nao foi possivel confirmar visualmente por automacao nesta rodada. A janela mantem `MinWidth` de 1366 e o layout foi ajustado para colunas elasticas, abas compactas e acoes fixas, mas a validacao fina deve ser feita diretamente no app Windows.
+
+**Pendencias:** Validar manualmente com 3 notas abertas em 1600x900 e 1366x768, confirmando truncamento de abas, alinhamento dos modos e do botao salvar, e legibilidade do painel direito.
+
+**Riscos tecnicos:** Baixo; a rodada e visual e nao altera storage, salvamento, tabs funcionais ou preview. O risco residual e ajuste fino de proporcoes em cenarios com muitas abas ou caminhos muito longos.
+
+**Proximo passo sugerido:** Fazer QA visual direto no Windows com varias abas e, se aprovado, seguir para confirmacoes visuais de lixeira ou melhorias de scroll sync no Split.
