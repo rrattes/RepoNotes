@@ -1156,3 +1156,33 @@
 **Riscos tecnicos:** Medio-baixo; a palette introduz um pequeno ponto de coordenacao entre ViewModel e code-behind para comandos dependentes de selecao do editor. O risco residual e manter a lista de comandos sincronizada com novas acoes futuras.
 
 **Proximo passo sugerido:** Fazer QA manual da Command Palette e, se aprovada, continuar com auto-continuacao de listas/checklists/quotes ou scroll sync no Split.
+
+## 2026-06-03 14:32:10 -03:00
+
+**Objetivo da rodada:** Implementar paineis laterais colapsaveis/reexpansiveis para liberar area util do editor e do Split View em telas menores.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O ViewModel agora expoe `IsLeftSidebarCollapsed`, `IsRightSidebarCollapsed`, propriedades derivadas de expansao/largura e comandos `ToggleLeftSidebarCommand` e `ToggleRightSidebarCommand`. A grade principal passou a usar colunas laterais `Auto`, com largura expandida atual (`252px` e `326px`) ou rail recolhido de `42px`. A sidebar esquerda e o painel direito ganharam botoes reais de recolher/expandir, mantendo um rail visivel para reabrir. O tema recebeu estilos reutilizaveis para `panel-toggle` e `collapsed-rail`. Foram adicionados testes de ViewModel para estado inicial e alternancia dos dois paineis.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 134 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu e foi encerrada sem crash observado. Os estados de colapso/expansao foram cobertos por testes unitarios de ViewModel. A validacao interativa fina de clique, ganho visual de espaco e comportamento em 1366x768/1600x900 deve ser conferida diretamente no app Windows, pois nao foi feita automacao de UI nesta rodada.
+
+**Pendencias:** Persistir o estado recolhido/expandido entre sessoes continua futuro. Validar manualmente o comportamento visual em 1366x768 e 1600x900, especialmente com Split View ativo.
+
+**Riscos tecnicos:** Baixo; a mudanca e concentrada em layout e estado simples de ViewModel. O risco residual e ajuste fino de largura/descoberta visual dos rails em telas pequenas.
+
+**Proximo passo sugerido:** Fazer QA manual dos paineis colapsaveis em Editor, Preview e Split, depois avaliar persistencia simples do estado visual ou scroll sync do Split.

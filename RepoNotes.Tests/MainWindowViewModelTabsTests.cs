@@ -85,6 +85,55 @@ public sealed class MainWindowViewModelTabsTests : IDisposable
     }
 
     [Fact]
+    public void SidePanelsStartExpanded()
+    {
+        var viewModel = CreateViewModel();
+
+        Assert.False(viewModel.IsLeftSidebarCollapsed);
+        Assert.True(viewModel.IsLeftSidebarExpanded);
+        Assert.Equal(252, viewModel.LeftSidebarWidth);
+        Assert.False(viewModel.IsRightSidebarCollapsed);
+        Assert.True(viewModel.IsRightSidebarExpanded);
+        Assert.Equal(326, viewModel.RightSidebarWidth);
+    }
+
+    [Fact]
+    public void ToggleLeftSidebarCollapsesAndExpands()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.ToggleLeftSidebarCommand.Execute(null);
+
+        Assert.True(viewModel.IsLeftSidebarCollapsed);
+        Assert.False(viewModel.IsLeftSidebarExpanded);
+        Assert.Equal(42, viewModel.LeftSidebarWidth);
+
+        viewModel.ToggleLeftSidebarCommand.Execute(null);
+
+        Assert.False(viewModel.IsLeftSidebarCollapsed);
+        Assert.True(viewModel.IsLeftSidebarExpanded);
+        Assert.Equal(252, viewModel.LeftSidebarWidth);
+    }
+
+    [Fact]
+    public void ToggleRightSidebarCollapsesAndExpands()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.ToggleRightSidebarCommand.Execute(null);
+
+        Assert.True(viewModel.IsRightSidebarCollapsed);
+        Assert.False(viewModel.IsRightSidebarExpanded);
+        Assert.Equal(42, viewModel.RightSidebarWidth);
+
+        viewModel.ToggleRightSidebarCommand.Execute(null);
+
+        Assert.False(viewModel.IsRightSidebarCollapsed);
+        Assert.True(viewModel.IsRightSidebarExpanded);
+        Assert.Equal(326, viewModel.RightSidebarWidth);
+    }
+
+    [Fact]
     public void CommandPaletteInitialListContainsExpectedCommands()
     {
         var viewModel = CreateViewModel();

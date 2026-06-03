@@ -14,6 +14,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
   - Compact sidebar.
   - Flexible editor-first center column.
   - Compact preview/info panel.
+- The left repository sidebar and the right info/context panel can be collapsed and expanded to improve usable writing space on smaller screens.
+- Collapsed side panels keep a narrow rail with an explicit re-open control so the state is never irreversible.
 - RepoNotes uses client-side custom window chrome in Avalonia. The native Windows title bar must not appear as a duplicated separate bar.
 - The custom window controls are real controls wired to the `Window`: minimize sets `WindowState.Minimized`, maximize/restore toggles `WindowState`, and close calls `Close()`.
 - The window remains resizable and includes a compact draggable area in the integrated bar.
@@ -90,6 +92,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Split View uses a subtle resizable divider between editor and preview so the user can prioritize writing or reading space.
 - Split View does not yet synchronize scroll between editor and preview.
 - Split View should remain compact enough for 1366x768, but the center editor/preview workspace takes priority over decorative chrome.
+- Collapsing either side panel should immediately give the central Editor/Preview/Split workspace more horizontal room without changing the active tab or document mode.
 - Markdown formatting commands should be available by toolbar and keyboard shortcut: `Ctrl+B`, `Ctrl+I`, `Ctrl+Alt+1`, `Ctrl+Alt+2`, `Ctrl+Alt+3`, `Ctrl+Shift+7`, `Ctrl+Shift+8`, `Ctrl+\``, `Ctrl+Shift+Q`, and contextual `Ctrl+K`.
 - `Ctrl+K` is contextual: while a Markdown editor has focus it applies link formatting; outside the editor it focuses the sidebar search field.
 - A compact Command Palette opens with `Ctrl+Shift+P` and provides keyboard access to common editor modes, Markdown formatting, insertions, and safe note actions.
@@ -127,6 +130,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 
 - Sidebar: around 250px to 260px, currently `252px`.
 - Preview panel: around 320px to 340px, currently `326px`.
+- Collapsed side rail: currently `42px` for each side panel.
 - Integrated window bar: compact, currently `34px`, used only for drag/window controls and very light context.
 - Status bar: compact, around 38px to 42px, currently `38px`.
 - Editor column gets priority for all extra horizontal space.

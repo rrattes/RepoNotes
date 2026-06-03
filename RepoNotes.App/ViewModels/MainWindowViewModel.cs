@@ -33,6 +33,8 @@ public sealed class MainWindowViewModel : ViewModelBase
     private CommandPaletteItemViewModel? _selectedCommandPaletteItem;
     private bool _hasUnsavedChanges;
     private bool _isCommandPaletteOpen;
+    private bool _isLeftSidebarCollapsed;
+    private bool _isRightSidebarCollapsed;
     private DocumentViewMode _documentViewMode = DocumentViewMode.Editor;
     private int _searchResultCount;
     private CancellationTokenSource? _searchDebounceCancellation;
@@ -91,6 +93,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowEditorCommand = new RelayCommand(ShowEditor);
         ShowPreviewCommand = new RelayCommand(ShowPreview);
         ShowSplitCommand = new RelayCommand(ShowSplit);
+        ToggleLeftSidebarCommand = new RelayCommand(ToggleLeftSidebar);
+        ToggleRightSidebarCommand = new RelayCommand(ToggleRightSidebar);
         OpenCommandPaletteCommand = new RelayCommand(OpenCommandPalette);
         CloseCommandPaletteCommand = new RelayCommand(CloseCommandPalette);
         ExecuteSelectedCommandPaletteItemCommand = new RelayCommand(ExecuteSelectedCommandPaletteItem);
@@ -184,6 +188,10 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand ShowSplitCommand { get; }
 
+    public ICommand ToggleLeftSidebarCommand { get; }
+
+    public ICommand ToggleRightSidebarCommand { get; }
+
     public ICommand OpenCommandPaletteCommand { get; }
 
     public ICommand CloseCommandPaletteCommand { get; }
@@ -203,6 +211,18 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasPreviewVisible => _documentViewMode is DocumentViewMode.Preview or DocumentViewMode.Split;
 
     public bool HasOpenTabs => OpenTabs.Count > 0;
+
+    public bool IsLeftSidebarCollapsed => _isLeftSidebarCollapsed;
+
+    public bool IsLeftSidebarExpanded => !_isLeftSidebarCollapsed;
+
+    public bool IsRightSidebarCollapsed => _isRightSidebarCollapsed;
+
+    public bool IsRightSidebarExpanded => !_isRightSidebarCollapsed;
+
+    public double LeftSidebarWidth => IsLeftSidebarCollapsed ? 42 : 252;
+
+    public double RightSidebarWidth => IsRightSidebarCollapsed ? 42 : 326;
 
     public bool IsCommandPaletteOpen
     {
@@ -633,6 +653,22 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ShowSplit()
     {
         SetDocumentViewMode(DocumentViewMode.Split);
+    }
+
+    private void ToggleLeftSidebar()
+    {
+        _isLeftSidebarCollapsed = !_isLeftSidebarCollapsed;
+        OnPropertyChanged(nameof(IsLeftSidebarCollapsed));
+        OnPropertyChanged(nameof(IsLeftSidebarExpanded));
+        OnPropertyChanged(nameof(LeftSidebarWidth));
+    }
+
+    private void ToggleRightSidebar()
+    {
+        _isRightSidebarCollapsed = !_isRightSidebarCollapsed;
+        OnPropertyChanged(nameof(IsRightSidebarCollapsed));
+        OnPropertyChanged(nameof(IsRightSidebarExpanded));
+        OnPropertyChanged(nameof(RightSidebarWidth));
     }
 
     private void OpenCommandPalette()

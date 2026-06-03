@@ -13,6 +13,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
 - Continue visual polish carefully; custom integrated window chrome is started/completed with real window controls.
 - Continue evolving document navigation; functional note tabs are started/completed for opening, switching, saving, and closing notes.
 - Continue the Markdown Power Editor path before WYSIWYG work; Split View is started/completed as the first step.
+- Improve workspace layout for smaller screens; collapsible left/right side panels are started/completed.
 - Plan Visual Markdown Mode / WYSIWYG-lite only after rich preview, toolbar, tabs, and editor stability are validated.
 
 ## Next Product Milestones
@@ -75,6 +76,7 @@ RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark producti
    - Central Editor/Preview/Split mode toggle is started/completed so users can switch the main workspace between raw Markdown editing, rendered Markdown preview, and side-by-side editing/preview.
    - Split View shows the Markdown source editor on the left and the native visual preview on the right, using the same `MarkdownPreviewService` output as Preview mode.
    - Split View now includes a resizable divider between editor and preview.
+   - Workspace side panels are collapsible so the central editor/preview area can gain space on smaller screens.
    - Markdown formatting keyboard shortcuts are started/completed for bold, italic, headings, lists, checklist, code, quote, and contextual link/search behavior.
    - A compact Command Palette is started/completed for editor modes, Markdown formatting, basic insertions, save, and safe note/folder actions.
    - Future Split View improvements may include scroll synchronization between editor and preview.
