@@ -1308,3 +1308,49 @@
 **Riscos tecnicos:** Baixo; a solucao reduz risco ao remover dependencia do `GridSplitter` instavel. O binding direto de `ColumnDefinitions` foi descartado apos erro de build; a versao final usa `ColumnDefinition.Width` com `GridLength` exposto pela camada App.
 
 **Proximo passo sugerido:** Validar presets do Split em 1366x768 e 1600x900 e, depois, seguir para scroll sync entre editor e preview.
+
+## 2026-06-03 20:04:57 -03:00
+
+**Objetivo da rodada:** Fazer checkpoint tecnico e visual pos-abas/layout e pos-estabilizacao do Split, sem implementar nova funcionalidade.
+
+**Comandos executados:**
+
+- `git status --short`
+- `git log --oneline -10`
+- `git status --short -- sample-repository`
+- `.\.dotnet\dotnet.exe restore RepoNotes.sln`
+- `.\.dotnet\dotnet.exe build RepoNotes.sln`
+- `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build`
+- `git diff --stat`
+
+**Status do working tree:** Limpo no inicio da rodada. `sample-repository` nao apresentou arquivos modificados ou nao rastreados. Apos abrir e fechar o app para validacao visual, o working tree continuou limpo antes desta entrada de log.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 140 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao visual em 1600x900:** A janela foi aberta e ajustada para 1600x900. A captura mostrou a custom window bar sem title bar nativa duplicada, abas compactas, breadcrumb truncado, controles `Editor`/`Preview`/`Split`/`Salvar` alinhados sem sobrepor as abas, editor com area util ampla e painel direito `Info`/`Links`/`Previa` legivel. O overlay da automacao ficou sobre parte da regiao superior, mas nao impediu verificar alinhamento geral e ausencia de colapso visual evidente.
+
+**Validacao visual em 1366x768:** A janela foi ajustada para 1366x768. A captura mostrou o modo Split utilizavel, controles de modo/presets/salvar ainda acessiveis, editor e preview lado a lado legiveis, painel direito ainda legivel e status bar visivel. Nao foi observada sobreposicao evidente na area superior nesta resolucao minima.
+
+**Validacao das abas:** Os testes automatizados cobrem abertura de nota em aba, nao duplicacao ao selecionar a mesma nota, preservacao de Markdown sujo ao trocar de aba, salvamento da aba ativa, fechamento de abas sujas com save previo, falha de save sem perda de conteudo e fechamento da ultima aba sem crash. A tentativa de abrir tres notas por coordenadas na UI nao foi confiavel porque a arvore estava parcialmente recolhida e a automacao por clique nao selecionou filhos de forma deterministica; por isso a validacao funcional detalhada de 3 abas fica registrada como pendencia manual direta.
+
+**Validacao do Split:** O modo Split foi ativado visualmente. Como o drag livre foi removido na rodada anterior, a validacao aplicavel agora e alternar presets `50/50`, `60/40` e `70/30`, nao arrastar divisor. A captura mostrou editor e preview lado a lado, separador visual estatico e presets visiveis. Testes cobrem estado inicial dos presets, troca de presets e preservacao do preset ao alternar modos.
+
+**Validacao dos modos Editor/Preview/Split:** Split foi validado visualmente. A troca de modos e coberta por testes de ViewModel (`ShowEditor`, `ShowPreview`, `ShowSplit`) e pela Command Palette. A alternancia visual por coordenadas ficou limitada pelo overlay da automacao na regiao superior, entao a validacao interativa fina de clique nos tres modos continua recomendada no app real.
+
+**Validacao da toolbar Markdown:** A toolbar apareceu visivelmente compacta e alinhada em Editor/Split. As transformacoes de B, I, H1/H2/H3, List, Chk, Link, Code e Qt sao cobertas por `MarkdownFormatTests` e pelo code-behind existente. Nao foram aplicadas edicoes manuais nesta rodada para evitar sujar notas do `sample-repository`.
+
+**Validacao do preview:** O preview no Split renderizou titulo, paragrafo e lista visualmente no painel central direito. A renderizacao rich inline de bold, italic, bold italic, inline code e links permanece coberta por testes de `MarkdownPreviewService`; nao foi criada nota manual nova nesta rodada.
+
+**Validacao dos paineis laterais:** A sidebar esquerda e o painel direito apareceram legiveis em 1600x900 e 1366x768. A tentativa de colapso/expansao por coordenadas abriu acidentalmente o seletor de repositorio; o dialogo foi cancelado sem selecionar pasta e sem alterar arquivos. Os estados de colapso/expansao continuam cobertos por testes de ViewModel.
+
+**Problemas encontrados:** A automacao visual por coordenadas e sensivel ao overlay de controle e nao substitui QA manual completo para abrir 3 abas, trocar modos por clique e colapsar paineis com precisao. A tarefa ainda mencionava arrastar o divisor do Split, mas o produto agora usa presets estaveis em vez de drag livre; a validacao foi adaptada a essa decisao registrada.
+
+**Pendencias reais:** Fazer QA manual direto no Windows para: abrir 3 notas reais pela arvore, confirmar truncamento de titulos longos, clicar nos tres modos, alternar presets do Split repetidamente, colapsar/expandir laterais por clique e validar toolbar com edicoes descartaveis. Implementar confirmacoes visuais para `Delete Permanently` e `Empty Trash` continua pendente.
+
+**Riscos tecnicos:** Baixo para build/testes e medio-baixo para layout visual: os testes estao verdes, mas a validacao visual automatizada nao cobre todos os cenarios de clique e resolucao como uma sessao humana completa. O Split esta mais previsivel por usar presets, mas ainda precisa de QA manual de ergonomia.
+
+**Proximo passo recomendado:** Fazer uma rodada curta de QA manual assistida no Windows para abas/multiplas notas e, em seguida, implementar confirmacoes visuais para exclusao permanente/esvaziar lixeira.
