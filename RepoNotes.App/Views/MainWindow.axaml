@@ -602,17 +602,17 @@
         <Border Grid.Row="2" Padding="12,0" IsVisible="{Binding HasEditorVisible}">
           <Border Classes="card" Height="34" Padding="4,0">
             <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Center">
-              <Button Classes="icon" Content="B" FontWeight="Bold" Width="27" Height="26" Click="OnBoldClick" />
-              <Button Classes="icon" Content="I" FontStyle="Italic" Width="27" Height="26" Click="OnItalicClick" />
-              <Button Classes="icon" Content="H1" FontSize="11" Width="30" Height="26" Click="OnH1Click" />
-              <Button Classes="icon" Content="H2" FontSize="11" Width="30" Height="26" Click="OnH2Click" />
-              <Button Classes="icon" Content="H3" FontSize="11" Width="30" Height="26" Click="OnH3Click" />
+              <Button Classes="icon" Content="B" FontWeight="Bold" Width="27" Height="26" Click="OnBoldClick" ToolTip.Tip="Bold (Ctrl+B)" />
+              <Button Classes="icon" Content="I" FontStyle="Italic" Width="27" Height="26" Click="OnItalicClick" ToolTip.Tip="Italic (Ctrl+I)" />
+              <Button Classes="icon" Content="H1" FontSize="11" Width="30" Height="26" Click="OnH1Click" ToolTip.Tip="Heading 1 (Ctrl+Alt+1)" />
+              <Button Classes="icon" Content="H2" FontSize="11" Width="30" Height="26" Click="OnH2Click" ToolTip.Tip="Heading 2 (Ctrl+Alt+2)" />
+              <Button Classes="icon" Content="H3" FontSize="11" Width="30" Height="26" Click="OnH3Click" ToolTip.Tip="Heading 3 (Ctrl+Alt+3)" />
               <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,6" />
-              <Button Classes="icon" Content="List" FontSize="10" Width="32" Height="26" Click="OnListClick" />
-              <Button Classes="icon" Content="Chk" FontSize="10" Width="32" Height="26" Click="OnChecklistClick" />
-              <Button Classes="icon" Content="Link" FontSize="10" Width="32" Height="26" Click="OnLinkClick" />
-              <Button Classes="icon" Content="Code" FontSize="10" Width="34" Height="26" Click="OnCodeClick" />
-              <Button Classes="icon" Content="Qt" FontSize="10" Width="28" Height="26" Click="OnQuoteClick" />
+              <Button Classes="icon" Content="List" FontSize="10" Width="32" Height="26" Click="OnListClick" ToolTip.Tip="List (Ctrl+Shift+7)" />
+              <Button Classes="icon" Content="Chk" FontSize="10" Width="32" Height="26" Click="OnChecklistClick" ToolTip.Tip="Checklist (Ctrl+Shift+8)" />
+              <Button Classes="icon" Content="Link" FontSize="10" Width="32" Height="26" Click="OnLinkClick" ToolTip.Tip="Link (Ctrl+K)" />
+              <Button Classes="icon" Content="Code" FontSize="10" Width="34" Height="26" Click="OnCodeClick" ToolTip.Tip="Code (Ctrl+`)" />
+              <Button Classes="icon" Content="Qt" FontSize="10" Width="28" Height="26" Click="OnQuoteClick" ToolTip.Tip="Quote (Ctrl+Shift+Q)" />
               <Border Width="1" Background="{StaticResource Brush.Divider}" Margin="4,6" />
               <Button Classes="icon" Content="Img" FontSize="10" Width="32" Height="26" IsEnabled="False" />
               <Button Classes="icon" Content="Tbl" FontSize="10" Width="32" Height="26" IsEnabled="False" />

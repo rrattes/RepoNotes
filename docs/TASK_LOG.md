@@ -1094,3 +1094,31 @@
 **Riscos tecnicos:** Baixo; a implementacao usa `GridSplitter` nativo do Avalonia e nao altera ViewModel, storage, tabs ou preview service. O risco residual e apenas ajuste fino visual/min-width em telas menores.
 
 **Proximo passo sugerido:** Fazer validacao manual direta no app em 1366x768 e 1600x900 e, depois, avaliar sincronizacao leve de scroll no Split.
+
+## 2026-06-03 14:06:03 -03:00
+
+**Objetivo da rodada:** Implementar atalhos de teclado para a toolbar Markdown, mantendo o editor Markdown puro e a regra contextual do `Ctrl+K`.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O code-behind agora captura atalhos de formatacao Markdown quando um editor Markdown esta focado e reutiliza `ApplyToolbarFormat(type)`, preservando a mesma logica da toolbar. Foram adicionados atalhos para bold, italic, H1/H2/H3, lista, checklist, code, quote e link. `Ctrl+K` ficou contextual: aplica link quando o editor Markdown esta focado e continua focando a busca quando o foco esta fora do editor. A toolbar recebeu tooltips com os atalhos correspondentes. A documentacao foi atualizada para registrar os atalhos como parte da trilha Markdown Power Editor.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 119 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu visivelmente e foi encerrada sem crash. A validacao interativa fina dos atalhos por automacao de UI nao foi executada nesta rodada; as transformacoes Markdown permanecem cobertas por `MarkdownFormatTests`.
+
+**Pendencias:** Validar manualmente no Windows os atalhos em uso real, especialmente `Ctrl+Alt+1/2/3`, `Ctrl+Shift+7/8`, `Ctrl+\`` e a regra contextual do `Ctrl+K` em Editor e Split.
+
+**Riscos tecnicos:** Baixo-medio; os atalhos vivem no code-behind por serem integracao de teclado/seleção da View. O risco residual e conflito de teclado com layout regional ou com comportamento interno do TextBox para algumas combinacoes.
+
+**Proximo passo sugerido:** Fazer uma rodada curta de QA manual dos atalhos e, se estiverem confortaveis, avaliar scroll sync leve no Split.

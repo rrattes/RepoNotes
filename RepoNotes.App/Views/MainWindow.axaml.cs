@@ -27,7 +27,20 @@ public sealed partial class MainWindow : Window
     {
         if (e.Key == Key.K && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
+            if (TryGetFocusedMarkdownEditor(out var linkEditor))
+            {
+                ApplyToolbarFormat("link", linkEditor);
+                e.Handled = true;
+                return;
+            }
+
             SearchBox.Focus();
+            e.Handled = true;
+            return;
+        }
+
+        if (TryHandleMarkdownShortcut(e))
+        {
             e.Handled = true;
             return;
         }
@@ -39,14 +52,57 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private bool TryHandleMarkdownShortcut(KeyEventArgs e)
+    {
+        if (!TryGetFocusedMarkdownEditor(out var editor))
+        {
+            return false;
+        }
+
+        var hasControl = e.KeyModifiers.HasFlag(KeyModifiers.Control);
+        var hasAlt = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+        var hasShift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+        var formatType = e.Key switch
+        {
+            Key.B when hasControl && !hasAlt && !hasShift => "bold",
+            Key.I when hasControl && !hasAlt && !hasShift => "italic",
+            Key.D1 when hasControl && hasAlt && !hasShift => "h1",
+            Key.D2 when hasControl && hasAlt && !hasShift => "h2",
+            Key.D3 when hasControl && hasAlt && !hasShift => "h3",
+            Key.D7 when hasControl && hasShift && !hasAlt => "list",
+            Key.D8 when hasControl && hasShift && !hasAlt => "checklist",
+            Key.Oem3 when hasControl && !hasAlt && !hasShift => "code",
+            Key.Q when hasControl && hasShift && !hasAlt => "quote",
+            _ => null
+        };
+
+        if (formatType is null)
+        {
+            return false;
+        }
+
+        ApplyToolbarFormat(formatType, editor);
+        return true;
+    }
+
     private void ApplyToolbarFormat(string type)
+    {
+        if (!TryGetFocusedMarkdownEditor(out var editor))
+        {
+            editor = MarkdownEditorSplit.IsVisible ? MarkdownEditorSplit : MarkdownEditor;
+        }
+
+        ApplyToolbarFormat(type, editor);
+    }
+
+    private void ApplyToolbarFormat(string type, TextBox editor)
     {
         if (DataContext is not MainWindowViewModel viewModel)
         {
             return;
         }
 
-        var editor = MarkdownEditorSplit.IsVisible ? MarkdownEditorSplit : MarkdownEditor;
         var text = editor.Text ?? string.Empty;
         var selStart = editor.SelectionStart;
         var selEnd = editor.SelectionEnd;
@@ -57,6 +113,24 @@ public sealed partial class MainWindow : Window
         editor.SelectionStart = newSelStart;
         editor.SelectionEnd = newSelEnd;
         editor.Focus();
+    }
+
+    private bool TryGetFocusedMarkdownEditor(out TextBox editor)
+    {
+        if (MarkdownEditor.IsFocused)
+        {
+            editor = MarkdownEditor;
+            return true;
+        }
+
+        if (MarkdownEditorSplit.IsFocused)
+        {
+            editor = MarkdownEditorSplit;
+            return true;
+        }
+
+        editor = MarkdownEditor;
+        return false;
     }
 
     private void OnBoldClick(object? sender, RoutedEventArgs e) => ApplyToolbarFormat("bold");

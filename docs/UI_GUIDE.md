@@ -90,6 +90,8 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Split View uses a subtle resizable divider between editor and preview so the user can prioritize writing or reading space.
 - Split View does not yet synchronize scroll between editor and preview.
 - Split View should remain compact enough for 1366x768, but the center editor/preview workspace takes priority over decorative chrome.
+- Markdown formatting commands should be available by toolbar and keyboard shortcut: `Ctrl+B`, `Ctrl+I`, `Ctrl+Alt+1`, `Ctrl+Alt+2`, `Ctrl+Alt+3`, `Ctrl+Shift+7`, `Ctrl+Shift+8`, `Ctrl+\``, `Ctrl+Shift+Q`, and contextual `Ctrl+K`.
+- `Ctrl+K` is contextual: while a Markdown editor has focus it applies link formatting; outside the editor it focuses the sidebar search field.
 - The right sidebar focuses on note info, internal links, and metadata; it must not present a confusing fake `Preview` tab when preview mode is handled centrally.
 - Paragraphs, headings, and list items use inline runs so Markdown markers are removed from the visual preview.
 - `**bold**` must render with real bold weight.
