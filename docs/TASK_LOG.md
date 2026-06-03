@@ -1354,3 +1354,29 @@
 **Riscos tecnicos:** Baixo para build/testes e medio-baixo para layout visual: os testes estao verdes, mas a validacao visual automatizada nao cobre todos os cenarios de clique e resolucao como uma sessao humana completa. O Split esta mais previsivel por usar presets, mas ainda precisa de QA manual de ergonomia.
 
 **Proximo passo recomendado:** Fazer uma rodada curta de QA manual assistida no Windows para abas/multiplas notas e, em seguida, implementar confirmacoes visuais para exclusao permanente/esvaziar lixeira.
+
+## 2026-06-03 20:13:34 -03:00
+
+**Objetivo da rodada:** Refinar a area superior do editor para remover duplicacao visual do nome/caminho da nota e ganhar area util.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A area central passou de quatro linhas para tres: abas/acoes, toolbar Markdown e conteudo. Foi removido o titulo grande editavel duplicado acima do editor, removido o breadcrumb/caminho competitivo ao lado das abas e removido o caminho da barra integrada da janela. O nome da nota permanece como identidade primaria na aba, com caminho completo acessivel no tooltip da aba, no painel Info e na status bar. A toolbar Markdown subiu para ficar logo abaixo das abas, aumentando a area vertical do editor.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 140 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** App aberto localmente com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`. A captura visual confirmou que o titulo grande duplicado nao aparece mais, a toolbar Markdown ficou imediatamente abaixo da linha de abas, o nome da nota continua visivel na aba ativa, `Editor`/`Preview`/`Split`/`Salvar` permanecem alinhados a direita e o painel Info ainda mostra caminho e metadados. Durante a validacao apareceu um arquivo nao rastreado `sample-repository/Inbox/Teste.md`, identificado como nota automatica de teste, e ele foi removido isoladamente.
+
+**Pendencias:** Validar manualmente com 3 notas abertas e titulos longos para confirmar truncamento das abas em uso real. A edicao do titulo/frontmatter agora fica principalmente pelo painel Info/metadata e pelo conteudo/frontmatter, sem campo grande dedicado no centro.
+
+**Riscos tecnicos:** Baixo; a rodada e visual e remove XAML duplicado sem alterar storage, salvamento, tabs, preview ou ViewModel. O risco residual e algum usuario sentir falta do campo grande de edicao de titulo, mas a decisao de produto desta rodada prioriza a aba como identidade primaria.
+
+**Proximo passo sugerido:** Fazer QA visual com 3 abas/titulos longos e seguir para confirmacoes visuais de acoes destrutivas da lixeira.

@@ -33,17 +33,18 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Sidebar item actions such as rename and delete may remain in the lower-left toolbar, but the primary explorer ergonomics should use context menus on notes and folders.
 - Trash actions live in the lower-left sidebar area as a compact picker plus small action buttons for restore, permanent delete, and empty trash.
 - Permanent delete controls must remain visually secondary and should gain explicit confirmation UX in a future round.
-- The only persistent top area inside the main content is the document context bar above the editor.
-- The document context bar shows real open note tabs, breadcrumb, Editor/Preview mode, and note-scoped actions.
+- The only persistent top area inside the main content is the compact document context bar above the editor.
+- The document context bar shows real open note tabs, Editor/Preview/Split mode, split presets when applicable, and note-scoped actions.
+- The note title belongs to the active tab as the primary note identity. Do not duplicate it as a large editable heading above the editor.
+- The full note path is secondary information and should live in the tab tooltip, the right-side Info panel, and the status bar. Avoid showing a large breadcrumb in the central editor header.
 - Note tabs are functional, not decorative: selecting a note opens a tab or activates the existing tab; duplicate tabs for the same note are not created.
 - Note tabs should remain compact, around `30px` high, with trimmed titles and a restrained close button. Long titles must not push editor mode controls or save actions out of view.
 - Active tabs use a stronger panel background and open tabs with unsaved edits show a compact `*` dirty indicator.
 - Each tab has a small close action aligned inside the tab. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
 - Open note tabs expose a compact context menu for close, close others, close all, reveal in explorer, and copy path.
 - Switching between tabs must preserve unsaved edits in each tab and must not auto-save just because focus changed.
-- Breadcrumbs should make the current context visible without becoming a large header, for example `sample-repository / Inbox\Bem-vindo.md`; repository and path labels should truncate before competing with tabs or actions.
 - The central document area has a clear `Editor` / `Preview` / `Split` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar; `Split` shows the Markdown editor and rendered preview side by side.
-- The top editor row should use compact tabs on the left, truncated breadcrumb/context in the middle, and fixed-width actions on the right. `Editor`, `Preview`, `Split`, and `Salvar` must remain aligned and must not overlap tabs.
+- The top editor row should use compact tabs on the left, flexible empty space in the middle, and fixed-width actions on the right. `Editor`, `Preview`, `Split`, split presets, and `Salvar` must remain aligned and must not overlap tabs.
 - Disabled future actions should not pollute the editor top row. Remove inactive `Info`/`Tags` style actions until they have real behavior; formatting commands stay in the editor toolbar.
 - The app must not draw fake window controls. When custom chrome is used, minimize, maximize/restore, close, drag, and resize behavior must be real and validated.
 - The integrated window bar should stay around `34px` high, dark, quiet, and visually secondary to the editor.
@@ -148,7 +149,7 @@ RepoNotes should feel like a premium dark desktop productivity app, closer to Ob
 - Integrated window bar: compact, currently `34px`, used only for drag/window controls and very light context.
 - Status bar: compact, around 38px to 42px, currently `38px`.
 - Editor column gets priority for all extra horizontal space.
-- Editor chrome should stay compact: document context bar around `38px`, title row around `46px` to `50px`, and formatting toolbar around `34px` to `40px`.
+- Editor chrome should stay compact: document context bar around `34px`, no separate title row, and formatting toolbar around `34px` to `40px`.
 - Editor outer padding should stay tight, roughly `10px` to `12px`, so the writing area feels like the main workspace rather than a small card.
 
 ## Theme
