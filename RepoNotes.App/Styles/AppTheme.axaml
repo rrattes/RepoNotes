@@ -135,14 +135,14 @@
   </Style>
 
   <Style Selector="GridSplitter.split-divider">
-    <Setter Property="Background" Value="{StaticResource Brush.Divider}" />
-    <Setter Property="Opacity" Value="0.65" />
-    <Setter Property="Margin" Value="1,0" />
+    <Setter Property="Background" Value="#223041" />
+    <Setter Property="Opacity" Value="0.5" />
+    <Setter Property="Margin" Value="2,0" />
   </Style>
 
   <Style Selector="GridSplitter.split-divider:pointerover">
     <Setter Property="Background" Value="{StaticResource Brush.Accent}" />
-    <Setter Property="Opacity" Value="0.85" />
+    <Setter Property="Opacity" Value="0.9" />
   </Style>
 
   <Style Selector="Border.command-palette">

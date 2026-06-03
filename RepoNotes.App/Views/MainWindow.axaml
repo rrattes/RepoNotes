@@ -747,12 +747,12 @@
           </Border>
         </Border>
         <Grid IsVisible="{Binding IsSplitMode}"
-              ColumnDefinitions="*,6,*"
+              ColumnDefinitions="*,10,*"
               Margin="10,4,10,10">
           <Border Grid.Column="0"
                   Classes="card"
                   Background="{StaticResource Brush.Editor}"
-                  MinWidth="300"
+                  MinWidth="240"
                   Padding="0"
                   ClipToBounds="True">
             <Grid ColumnDefinitions="32,*">
@@ -791,12 +791,13 @@
                         ResizeBehavior="PreviousAndNext"
                         HorizontalAlignment="Stretch"
                         VerticalAlignment="Stretch"
-                        ShowsPreview="True" />
+                        Cursor="SizeWestEast"
+                        ShowsPreview="False" />
 
           <Border Grid.Column="2"
                   Classes="card"
                   Background="{StaticResource Brush.Panel}"
-                  MinWidth="280"
+                  MinWidth="240"
                   Padding="0"
                   ClipToBounds="True">
             <ScrollViewer Padding="20,16">

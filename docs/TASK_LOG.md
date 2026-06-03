@@ -1249,3 +1249,30 @@
 **Riscos tecnicos:** Baixo; a rodada e visual e nao altera storage, salvamento, tabs funcionais ou preview. O risco residual e ajuste fino de proporcoes em cenarios com muitas abas ou caminhos muito longos.
 
 **Proximo passo sugerido:** Fazer QA visual direto no Windows com varias abas e, se aprovado, seguir para confirmacoes visuais de lixeira ou melhorias de scroll sync no Split.
+
+## 2026-06-03 19:47:15 -03:00
+
+**Objetivo da rodada:** Corrigir o divisor redimensionavel do modo Split para continuar disponivel apos multiplos ajustes.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O Grid do modo Split foi ajustado de `*,6,*` para `*,10,*`, aumentando a area de hit do divisor. O `GridSplitter` passou a usar `ShowsPreview=False`, cursor `SizeWestEast` e estilo com faixa discreta porem clicavel. Os `MinWidth` dos paineis editor/preview foram reduzidos de `300/280` para `240/240` para evitar travamento prematuro em resolucoes menores. A mudanca mantem `ResizeBehavior=PreviousAndNext` e nao altera a funcionalidade Split.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 137 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu e foi encerrada sem crash observado. A validacao especifica de arrastar o divisor multiplas vezes deve ser feita diretamente no app Windows.
+
+**Pendencias:** Confirmar manualmente em 1366x768 e 1600x900 que o divisor permite arrastar para esquerda, direita e novamente sem ficar coberto por editor/preview.
+
+**Riscos tecnicos:** Baixo; a correcao e concentrada no GridSplitter e nos limites minimos dos paineis. O risco residual e ajuste visual fino da largura da hit area.
+
+**Proximo passo sugerido:** Fazer QA manual do Split em 1366x768 e 1600x900; se o divisor estiver estavel, seguir para scroll sync ou confirmacoes de lixeira.
