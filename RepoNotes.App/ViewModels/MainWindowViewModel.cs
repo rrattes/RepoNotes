@@ -1006,6 +1006,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         if (item is null)
         {
+            Status = "Selecione um item da lixeira";
             return;
         }
 
@@ -1017,6 +1018,7 @@ public sealed class MainWindowViewModel : ViewModelBase
     {
         if (item is null)
         {
+            Status = "Selecione um item da lixeira";
             return;
         }
 
@@ -1209,7 +1211,7 @@ public sealed class MainWindowViewModel : ViewModelBase
             var restoredPath = _noteRepository.RestoreFromTrash(SelectedTrashItem.TrashPath);
             RefreshTree();
             RefreshTagFilters();
-            RefreshTrashItems();
+            RefreshTrashItems(selectFirst: false);
             SelectNodeByPath(restoredPath);
             SelectNodeByNoteId(restoredPath);
             Status = $"Item restaurado: {restoredPath}";
@@ -1233,12 +1235,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         {
             var deletedPath = SelectedTrashItem.TrashPath;
             _noteRepository.DeletePermanently(deletedPath);
-            RefreshTrashItems();
+            RefreshTrashItems(selectFirst: false);
             Status = $"Item excluido permanentemente: {deletedPath}";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             LastErrorMessage = ex.Message;
+            RefreshTrashItems(selectFirst: false);
             Status = "Erro ao excluir permanentemente";
         }
     }
@@ -1248,12 +1251,13 @@ public sealed class MainWindowViewModel : ViewModelBase
         try
         {
             _noteRepository.EmptyTrash();
-            RefreshTrashItems();
+            RefreshTrashItems(selectFirst: false);
             Status = "Lixeira esvaziada";
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or InvalidOperationException)
         {
             LastErrorMessage = ex.Message;
+            RefreshTrashItems(selectFirst: false);
             Status = "Erro ao esvaziar lixeira";
         }
     }
@@ -1355,8 +1359,9 @@ public sealed class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private void RefreshTrashItems()
+    private void RefreshTrashItems(bool selectFirst = true)
     {
+        var previousTrashPath = SelectedTrashItem?.TrashPath;
         TrashItems.Clear();
 
         foreach (var item in _noteRepository.GetTrashItems())
@@ -1364,7 +1369,10 @@ public sealed class MainWindowViewModel : ViewModelBase
             TrashItems.Add(item);
         }
 
-        SelectedTrashItem = TrashItems.FirstOrDefault();
+        SelectedTrashItem = selectFirst
+            ? TrashItems.FirstOrDefault(item => item.TrashPath.Equals(previousTrashPath, StringComparison.OrdinalIgnoreCase))
+                ?? TrashItems.FirstOrDefault()
+            : null;
     }
 
     private void RefreshTagFilters()

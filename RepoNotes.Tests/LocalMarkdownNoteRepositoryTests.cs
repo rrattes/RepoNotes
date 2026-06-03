@@ -1,5 +1,6 @@
 using RepoNotes.Core.Services;
 using RepoNotes.Storage;
+using System.Text.Json;
 
 namespace RepoNotes.Tests;
 
@@ -285,6 +286,46 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
     }
 
     [Fact]
+    public void DeletesFolderPermanentlyFromTrash()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var folderPath = repository.CreateFolder(null, "Pasta lixo");
+        repository.CreateNote(folderPath, "Nota dentro");
+        var trashPath = repository.MoveItemToTrash(folderPath);
+
+        repository.DeletePermanently(trashPath);
+
+        Assert.False(Directory.Exists(Path.Combine(_tempRepositoryPath, trashPath)));
+        Assert.DoesNotContain(repository.GetTrashItems(), item => item.TrashPath == trashPath);
+        Assert.Empty(ReadTrashMetadata());
+    }
+
+    [Fact]
+    public void DeletePermanentlyMissingTrashItemClearsMetadataWithoutThrowing()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var note = repository.CreateNote(null, "Lixo stale");
+        var trashPath = repository.MoveItemToTrash(note.Path);
+        File.Delete(Path.Combine(_tempRepositoryPath, trashPath));
+
+        repository.DeletePermanently(trashPath);
+
+        Assert.Empty(repository.GetTrashItems());
+        Assert.Empty(ReadTrashMetadata());
+    }
+
+    [Fact]
+    public void DeletePermanentlyRejectsAbsolutePathOutsideTrash()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var outsideTrashPath = Path.Combine(_tempRepositoryPath, "Fora.md");
+        File.WriteAllText(outsideTrashPath, "# Fora");
+
+        Assert.Throws<InvalidOperationException>(() => repository.DeletePermanently(outsideTrashPath));
+        Assert.True(File.Exists(outsideTrashPath));
+    }
+
+    [Fact]
     public void EmptyTrashRemovesAllTrashItems()
     {
         var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
@@ -301,6 +342,34 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
     }
 
     [Fact]
+    public void EmptyTrashRemovesFoldersAndClearsMetadata()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+        var folderPath = repository.CreateFolder(null, "Pasta lixo");
+        repository.CreateNote(folderPath, "Nota dentro");
+        repository.MoveItemToTrash(folderPath);
+
+        repository.EmptyTrash();
+
+        Assert.Empty(repository.GetTrashItems());
+        Assert.Empty(Directory.EnumerateFileSystemEntries(Path.Combine(_tempRepositoryPath, ".reponotes-trash"))
+            .Where(path => Path.GetFileName(path) != ".trash-metadata.json"));
+        Assert.Empty(ReadTrashMetadata());
+    }
+
+    [Fact]
+    public void EmptyTrashWhenEmptyDoesNotThrow()
+    {
+        var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
+
+        repository.EmptyTrash();
+
+        Assert.Empty(repository.GetTrashItems());
+        Assert.True(Directory.Exists(Path.Combine(_tempRepositoryPath, ".reponotes-trash")));
+        Assert.Empty(ReadTrashMetadata());
+    }
+
+    [Fact]
     public void DoesNotAllowDeletingRepositoryRoot()
     {
         var repository = new LocalMarkdownNoteRepository(_tempRepositoryPath);
@@ -314,5 +383,16 @@ public sealed class LocalMarkdownNoteRepositoryTests : IDisposable
         {
             Directory.Delete(_tempRepositoryPath, recursive: true);
         }
+    }
+
+    private Dictionary<string, string> ReadTrashMetadata()
+    {
+        var metadataPath = Path.Combine(_tempRepositoryPath, ".reponotes-trash", ".trash-metadata.json");
+        if (!File.Exists(metadataPath))
+        {
+            return [];
+        }
+
+        return JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(metadataPath)) ?? [];
     }
 }

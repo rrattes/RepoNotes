@@ -468,6 +468,50 @@ public sealed class MainWindowViewModelTabsTests : IDisposable
     }
 
     [Fact]
+    public void DeletePermanentlyWithNoTrashSelectionDoesNotCrash()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.DeletePermanentlyCommand.Execute(null);
+
+        Assert.Equal("Selecione um item da lixeira", viewModel.Status);
+        Assert.Null(viewModel.SelectedTrashItem);
+    }
+
+    [Fact]
+    public void DeletePermanentlyMissingTrashItemClearsSelection()
+    {
+        var viewModel = CreateViewModel();
+        SelectNode(viewModel, "A.md");
+        viewModel.DeleteSelectedItemCommand.Execute(null);
+        var trashItem = viewModel.SelectedTrashItem;
+        Assert.NotNull(trashItem);
+        File.Delete(Path.Combine(_tempRepositoryPath, trashItem.TrashPath));
+
+        viewModel.DeletePermanentlyCommand.Execute(null);
+
+        Assert.Empty(viewModel.TrashItems);
+        Assert.Null(viewModel.SelectedTrashItem);
+        Assert.StartsWith("Item excluido permanentemente", viewModel.Status, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void EmptyTrashClearsTrashItemsAndSelection()
+    {
+        var viewModel = CreateViewModel();
+        SelectNode(viewModel, "A.md");
+        viewModel.DeleteSelectedItemCommand.Execute(null);
+        SelectNode(viewModel, "B.md");
+        viewModel.DeleteSelectedItemCommand.Execute(null);
+
+        viewModel.EmptyTrashCommand.Execute(null);
+
+        Assert.Empty(viewModel.TrashItems);
+        Assert.Null(viewModel.SelectedTrashItem);
+        Assert.Equal("Lixeira esvaziada", viewModel.Status);
+    }
+
+    [Fact]
     public void PreviewAndInternalLinksFollowActiveTab()
     {
         var viewModel = CreateViewModel();

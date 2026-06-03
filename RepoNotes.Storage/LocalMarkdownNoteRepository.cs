@@ -266,6 +266,8 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
             throw new InvalidOperationException("Only items inside the trash can be permanently deleted.");
         }
 
+        var normalizedTrashPath = GetTrashRelativePath(fullTrashPath);
+
         if (File.Exists(fullTrashPath))
         {
             File.Delete(fullTrashPath);
@@ -274,13 +276,9 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         {
             Directory.Delete(fullTrashPath, recursive: true);
         }
-        else
-        {
-            throw new InvalidOperationException("Trash item does not exist.");
-        }
 
         var metadata = LoadTrashMetadata();
-        metadata.Remove(NormalizePath(trashPath));
+        RemoveTrashMetadataEntry(metadata, normalizedTrashPath);
         WriteTrashMetadata(metadata);
         Reload();
     }
@@ -290,10 +288,12 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
         var trashDirectory = Path.Combine(_rootPath, TrashDirectoryName);
         if (!Directory.Exists(trashDirectory))
         {
+            Directory.CreateDirectory(trashDirectory);
+            WriteTrashMetadata([]);
             return;
         }
 
-        foreach (var path in Directory.EnumerateFileSystemEntries(trashDirectory))
+        foreach (var path in Directory.EnumerateFileSystemEntries(trashDirectory).ToList())
         {
             if (string.Equals(Path.GetFileName(path), TrashMetadataFileName, StringComparison.OrdinalIgnoreCase))
             {
@@ -395,9 +395,10 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
     private string GetSafeFullPath(string relativePath)
     {
         var fullPath = Path.GetFullPath(Path.Combine(_rootPath, relativePath));
-        var rootPath = Path.GetFullPath(_rootPath);
+        var rootPath = Path.GetFullPath(_rootPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-        if (!fullPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase))
+        if (!fullPath.Equals(rootPath, StringComparison.OrdinalIgnoreCase)
+            && !fullPath.StartsWith(rootPath + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException("Note path is outside the configured repository.");
         }
@@ -773,6 +774,22 @@ public sealed class LocalMarkdownNoteRepository : INoteRepository
 
     private string GetTrashMetadataPath() =>
         Path.Combine(_rootPath, TrashDirectoryName, TrashMetadataFileName);
+
+    private string GetTrashRelativePath(string fullTrashPath) =>
+        NormalizePath(Path.GetRelativePath(_rootPath, fullTrashPath));
+
+    private static void RemoveTrashMetadataEntry(Dictionary<string, string> metadata, string trashPath)
+    {
+        var normalizedTrashPath = NormalizePath(trashPath);
+        foreach (var key in metadata.Keys.ToList())
+        {
+            if (key.Equals(normalizedTrashPath, StringComparison.OrdinalIgnoreCase)
+                || key.StartsWith(normalizedTrashPath + "\\", StringComparison.OrdinalIgnoreCase))
+            {
+                metadata.Remove(key);
+            }
+        }
+    }
 
     private sealed class ParsedFrontmatter
     {

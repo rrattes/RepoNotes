@@ -1380,3 +1380,36 @@
 **Riscos tecnicos:** Baixo; a rodada e visual e remove XAML duplicado sem alterar storage, salvamento, tabs, preview ou ViewModel. O risco residual e algum usuario sentir falta do campo grande de edicao de titulo, mas a decisao de produto desta rodada prioriza a aba como identidade primaria.
 
 **Proximo passo sugerido:** Fazer QA visual com 3 abas/titulos longos e seguir para confirmacoes visuais de acoes destrutivas da lixeira.
+
+## 2026-06-03 20:42:00 -03:00
+
+**Objetivo da rodada:** Corrigir erros ao excluir permanentemente itens da lixeira e ao esvaziar `.reponotes-trash`, mantendo a lixeira fora da arvore, busca, tags e preview.
+
+**Diagnostico:** A UI possui dois caminhos para exclusao permanente: o botao compacto chama `DeletePermanentlyCommand`, enquanto o menu de contexto da lixeira chama `DeleteTrashItemPermanentlyCommand` com parametro. Ambos convergem para `DeletePermanently()` no ViewModel. O esvaziamento usa `EmptyTrashCommand`. O erro provavel vinha de dois pontos combinados: o `ComboBox.ContextMenu` da lixeira usava bindings relativos (`DeleteTrashItemPermanentlyCommand`, `SelectedTrashItem`) que podiam nao resolver explicitamente para o ViewModel, e o storage tratava item de lixeira ja ausente como excecao, deixando selecao/itens stale apos cliques repetidos ou alteracoes externas. Tambem faltava limpar `SelectedTrashItem` apos excluir/restaurar/esvaziar.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.Storage/LocalMarkdownNoteRepository.cs`
+- `RepoNotes.Tests/LocalMarkdownNoteRepositoryTests.cs`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Os comandos do context menu da lixeira agora apontam explicitamente para `#Root.DataContext`. `DeletePermanently` no storage ficou idempotente para item ja ausente dentro da lixeira, continua bloqueando caminhos fora de `.reponotes-trash`, normaliza caminho relativo para metadados e remove entradas aninhadas ao excluir pastas. `EmptyTrash` agora cria/recria a pasta e metadado quando necessario, enumera uma copia dos itens e limpa metadados. O ViewModel recarrega `TrashItems`, limpa `SelectedTrashItem` apos restaurar/excluir/esvaziar e exibe status amigavel para selecao nula.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 148 testes aprovados, 0 falhas, 0 ignorados.
+
+**Status do working tree:** Antes da correcao ja existiam alteracoes locais fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Esses itens nao foram removidos nem incluidos no commit desta rodada.
+
+**Validacao da lixeira:** Testes adicionados cobrem exclusao permanente de arquivo, exclusao permanente de pasta, selecao nula sem crash, item stale/ja inexistente sem crash, rejeicao de caminho absoluto fora da lixeira, esvaziamento com arquivos, esvaziamento com pastas, lixeira vazia sem crash, limpeza de `TrashItems`/`SelectedTrashItem` e limpeza de `.trash-metadata.json`. Testes existentes continuam cobrindo exclusao da arvore, busca e tags.
+
+**Pendencias:** Ainda falta confirmacao visual antes de `Delete Permanently` e `Empty Trash`. A validacao manual interativa no app Windows deve ser refeita depois que a sujeira atual de `sample-repository` for decidida/limpa.
+
+**Riscos tecnicos:** Baixo-medio; a protecao contra caminhos fora da lixeira foi reforcada, mas operacoes destrutivas ainda sao sincronas e dependem de permissoes do filesystem. A lixeira usa metadado JSON simples e pode precisar de migracao se ganhar historico mais rico.
+
+**Proximo passo sugerido:** Implementar confirmacoes visuais compactas para exclusao permanente/esvaziar lixeira e limpar ou restaurar conscientemente os artefatos locais atuais do `sample-repository`.

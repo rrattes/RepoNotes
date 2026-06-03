@@ -457,14 +457,14 @@
                   <ComboBox.ContextMenu>
                     <ContextMenu>
                       <MenuItem Header="Restore"
-                                Command="{Binding RestoreTrashItemCommand}"
-                                CommandParameter="{Binding SelectedTrashItem}" />
+                                Command="{Binding #Root.DataContext.RestoreTrashItemCommand}"
+                                CommandParameter="{Binding #Root.DataContext.SelectedTrashItem}" />
                       <MenuItem Header="Delete Permanently"
-                                Command="{Binding DeleteTrashItemPermanentlyCommand}"
-                                CommandParameter="{Binding SelectedTrashItem}" />
+                                Command="{Binding #Root.DataContext.DeleteTrashItemPermanentlyCommand}"
+                                CommandParameter="{Binding #Root.DataContext.SelectedTrashItem}" />
                       <Separator />
                       <MenuItem Header="Empty Trash"
-                                Command="{Binding EmptyTrashCommand}" />
+                                Command="{Binding #Root.DataContext.EmptyTrashCommand}" />
                     </ContextMenu>
                   </ComboBox.ContextMenu>
                   <ComboBox.ItemTemplate>
