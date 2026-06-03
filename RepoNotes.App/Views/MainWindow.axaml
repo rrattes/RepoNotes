@@ -858,5 +858,60 @@
                    VerticalAlignment="Center" />
       </Grid>
     </Border>
+
+    <Border Grid.RowSpan="3"
+            Background="#99070B11"
+            IsVisible="{Binding IsCommandPaletteOpen}">
+      <Grid RowDefinitions="96,Auto,*">
+        <Border Grid.Row="1"
+                Classes="command-palette"
+                Width="620"
+                Padding="12"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top">
+          <StackPanel Spacing="10">
+            <TextBox x:Name="CommandPaletteSearchBox"
+                     Classes="command-palette-search"
+                     Text="{Binding CommandPaletteSearchText}"
+                     PlaceholderText="Digite um comando..."
+                     KeyDown="OnCommandPaletteKeyDown" />
+            <ItemsControl ItemsSource="{Binding FilteredCommandPaletteItems}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Classes.command-palette-item="True"
+                          Classes.selected="{Binding IsSelected}"
+                          Click="OnCommandPaletteItemClick">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Title}"
+                                   FontSize="13"
+                                   FontWeight="SemiBold"
+                                   Foreground="{StaticResource Brush.Text}" />
+                        <TextBlock Text="{Binding Description}"
+                                   FontSize="11"
+                                   Foreground="{StaticResource Brush.TextWeak}"
+                                   TextTrimming="CharacterEllipsis" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="1"
+                                 Text="{Binding ShortcutText}"
+                                 FontSize="11"
+                                 Foreground="{StaticResource Brush.TextMuted}"
+                                 Margin="18,0,0,0"
+                                 VerticalAlignment="Center" />
+                    </Grid>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="Nenhum comando encontrado"
+                       IsVisible="{Binding !HasCommandPaletteResults}"
+                       Foreground="{StaticResource Brush.TextWeak}"
+                       FontSize="12"
+                       HorizontalAlignment="Center"
+                       Margin="0,8" />
+          </StackPanel>
+        </Border>
+      </Grid>
+    </Border>
   </Grid>
 </Window>

@@ -1122,3 +1122,37 @@
 **Riscos tecnicos:** Baixo-medio; os atalhos vivem no code-behind por serem integracao de teclado/seleção da View. O risco residual e conflito de teclado com layout regional ou com comportamento interno do TextBox para algumas combinacoes.
 
 **Proximo passo sugerido:** Fazer uma rodada curta de QA manual dos atalhos e, se estiverem confortaveis, avaliar scroll sync leve no Split.
+
+## 2026-06-03 14:16:11 -03:00
+
+**Objetivo da rodada:** Implementar uma Command Palette simples para o Markdown Power Editor, acessivel por `Ctrl+Shift+P`.
+
+**Arquivos alterados:**
+
+- `RepoNotes.App/ViewModels/CommandPaletteActionKind.cs`
+- `RepoNotes.App/ViewModels/CommandPaletteItemViewModel.cs`
+- `RepoNotes.App/ViewModels/MainWindowViewModel.cs`
+- `RepoNotes.App/Views/MainWindow.axaml`
+- `RepoNotes.App/Views/MainWindow.axaml.cs`
+- `RepoNotes.App/Styles/AppTheme.axaml`
+- `RepoNotes.Tests/MainWindowViewModelTabsTests.cs`
+- `RepoNotes.Tests/MarkdownFormatTests.cs`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Criada Command Palette compacta em overlay dark, aberta por `Ctrl+Shift+P`, com busca, estado vazio, selecao por setas, `Enter` para executar e `Esc` para fechar. A palette inclui comandos de modo (`Show Editor`, `Show Preview`, `Show Split`), formatacao Markdown, insercoes (`Insert Table`, `Insert Code Block`, `Insert Callout`) e acoes seguras ja existentes (`Save`, `New Note`, `New Folder`, `Rename`, `Move to Trash`). Comandos que dependem da selecao do TextBox continuam restritos ao code-behind da View e reutilizam `ApplyMarkdownFormat`/`ApplyMarkdownInsertion`. Foram adicionados modelos simples para itens/acoes da palette e testes para lista inicial, filtro, estado vazio, abrir/fechar, execucao de modos e save. As insercoes de tabela, code block e callout ganharam transformacoes puras e testes.
+
+**Resultado do restore:** `.\.dotnet\dotnet.exe restore RepoNotes.sln` executado com sucesso; todos os projetos estavam atualizados para restauracao.
+
+**Resultado do dotnet build:** `.\.dotnet\dotnet.exe build RepoNotes.sln` executado com sucesso, 0 avisos e 0 erros.
+
+**Resultado dos testes:** `.\.dotnet\dotnet.exe test RepoNotes.sln --no-build` executado com sucesso: 131 testes aprovados, 0 falhas, 0 ignorados.
+
+**Validacao manual:** Smoke test local executado com `.\.dotnet\dotnet.exe run --project RepoNotes.App --no-build`; a janela abriu visivelmente e foi encerrada sem crash. A validacao interativa fina de `Ctrl+Shift+P`, filtro, `Enter`, `Esc` e execucao de comandos nao foi automatizada nesta rodada devido ao bloqueio anterior da automacao de janela nesta maquina.
+
+**Pendencias:** Validar manualmente no Windows o fluxo completo da palette: abrir com `Ctrl+Shift+P`, buscar `split/table/bold`, executar com `Enter`, fechar com `Esc` e confirmar comportamento em Editor/Split. A palette ainda nao tem fuzzy search complexo, categorias, historico nem extensibilidade por plugins.
+
+**Riscos tecnicos:** Medio-baixo; a palette introduz um pequeno ponto de coordenacao entre ViewModel e code-behind para comandos dependentes de selecao do editor. O risco residual e manter a lista de comandos sincronizada com novas acoes futuras.
+
+**Proximo passo sugerido:** Fazer QA manual da Command Palette e, se aprovada, continuar com auto-continuacao de listas/checklists/quotes ou scroll sync no Split.

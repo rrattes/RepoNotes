@@ -223,4 +223,48 @@ public sealed class MarkdownFormatTests
         Assert.Equal(11, s);
         Assert.Equal(14, e);
     }
+
+    [Fact]
+    public void InsertTable_InsertsBasicMarkdownTable()
+    {
+        var vm = CreateViewModel();
+        var (text, s, e) = vm.ApplyMarkdownInsertion("", 0, 0, "table");
+
+        Assert.Contains("| Column 1 | Column 2 | Column 3 |", text);
+        Assert.Contains("|---|---|---|", text);
+        Assert.Equal(text.Length, s);
+        Assert.Equal(s, e);
+    }
+
+    [Fact]
+    public void InsertCodeBlock_WithoutSelection_InsertsTextFenceAndSelectsPlaceholder()
+    {
+        var vm = CreateViewModel();
+        var (text, s, e) = vm.ApplyMarkdownInsertion("", 0, 0, "code-block");
+
+        Assert.Equal("```text\ncode here\n```", text.Replace("\r\n", "\n"));
+        Assert.Equal("code here", text[s..e]);
+    }
+
+    [Fact]
+    public void InsertCodeBlock_WithSelection_WrapsSelectionInFence()
+    {
+        var vm = CreateViewModel();
+        var (text, s, e) = vm.ApplyMarkdownInsertion("line 1\nline 2", 0, 13, "code-block");
+
+        Assert.Equal("```text\nline 1\nline 2\n```", text.Replace("\r\n", "\n"));
+        Assert.Equal("line 1\nline 2", text[s..e].Replace("\r\n", "\n"));
+    }
+
+    [Fact]
+    public void InsertCallout_InsertsNoteAdmonition()
+    {
+        var vm = CreateViewModel();
+        var (text, s, e) = vm.ApplyMarkdownInsertion("", 0, 0, "callout");
+
+        Assert.Contains("> [!NOTE]", text);
+        Assert.Contains("> Callout content", text);
+        Assert.Equal(text.Length, s);
+        Assert.Equal(s, e);
+    }
 }

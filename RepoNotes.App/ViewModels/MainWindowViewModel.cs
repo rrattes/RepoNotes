@@ -29,7 +29,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     private string _selectedTag = string.Empty;
     private string _status = "Salvo";
     private string _lastErrorMessage = string.Empty;
+    private string _commandPaletteSearchText = string.Empty;
+    private CommandPaletteItemViewModel? _selectedCommandPaletteItem;
     private bool _hasUnsavedChanges;
+    private bool _isCommandPaletteOpen;
     private DocumentViewMode _documentViewMode = DocumentViewMode.Editor;
     private int _searchResultCount;
     private CancellationTokenSource? _searchDebounceCancellation;
@@ -67,6 +70,8 @@ public sealed class MainWindowViewModel : ViewModelBase
         InternalLinks = [];
         TrashItems = [];
         TagFilters = [];
+        CommandPaletteItems = CreateCommandPaletteItems();
+        FilteredCommandPaletteItems = [];
 
         NewNoteCommand = new AsyncRelayCommand(CreateNewNoteAsync);
         NewFromTemplateCommand = new AsyncRelayCommand(CreateNewNoteFromSelectedTemplateAsync);
@@ -86,8 +91,12 @@ public sealed class MainWindowViewModel : ViewModelBase
         ShowEditorCommand = new RelayCommand(ShowEditor);
         ShowPreviewCommand = new RelayCommand(ShowPreview);
         ShowSplitCommand = new RelayCommand(ShowSplit);
+        OpenCommandPaletteCommand = new RelayCommand(OpenCommandPalette);
+        CloseCommandPaletteCommand = new RelayCommand(CloseCommandPalette);
+        ExecuteSelectedCommandPaletteItemCommand = new RelayCommand(ExecuteSelectedCommandPaletteItem);
 
         ReloadRepository(noteRepository, initialStatus);
+        RefreshCommandPaletteFilter();
     }
 
     public string AppName => "RepoNotes";
@@ -117,6 +126,10 @@ public sealed class MainWindowViewModel : ViewModelBase
     public ObservableCollection<TagFilterViewModel> TagFilters { get; }
 
     public IReadOnlyList<NoteTemplate> Templates { get; }
+
+    public IReadOnlyList<CommandPaletteItemViewModel> CommandPaletteItems { get; }
+
+    public ObservableCollection<CommandPaletteItemViewModel> FilteredCommandPaletteItems { get; }
 
     public IReadOnlyList<string> StatusOptions => _statusOptions;
 
@@ -171,6 +184,12 @@ public sealed class MainWindowViewModel : ViewModelBase
 
     public ICommand ShowSplitCommand { get; }
 
+    public ICommand OpenCommandPaletteCommand { get; }
+
+    public ICommand CloseCommandPaletteCommand { get; }
+
+    public ICommand ExecuteSelectedCommandPaletteItemCommand { get; }
+
     public DocumentViewMode DocumentViewMode => _documentViewMode;
 
     public bool IsEditorMode => _documentViewMode == DocumentViewMode.Editor;
@@ -184,6 +203,54 @@ public sealed class MainWindowViewModel : ViewModelBase
     public bool HasPreviewVisible => _documentViewMode is DocumentViewMode.Preview or DocumentViewMode.Split;
 
     public bool HasOpenTabs => OpenTabs.Count > 0;
+
+    public bool IsCommandPaletteOpen
+    {
+        get => _isCommandPaletteOpen;
+        private set => SetProperty(ref _isCommandPaletteOpen, value);
+    }
+
+    public string CommandPaletteSearchText
+    {
+        get => _commandPaletteSearchText;
+        set
+        {
+            if (!SetProperty(ref _commandPaletteSearchText, value))
+            {
+                return;
+            }
+
+            RefreshCommandPaletteFilter();
+        }
+    }
+
+    public CommandPaletteItemViewModel? SelectedCommandPaletteItem
+    {
+        get => _selectedCommandPaletteItem;
+        private set
+        {
+            if (ReferenceEquals(_selectedCommandPaletteItem, value))
+            {
+                return;
+            }
+
+            if (_selectedCommandPaletteItem is not null)
+            {
+                _selectedCommandPaletteItem.IsSelected = false;
+            }
+
+            _selectedCommandPaletteItem = value;
+
+            if (_selectedCommandPaletteItem is not null)
+            {
+                _selectedCommandPaletteItem.IsSelected = true;
+            }
+
+            OnPropertyChanged();
+        }
+    }
+
+    public bool HasCommandPaletteResults => FilteredCommandPaletteItems.Count > 0;
 
     public string SearchText
     {
@@ -566,6 +633,116 @@ public sealed class MainWindowViewModel : ViewModelBase
     private void ShowSplit()
     {
         SetDocumentViewMode(DocumentViewMode.Split);
+    }
+
+    private void OpenCommandPalette()
+    {
+        CommandPaletteSearchText = string.Empty;
+        IsCommandPaletteOpen = true;
+        RefreshCommandPaletteFilter();
+    }
+
+    private void CloseCommandPalette()
+    {
+        IsCommandPaletteOpen = false;
+        CommandPaletteSearchText = string.Empty;
+    }
+
+    private void ExecuteSelectedCommandPaletteItem()
+    {
+        if (SelectedCommandPaletteItem is not null)
+        {
+            ExecuteCommandPaletteItem(SelectedCommandPaletteItem);
+        }
+    }
+
+    public bool ExecuteCommandPaletteItem(CommandPaletteItemViewModel item)
+    {
+        if (item.RequiresEditor)
+        {
+            return false;
+        }
+
+        switch (item.ActionKind)
+        {
+            case CommandPaletteActionKind.ShowEditor:
+                ShowEditorCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.ShowPreview:
+                ShowPreviewCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.ShowSplit:
+                ShowSplitCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.Save:
+                SaveNoteCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.NewNote:
+                NewNoteCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.NewFolder:
+                NewFolderCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.Rename:
+                RenameSelectedItemCommand.Execute(null);
+                break;
+            case CommandPaletteActionKind.MoveToTrash:
+                DeleteSelectedItemCommand.Execute(null);
+                break;
+            default:
+                return false;
+        }
+
+        CloseCommandPalette();
+        return true;
+    }
+
+    public void SelectNextCommandPaletteItem()
+    {
+        if (FilteredCommandPaletteItems.Count == 0)
+        {
+            SelectedCommandPaletteItem = null;
+            return;
+        }
+
+        var index = SelectedCommandPaletteItem is null
+            ? -1
+            : FilteredCommandPaletteItems.IndexOf(SelectedCommandPaletteItem);
+        SelectedCommandPaletteItem = FilteredCommandPaletteItems[(index + 1) % FilteredCommandPaletteItems.Count];
+    }
+
+    public void SelectPreviousCommandPaletteItem()
+    {
+        if (FilteredCommandPaletteItems.Count == 0)
+        {
+            SelectedCommandPaletteItem = null;
+            return;
+        }
+
+        var index = SelectedCommandPaletteItem is null
+            ? 0
+            : FilteredCommandPaletteItems.IndexOf(SelectedCommandPaletteItem);
+        if (index <= 0)
+        {
+            index = FilteredCommandPaletteItems.Count;
+        }
+
+        SelectedCommandPaletteItem = FilteredCommandPaletteItems[index - 1];
+    }
+
+    private void RefreshCommandPaletteFilter()
+    {
+        var selectedId = SelectedCommandPaletteItem?.Id;
+        FilteredCommandPaletteItems.Clear();
+
+        foreach (var item in CommandPaletteItems.Where(item => item.Matches(CommandPaletteSearchText)).Take(12))
+        {
+            FilteredCommandPaletteItems.Add(item);
+        }
+
+        SelectedCommandPaletteItem = FilteredCommandPaletteItems.FirstOrDefault(item => item.Id == selectedId)
+            ?? FilteredCommandPaletteItems.FirstOrDefault();
+        OnPropertyChanged(nameof(HasCommandPaletteResults));
     }
 
     private void SetDocumentViewMode(DocumentViewMode mode)
@@ -1170,6 +1347,31 @@ public sealed class MainWindowViewModel : ViewModelBase
             ? "Nova nota"
             : $"Novo {template.SuggestedType}";
 
+    private static IReadOnlyList<CommandPaletteItemViewModel> CreateCommandPaletteItems() =>
+    [
+        new("show-editor", "Show Editor", "Switch central workspace to Markdown editor", "Editor", CommandPaletteActionKind.ShowEditor),
+        new("show-preview", "Show Preview", "Switch central workspace to rendered preview", "Preview", CommandPaletteActionKind.ShowPreview),
+        new("show-split", "Show Split", "Show Markdown editor and preview side by side", "Split", CommandPaletteActionKind.ShowSplit),
+        new("bold", "Bold", "Apply Markdown bold formatting", "Ctrl+B", CommandPaletteActionKind.Bold, requiresEditor: true),
+        new("italic", "Italic", "Apply Markdown italic formatting", "Ctrl+I", CommandPaletteActionKind.Italic, requiresEditor: true),
+        new("heading-1", "Heading 1", "Apply H1 heading formatting", "Ctrl+Alt+1", CommandPaletteActionKind.Heading1, requiresEditor: true),
+        new("heading-2", "Heading 2", "Apply H2 heading formatting", "Ctrl+Alt+2", CommandPaletteActionKind.Heading2, requiresEditor: true),
+        new("heading-3", "Heading 3", "Apply H3 heading formatting", "Ctrl+Alt+3", CommandPaletteActionKind.Heading3, requiresEditor: true),
+        new("list", "List", "Apply Markdown list formatting", "Ctrl+Shift+7", CommandPaletteActionKind.List, requiresEditor: true),
+        new("checklist", "Checklist", "Apply Markdown checklist formatting", "Ctrl+Shift+8", CommandPaletteActionKind.Checklist, requiresEditor: true),
+        new("quote", "Quote", "Apply Markdown quote formatting", "Ctrl+Shift+Q", CommandPaletteActionKind.Quote, requiresEditor: true),
+        new("code", "Code", "Apply inline or block code formatting", "Ctrl+`", CommandPaletteActionKind.Code, requiresEditor: true),
+        new("link", "Link", "Insert Markdown link formatting", "Ctrl+K", CommandPaletteActionKind.Link, requiresEditor: true),
+        new("insert-table", "Insert Table", "Insert a basic 3-column Markdown table", "", CommandPaletteActionKind.InsertTable, requiresEditor: true),
+        new("insert-code-block", "Insert Code Block", "Insert a fenced Markdown code block", "", CommandPaletteActionKind.InsertCodeBlock, requiresEditor: true),
+        new("insert-callout", "Insert Callout", "Insert a Markdown callout/admonition block", "", CommandPaletteActionKind.InsertCallout, requiresEditor: true),
+        new("save", "Save", "Save the active note", "Ctrl+S", CommandPaletteActionKind.Save),
+        new("new-note", "New Note", "Create a new Markdown note", "", CommandPaletteActionKind.NewNote),
+        new("new-folder", "New Folder", "Create a new folder", "", CommandPaletteActionKind.NewFolder),
+        new("rename", "Rename", "Rename the selected note or folder", "", CommandPaletteActionKind.Rename),
+        new("move-to-trash", "Move to Trash", "Move the selected note or folder to trash", "", CommandPaletteActionKind.MoveToTrash)
+    ];
+
     private static IReadOnlyList<string> ParseTagsText(string value) =>
         value
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
@@ -1450,6 +1652,30 @@ public sealed class MainWindowViewModel : ViewModelBase
         };
     }
 
+    public (string newText, int newSelStart, int newSelEnd) ApplyMarkdownInsertion(
+        string text, int selStart, int selEnd, string insertionType)
+    {
+        selStart = Math.Clamp(selStart, 0, text.Length);
+        selEnd = Math.Clamp(selEnd, selStart, text.Length);
+        var selection = text[selStart..selEnd];
+
+        return insertionType switch
+        {
+            "table" => InsertBlock(text, selStart, selEnd, """
+            | Column 1 | Column 2 | Column 3 |
+            |---|---|---|
+            |  |  |  |
+            |  |  |  |
+            """),
+            "code-block" => InsertCodeBlock(text, selStart, selEnd, selection),
+            "callout" => InsertBlock(text, selStart, selEnd, """
+            > [!NOTE]
+            > Callout content
+            """),
+            _ => (text, selStart, selEnd)
+        };
+    }
+
     private static (string, int, int) WrapInline(string text, int selStart, int selEnd, string selection, string marker)
     {
         if (selection.Length > 0)
@@ -1535,6 +1761,26 @@ public sealed class MainWindowViewModel : ViewModelBase
             var newText = text[..selStart] + "`" + selection + "`" + text[selEnd..];
             return (newText, selStart + 1, selEnd + 1);
         }
+    }
+
+    private static (string, int, int) InsertBlock(string text, int selStart, int selEnd, string block)
+    {
+        var prefix = selStart > 0 && text[selStart - 1] != '\n' ? Environment.NewLine : string.Empty;
+        var suffix = selEnd < text.Length && text[selEnd] != '\n' ? Environment.NewLine : string.Empty;
+        var insert = prefix + block + suffix;
+        var newText = text[..selStart] + insert + text[selEnd..];
+        var cursor = selStart + insert.Length;
+        return (newText, cursor, cursor);
+    }
+
+    private static (string, int, int) InsertCodeBlock(string text, int selStart, int selEnd, string selection)
+    {
+        var code = selection.Length > 0 ? selection : "code here";
+        var block = $"```text{Environment.NewLine}{code}{Environment.NewLine}```";
+        var prefixLength = selStart > 0 && text[selStart - 1] != '\n' ? Environment.NewLine.Length : 0;
+        var (newText, _, _) = InsertBlock(text, selStart, selEnd, block);
+        var codeStart = selStart + prefixLength + "```text".Length + Environment.NewLine.Length;
+        return (newText, codeStart, codeStart + code.Length);
     }
 
     private sealed class NullRepositorySettingsStore : IRepositorySettingsStore

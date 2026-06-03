@@ -85,6 +85,102 @@ public sealed class MainWindowViewModelTabsTests : IDisposable
     }
 
     [Fact]
+    public void CommandPaletteInitialListContainsExpectedCommands()
+    {
+        var viewModel = CreateViewModel();
+
+        Assert.Contains(viewModel.CommandPaletteItems, item => item.Title == "Bold");
+        Assert.Contains(viewModel.CommandPaletteItems, item => item.Title == "Show Split");
+        Assert.Contains(viewModel.CommandPaletteItems, item => item.Title == "Insert Table");
+        Assert.Contains(viewModel.CommandPaletteItems, item => item.Title == "Save");
+    }
+
+    [Fact]
+    public void CommandPaletteFiltersCommandsByText()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.OpenCommandPaletteCommand.Execute(null);
+        viewModel.CommandPaletteSearchText = "split";
+
+        Assert.Contains(viewModel.FilteredCommandPaletteItems, item => item.Title == "Show Split");
+        Assert.DoesNotContain(viewModel.FilteredCommandPaletteItems, item => item.Title == "Bold");
+    }
+
+    [Fact]
+    public void CommandPaletteFilterCanReturnNoResults()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.OpenCommandPaletteCommand.Execute(null);
+        viewModel.CommandPaletteSearchText = "zzzz";
+
+        Assert.Empty(viewModel.FilteredCommandPaletteItems);
+        Assert.False(viewModel.HasCommandPaletteResults);
+        Assert.Null(viewModel.SelectedCommandPaletteItem);
+    }
+
+    [Fact]
+    public void CommandPaletteOpenAndCloseUpdatesState()
+    {
+        var viewModel = CreateViewModel();
+
+        viewModel.OpenCommandPaletteCommand.Execute(null);
+        Assert.True(viewModel.IsCommandPaletteOpen);
+
+        viewModel.CloseCommandPaletteCommand.Execute(null);
+        Assert.False(viewModel.IsCommandPaletteOpen);
+        Assert.Equal(string.Empty, viewModel.CommandPaletteSearchText);
+    }
+
+    [Fact]
+    public void ExecutingCommandPaletteShowSplitChangesMode()
+    {
+        var viewModel = CreateViewModel();
+        var item = viewModel.CommandPaletteItems.First(item => item.ActionKind == CommandPaletteActionKind.ShowSplit);
+
+        Assert.True(viewModel.ExecuteCommandPaletteItem(item));
+
+        Assert.Equal(DocumentViewMode.Split, viewModel.DocumentViewMode);
+    }
+
+    [Fact]
+    public void ExecutingCommandPaletteShowPreviewChangesMode()
+    {
+        var viewModel = CreateViewModel();
+        var item = viewModel.CommandPaletteItems.First(item => item.ActionKind == CommandPaletteActionKind.ShowPreview);
+
+        Assert.True(viewModel.ExecuteCommandPaletteItem(item));
+
+        Assert.Equal(DocumentViewMode.Preview, viewModel.DocumentViewMode);
+    }
+
+    [Fact]
+    public void ExecutingCommandPaletteShowEditorChangesMode()
+    {
+        var viewModel = CreateViewModel();
+        viewModel.ShowPreviewCommand.Execute(null);
+        var item = viewModel.CommandPaletteItems.First(item => item.ActionKind == CommandPaletteActionKind.ShowEditor);
+
+        Assert.True(viewModel.ExecuteCommandPaletteItem(item));
+
+        Assert.Equal(DocumentViewMode.Editor, viewModel.DocumentViewMode);
+    }
+
+    [Fact]
+    public void ExecutingCommandPaletteSaveSavesActiveNote()
+    {
+        var viewModel = CreateViewModel();
+        var item = viewModel.CommandPaletteItems.First(item => item.ActionKind == CommandPaletteActionKind.Save);
+        viewModel.Markdown = "# Alpha salva pela palette";
+
+        Assert.True(viewModel.ExecuteCommandPaletteItem(item));
+
+        Assert.Contains("# Alpha salva pela palette", File.ReadAllText(Path.Combine(_tempRepositoryPath, "A.md")));
+        Assert.Equal("Salvo", viewModel.Status);
+    }
+
+    [Fact]
     public void SwitchingTabsPreservesDocumentViewMode()
     {
         var viewModel = CreateViewModel();

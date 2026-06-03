@@ -25,6 +25,21 @@ public sealed partial class MainWindow : Window
 
     private void OnWindowKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.P
+            && e.KeyModifiers.HasFlag(KeyModifiers.Control)
+            && e.KeyModifiers.HasFlag(KeyModifiers.Shift)
+            && DataContext is MainWindowViewModel paletteViewModel)
+        {
+            paletteViewModel.OpenCommandPaletteCommand.Execute(null);
+            Dispatcher.UIThread.Post(() =>
+            {
+                CommandPaletteSearchBox.Focus();
+                CommandPaletteSearchBox.SelectAll();
+            });
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.K && e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             if (TryGetFocusedMarkdownEditor(out var linkEditor))
@@ -49,6 +64,109 @@ public sealed partial class MainWindow : Window
         {
             viewModel.ClearSearchCommand.Execute(null);
             e.Handled = true;
+        }
+    }
+
+    private void OnCommandPaletteKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                viewModel.CloseCommandPaletteCommand.Execute(null);
+                e.Handled = true;
+                break;
+            case Key.Down:
+                viewModel.SelectNextCommandPaletteItem();
+                e.Handled = true;
+                break;
+            case Key.Up:
+                viewModel.SelectPreviousCommandPaletteItem();
+                e.Handled = true;
+                break;
+            case Key.Enter:
+                ExecuteSelectedCommandPaletteItem();
+                e.Handled = true;
+                break;
+        }
+    }
+
+    private void OnCommandPaletteItemClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is Button { DataContext: CommandPaletteItemViewModel item }
+            && DataContext is MainWindowViewModel viewModel)
+        {
+            ExecuteCommandPaletteItem(viewModel, item);
+        }
+    }
+
+    private void ExecuteSelectedCommandPaletteItem()
+    {
+        if (DataContext is MainWindowViewModel viewModel && viewModel.SelectedCommandPaletteItem is not null)
+        {
+            ExecuteCommandPaletteItem(viewModel, viewModel.SelectedCommandPaletteItem);
+        }
+    }
+
+    private void ExecuteCommandPaletteItem(MainWindowViewModel viewModel, CommandPaletteItemViewModel item)
+    {
+        if (viewModel.ExecuteCommandPaletteItem(item))
+        {
+            return;
+        }
+
+        ExecuteEditorCommandPaletteItem(viewModel, item);
+        viewModel.CloseCommandPaletteCommand.Execute(null);
+    }
+
+    private void ExecuteEditorCommandPaletteItem(MainWindowViewModel viewModel, CommandPaletteItemViewModel item)
+    {
+        if (!viewModel.HasEditorVisible)
+        {
+            viewModel.ShowEditorCommand.Execute(null);
+        }
+
+        if (!TryGetFocusedMarkdownEditor(out var editor))
+        {
+            editor = MarkdownEditorSplit.IsVisible ? MarkdownEditorSplit : MarkdownEditor;
+        }
+
+        var formatType = item.ActionKind switch
+        {
+            CommandPaletteActionKind.Bold => "bold",
+            CommandPaletteActionKind.Italic => "italic",
+            CommandPaletteActionKind.Heading1 => "h1",
+            CommandPaletteActionKind.Heading2 => "h2",
+            CommandPaletteActionKind.Heading3 => "h3",
+            CommandPaletteActionKind.List => "list",
+            CommandPaletteActionKind.Checklist => "checklist",
+            CommandPaletteActionKind.Quote => "quote",
+            CommandPaletteActionKind.Code => "code",
+            CommandPaletteActionKind.Link => "link",
+            _ => null
+        };
+
+        if (formatType is not null)
+        {
+            ApplyToolbarFormat(formatType, editor);
+            return;
+        }
+
+        var insertionType = item.ActionKind switch
+        {
+            CommandPaletteActionKind.InsertTable => "table",
+            CommandPaletteActionKind.InsertCodeBlock => "code-block",
+            CommandPaletteActionKind.InsertCallout => "callout",
+            _ => null
+        };
+
+        if (insertionType is not null)
+        {
+            ApplyMarkdownInsertion(insertionType, editor);
         }
     }
 
@@ -108,6 +226,24 @@ public sealed partial class MainWindow : Window
         var selEnd = editor.SelectionEnd;
 
         var (newText, newSelStart, newSelEnd) = viewModel.ApplyMarkdownFormat(text, selStart, selEnd, type);
+
+        viewModel.Markdown = newText;
+        editor.SelectionStart = newSelStart;
+        editor.SelectionEnd = newSelEnd;
+        editor.Focus();
+    }
+
+    private void ApplyMarkdownInsertion(string type, TextBox editor)
+    {
+        if (DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        var text = editor.Text ?? string.Empty;
+        var selStart = editor.SelectionStart;
+        var selEnd = editor.SelectionEnd;
+        var (newText, newSelStart, newSelEnd) = viewModel.ApplyMarkdownInsertion(text, selStart, selEnd, type);
 
         viewModel.Markdown = newText;
         editor.SelectionStart = newSelStart;
