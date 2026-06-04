@@ -1699,3 +1699,24 @@
 **Observacoes:** Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
 
 **Proximo passo sugerido:** Adicionar testes automatizados pequenos para `splitMarkdownFrontmatter`/recomposicao de Markdown e avaliar como expor o Markdown gerado para autosave sem criar painel debug visivel.
+
+## 2026-06-04 15:50:46 -03:00
+
+**Objetivo da rodada:** Remover os dois logos/icones `R` redundantes da interface web do RepoNotes vNext.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/layout/TopBar.tsx`
+- `apps/reponotes-vnext/src/components/layout/LeftRail.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/TASK_LOG.md`
+
+**Resumo visual:** O `brand-mark` com `R` foi removido da TopBar, mantendo o texto `RepoNotes vNext`. O `rail-logo` com `R` foi removido do topo do LeftRail, que agora comeca diretamente pelo primeiro botao funcional/ativo (`Repository`). Os estilos mortos dos dois logos foram removidos e o padding superior do rail foi ajustado para evitar buraco visual.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror continua presente: chunk principal de aproximadamente `1,690.78 kB` minificado (`534.38 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; HTTP 200 confirmado.
+
+**Validacao visual:** No navegador embutido, o DOM confirmou `brandMarkExists=false`, `railLogoExists=false`, `RepoNotes vNext` ainda visivel na TopBar, primeiro botao do rail como `Repository`, 10 botoes funcionais/placeholder no rail e Milkdown ainda montado.
+
+**Proximo passo sugerido:** Revisar a densidade da TopBar web como um todo, avaliando se `RepoNotes vNext`, command box e indicadores de workspace devem ocupar menos largura em telas menores.

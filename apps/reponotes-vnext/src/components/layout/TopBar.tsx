@@ -2,7 +2,6 @@ export default function TopBar() {
   return (
     <header className="top-bar">
       <div className="brand">
-        <span className="brand-mark">R</span>
         <span className="brand-name">RepoNotes vNext</span>
       </div>
       <div className="command-box" role="search">

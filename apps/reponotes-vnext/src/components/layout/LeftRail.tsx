@@ -46,9 +46,6 @@ export default function LeftRail({ activeRailItem, onSelectRailItem }: LeftRailP
   return (
     <aside className="left-rail" aria-label="activity bar">
       <div className="rail-top">
-        <div className="rail-logo" aria-label="RepoNotes">
-          R
-        </div>
         <RailStack activeRailItem={activeRailItem} items={primaryRailItems} onSelectRailItem={onSelectRailItem} />
       </div>
       <RailStack activeRailItem={activeRailItem} items={secondaryRailItems} onSelectRailItem={onSelectRailItem} />
