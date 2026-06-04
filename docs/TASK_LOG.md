@@ -1720,3 +1720,23 @@
 **Validacao visual:** No navegador embutido, o DOM confirmou `brandMarkExists=false`, `railLogoExists=false`, `RepoNotes vNext` ainda visivel na TopBar, primeiro botao do rail como `Repository`, 10 botoes funcionais/placeholder no rail e Milkdown ainda montado.
 
 **Proximo passo sugerido:** Revisar a densidade da TopBar web como um todo, avaliando se `RepoNotes vNext`, command box e indicadores de workspace devem ocupar menos largura em telas menores.
+
+## 2026-06-04 15:55:03 -03:00
+
+**Objetivo da rodada:** Validar Markdown round-trip e fronteira de frontmatter no `VisualMarkdownEditor` do RepoNotes vNext, sem alterar codigo.
+
+**Arquivos alterados:**
+
+- `docs/TASK_LOG.md`
+
+**Resumo da validacao:** O mock principal em `mockRepository.ts` ja usa uma nota com frontmatter YAML (`title`, `type`, `status`, `owner`, `tags`) e corpo Markdown com heading, blockquote, checklist, link interno, link externo, tabela e code fence. O `VisualMarkdownEditor` separa o frontmatter do corpo, entrega apenas o corpo para o Milkdown/Crepe e recompõe o Markdown em memoria com o frontmatter preservado.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror permanece: chunk principal de aproximadamente `1,690.78 kB` minificado (`534.38 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; a validacao no navegador embutido acessou a URL com sucesso.
+
+**Validacao visual/round-trip:** O DOM confirmou `.milkdown-shell .ProseMirror` com `contenteditable="true"`, `data-has-frontmatter="true"`, `data-frontmatter-boundary="body-only-editor"` e `data-generated-markdown-starts-with-frontmatter="true"`. O corpo visual contem `Application Documentation Pack`, checklist, `[[10-RACI]]`, `LibreNMS`, tabela e `dotnet test`, mas nao contem `title: Application Documentation Pack` nem delimitadores YAML `---`.
+
+**Observacoes:** Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
+
+**Proximo passo sugerido:** Adicionar testes automatizados pequenos para split/recombine de frontmatter e definir o contrato de autosave que recebera Markdown limpo recomposto sem expor painel debug na UI principal.
