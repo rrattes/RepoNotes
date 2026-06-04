@@ -64,13 +64,13 @@ input::placeholder {
 
 .workspace-grid {
   display: grid;
-  grid-template-columns: 48px 284px minmax(0, 1fr) 44px;
+  grid-template-columns: 52px 284px minmax(0, 1fr) 44px;
   min-height: 0;
   transition: grid-template-columns 160ms ease;
 }
 
 .app-shell.info-open .workspace-grid {
-  grid-template-columns: 48px 284px minmax(0, 1fr) 340px;
+  grid-template-columns: 52px 284px minmax(0, 1fr) 340px;
 }
 
 .top-bar {
@@ -171,32 +171,82 @@ kbd {
   justify-content: space-between;
   align-items: center;
   min-height: 0;
-  padding: 10px 6px;
+  padding: 8px 7px;
   background: var(--bg-rail);
   border-right: 1px solid var(--border-soft);
 }
 
+.rail-top {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.rail-logo {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(99, 102, 241, 0.9), rgba(34, 197, 94, 0.72)),
+    #111827;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
+}
+
 .rail-stack {
   display: grid;
-  gap: 7px;
+  gap: 6px;
 }
 
 .icon-button {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
   padding: 0;
+  border-color: transparent;
+  background: transparent;
   color: var(--text-soft);
-  font-size: 12px;
-  font-weight: 700;
+  transition:
+    background 130ms ease,
+    border-color 130ms ease,
+    color 130ms ease,
+    opacity 130ms ease;
+}
+
+.icon-button:hover {
+  border-color: rgba(148, 163, 184, 0.18);
+  background: rgba(148, 163, 184, 0.08);
+  color: #f8fafc;
 }
 
 .icon-button.active {
   background: rgba(99, 102, 241, 0.24);
-  border-color: var(--accent);
+  border-color: rgba(99, 102, 241, 0.58);
   color: #fff;
+  box-shadow:
+    inset 2px 0 0 var(--accent),
+    0 8px 22px rgba(79, 70, 229, 0.18);
+}
+
+.icon-button.disabled,
+.icon-button:disabled {
+  cursor: default;
+  opacity: 0.36;
+}
+
+.icon-button.disabled:hover,
+.icon-button:disabled:hover {
+  border-color: transparent;
+  background: transparent;
+  color: var(--text-soft);
 }
 
 .repository-sidebar {
@@ -787,11 +837,11 @@ code {
 
 @media (max-width: 1400px) {
   .workspace-grid {
-    grid-template-columns: 48px 260px minmax(0, 1fr) 42px;
+    grid-template-columns: 52px 260px minmax(0, 1fr) 42px;
   }
 
   .app-shell.info-open .workspace-grid {
-    grid-template-columns: 48px 248px minmax(0, 1fr) 304px;
+    grid-template-columns: 52px 248px minmax(0, 1fr) 304px;
   }
 
   .note-tab {

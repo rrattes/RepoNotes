@@ -13,7 +13,7 @@ Core vNext rules:
 - Visual Markdown Editor-first: the main editor is the product surface.
 - The user can type Markdown and see visual formatting while editing.
 - Clean Markdown remains the saved/exportable source format.
-- The current vNext visual editor is a controlled Milkdown/Crepe spike with Markdown kept in memory and a temporary generated-Markdown debug panel.
+- The current vNext visual editor is a controlled Milkdown/Crepe spike with Markdown kept in memory and no visible generated-Markdown debug panel by default.
 - Do not treat the editor spike as final until Markdown round-trip, frontmatter boundaries, bundle size, and Tauri startup impact are validated.
 - No separate Preview mode in the initial vNext MVP.
 - No Split mode as the main initial MVP flow.
@@ -40,6 +40,7 @@ Core vNext rules:
   - Compact sidebar.
   - Flexible editor-first center column.
   - Compact preview/info panel.
+- The vNext Activity Bar / Left Rail is a fixed `52px` strip on the far left, visually separated from the repository sidebar.
 - The left repository sidebar and the right info/context panel can be collapsed and expanded to improve usable writing space on smaller screens.
 - Collapsed side panels keep a narrow rail with an explicit re-open control so the state is never irreversible.
 - RepoNotes uses client-side custom window chrome in Avalonia. The native Windows title bar must not appear as a duplicated separate bar.
@@ -49,6 +50,12 @@ Core vNext rules:
 ## Top Area
 
 - The app has a compact integrated window bar for client-side chrome only; it is not a heavy global app top bar.
+- The Activity Bar / Left Rail contains the small RepoNotes logo at the top, primary workspace icons below it, and utility icons near the bottom.
+- The initial rail icons are Repository, Search, Links/Graph, Tags, Tasks, Templates, Entities, Trash, Settings, and Profile.
+- Repository is active by default. Repository, Search, Trash, and Settings may change the local active rail state in the React shell.
+- Links/Graph, Tags, Tasks, Templates, Entities, and Profile are future placeholders for now; they should be visibly disabled, lower-opacity, titled clearly, and not look clickable.
+- The active rail item uses the accent blue/purple surface and a subtle inset indicator. Hover is quiet and monochrome.
+- Rail icons should come from `lucide-react` in vNext and remain icon-only with `title`/`aria-label` text for accessibility.
 - Repository selection and search live in the top of the left sidebar, close to note navigation.
 - The repository area in the sidebar presents the current repository context and may act as the local repository switcher when wired to `OpenRepositoryCommand`.
 - The repository switcher tooltip should be `Abrir ou trocar repositorio local`.

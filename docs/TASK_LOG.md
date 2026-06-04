@@ -1565,3 +1565,35 @@
 **Riscos tecnicos:** Baixo para UI; a mudanca remove somente diagnosticos visiveis. O risco principal continua sendo de arquitetura: Crepe ainda precisa de validacao de bundle/startup, frontmatter e persistencia antes de ser promovido para editor final.
 
 **Proximo passo sugerido:** Implementar uma validacao de round-trip controlada para frontmatter + tabelas/checklists/links/code blocks e decidir como expor o Markdown gerado para autosave sem poluir a UI.
+
+## 2026-06-04 11:22:34 -03:00
+
+**Objetivo da rodada:** Implementar a Activity Bar / Left Rail do RepoNotes vNext com icones reais, baseada no mockup aprovado.
+
+**Dependencia adicionada:** `lucide-react`.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/package.json`
+- `apps/reponotes-vnext/package-lock.json`
+- `apps/reponotes-vnext/src/components/common/IconButton.tsx`
+- `apps/reponotes-vnext/src/components/layout/AppShell.tsx`
+- `apps/reponotes-vnext/src/components/layout/LeftRail.tsx`
+- `apps/reponotes-vnext/src/components/layout/RepositorySidebar.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `apps/reponotes-vnext/src/types/reponotes.ts`
+- `apps/reponotes-vnext/README.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O rail esquerdo passou de letras mockadas para icones reais do `lucide-react`, com logo pequeno `R` no topo, grupo principal de workspace e grupo inferior de utilitarios. Repository fica ativo por padrao. Search, Trash e Settings mudam o estado visual local e atualizam o cabecalho contextual da sidebar. Links/Graph, Tags, Tasks, Templates, Entities e Profile aparecem como placeholders futuros desabilitados, com opacidade reduzida e title claro. O rail foi ajustado para `52px`, com hover sutil e estado ativo roxo/azul.
+
+**Resultado do install:** `npm install` em `apps/reponotes-vnext` executado com sucesso; 268 pacotes auditados, 0 vulnerabilidades.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso de chunk grande do Crepe/CodeMirror continua presente: chunk principal de aproximadamente `1,690.59 kB` minificado (`534.36 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; HTTP 200 confirmado. No navegador embutido, o DOM confirmou 10 botoes no rail com SVG real, logo `R`, grid com coluna de `52px`, Repository ativo por padrao e itens futuros desabilitados. Cliques em Search, Trash e Settings trocaram o destaque ativo e atualizaram o contexto da sidebar.
+
+**Pendencias:** Implementar telas/estados reais para Search, Trash e Settings em rodadas futuras. Definir se os itens futuros devem permanecer visiveis desabilitados ou ficar escondidos ate terem funcao real. O bundle do editor visual ainda precisa de lazy loading/code splitting.
+
+**Proximo passo sugerido:** Criar o layout real da area Search ou Trash dentro da sidebar, mantendo o rail como controlador visual de workspace sem implementar filesystem/Tauri ainda.

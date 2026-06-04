@@ -1,4 +1,7 @@
+import { useState } from "react";
+
 import type { MockNote } from "../../types/reponotes";
+import type { RailItemId } from "../../types/reponotes";
 import EditorWorkspace from "./EditorWorkspace";
 import InfoPanel from "./InfoPanel";
 import LeftRail from "./LeftRail";
@@ -21,12 +24,14 @@ export default function AppShell({
   onSelectNote,
   onToggleInfoPanel
 }: AppShellProps) {
+  const [activeRailItem, setActiveRailItem] = useState<RailItemId>("files");
+
   return (
     <main className={`app-shell ${isInfoPanelOpen ? "info-open" : "info-closed"}`}>
       <TopBar />
       <section className="workspace-grid">
-        <LeftRail />
-        <RepositorySidebar activeNoteId={activeNoteId} onSelectNote={onSelectNote} />
+        <LeftRail activeRailItem={activeRailItem} onSelectRailItem={setActiveRailItem} />
+        <RepositorySidebar activeNoteId={activeNoteId} activeRailItem={activeRailItem} onSelectNote={onSelectNote} />
         <EditorWorkspace
           activeNote={activeNote}
           activeNoteId={activeNoteId}

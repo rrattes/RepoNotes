@@ -1,21 +1,77 @@
 import { repositoryTree } from "../../data/mockRepository";
-import type { RepositoryNode } from "../../types/reponotes";
+import type { RailItemId, RepositoryNode } from "../../types/reponotes";
 import type { CSSProperties } from "react";
 
 type RepositorySidebarProps = {
   activeNoteId: string;
+  activeRailItem: RailItemId;
   onSelectNote: (noteId: string) => void;
 };
 
-export default function RepositorySidebar({ activeNoteId, onSelectNote }: RepositorySidebarProps) {
+const sidebarContext: Record<RailItemId, { label: string; title: string; description: string }> = {
+  files: {
+    label: "Repository",
+    title: "infra-docs",
+    description: "Local repository"
+  },
+  search: {
+    label: "Search",
+    title: "Search workspace",
+    description: "Visual placeholder"
+  },
+  links: {
+    label: "Links",
+    title: "Links graph",
+    description: "Future area"
+  },
+  tags: {
+    label: "Tags",
+    title: "Tags",
+    description: "Future area"
+  },
+  tasks: {
+    label: "Tasks",
+    title: "Tasks",
+    description: "Future area"
+  },
+  templates: {
+    label: "Templates",
+    title: "Templates",
+    description: "Future area"
+  },
+  entities: {
+    label: "Entities",
+    title: "Entities",
+    description: "Future area"
+  },
+  trash: {
+    label: "Trash",
+    title: "Trash",
+    description: "2 items"
+  },
+  settings: {
+    label: "Settings",
+    title: "Workspace settings",
+    description: "Visual placeholder"
+  },
+  profile: {
+    label: "Profile",
+    title: "Profile",
+    description: "Future area"
+  }
+};
+
+export default function RepositorySidebar({ activeNoteId, activeRailItem, onSelectNote }: RepositorySidebarProps) {
+  const context = sidebarContext[activeRailItem];
+
   return (
     <aside className="repository-sidebar">
       <section className="repository-card">
         <div>
-          <span className="label">Repository</span>
-          <strong>infra-docs</strong>
+          <span className="label">{context.label}</span>
+          <strong>{context.title}</strong>
         </div>
-        <span className="local-pill">Local repository</span>
+        <span className="local-pill">{context.description}</span>
       </section>
 
       <label className="file-search">

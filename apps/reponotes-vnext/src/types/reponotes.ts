@@ -4,9 +4,11 @@ export type RailItemId =
   | "links"
   | "tags"
   | "tasks"
+  | "templates"
   | "entities"
   | "trash"
-  | "settings";
+  | "settings"
+  | "profile";
 
 export type RepositoryNode = {
   id: string;

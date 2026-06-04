@@ -12,6 +12,7 @@ This app does not reuse or promote the old visual spike directly. It is a new pr
 - Modern CSS
 - Mocked in-memory repository data
 - Milkdown/Crepe visual Markdown editor
+- lucide-react icons for the Activity Bar / Left Rail
 
 Tauri is intentionally not initialized in this round.
 
@@ -34,7 +35,7 @@ http://127.0.0.1:5174/
 - Clean vNext folder structure.
 - Dark premium desktop-style shell.
 - Top bar with RepoNotes vNext identity, command/search box, and mocked window controls.
-- Left icon rail.
+- Left Activity Bar with real lucide icons, active state, disabled future items, and lower utility actions.
 - Repository navigation sidebar with mock tree and visible trash summary.
 - Compact note tabs with active-tab state.
 - Visual Markdown editor surface backed by Milkdown/Crepe.
@@ -69,6 +70,7 @@ Current limitations:
 - Repository data.
 - Tree navigation.
 - Tabs and selected note content.
+- Activity Bar sections beyond Repository/Search/Trash/Settings.
 - Visual Markdown editor persistence.
 - Autosave status.
 - Window controls.
