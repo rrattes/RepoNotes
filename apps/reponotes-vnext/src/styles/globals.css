@@ -433,46 +433,30 @@ kbd {
 
 .visual-editor {
   min-height: 0;
-  margin: 12px;
-  padding: 28px min(54px, 5vw);
-  overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: 14px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
   background:
-    linear-gradient(180deg, rgba(99, 102, 241, 0.05), transparent 180px),
-    var(--bg-editor);
-  box-shadow: var(--shadow);
+    linear-gradient(180deg, rgba(99, 102, 241, 0.035), transparent 220px),
+    var(--bg-main);
+  box-shadow: none;
 }
 
 .visual-editor-main {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 10px;
-  padding: 18px;
-}
-
-.document-editor-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border-soft);
-}
-
-.document-editor-header h1 {
-  margin: 10px 0 0;
-  color: #f8fafc;
-  font-size: 26px;
-  line-height: 1.15;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
+  padding: 0;
 }
 
 .milkdown-shell {
   min-height: 0;
   overflow: auto;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: #0a1018;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .milkdown-shell [data-milkdown-root] {
@@ -484,8 +468,10 @@ kbd {
 }
 
 .milkdown-shell .ProseMirror {
+  max-width: 980px;
   min-height: 100%;
-  padding: 26px min(48px, 4vw);
+  margin: 0 auto;
+  padding: 34px min(56px, 5vw) 72px;
   outline: none;
   color: var(--text);
   caret-color: var(--accent);
@@ -502,6 +488,16 @@ kbd {
 
 .milkdown-shell .ProseMirror h1 {
   font-size: 30px;
+}
+
+.milkdown-shell .ProseMirror h1:first-child {
+  margin-top: 0;
+  margin-bottom: 22px;
+  color: #ffffff;
+  font-size: clamp(34px, 4.5vw, 56px);
+  font-weight: 740;
+  letter-spacing: 0;
+  line-height: 1.05;
 }
 
 .milkdown-shell .ProseMirror h2 {
@@ -849,8 +845,8 @@ code {
   }
 
   .visual-editor {
-    margin: 10px;
-    padding: 22px 28px;
+    margin: 0;
+    padding: 0;
   }
 
   .two-column {

@@ -1597,3 +1597,33 @@
 **Pendencias:** Implementar telas/estados reais para Search, Trash e Settings em rodadas futuras. Definir se os itens futuros devem permanecer visiveis desabilitados ou ficar escondidos ate terem funcao real. O bundle do editor visual ainda precisa de lazy loading/code splitting.
 
 **Proximo passo sugerido:** Criar o layout real da area Search ou Trash dentro da sidebar, mantendo o rail como controlador visual de workspace sem implementar filesystem/Tauri ainda.
+
+## 2026-06-04 11:29:51 -03:00
+
+**Objetivo da rodada:** Simplificar a area central do Visual Markdown Editor no RepoNotes vNext, removendo titulo/metadata duplicados acima do editor e reduzindo a sensacao de janela dentro da janela.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `apps/reponotes-vnext/README.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O header externo do editor foi removido. A area central nao mostra mais `Application Documentation Pack`, `type`, `status` ou `owner` acima do Milkdown. O titulo visivel agora fica como primeiro bloco editavel do proprio documento. O CSS removeu bordas, radius, padding e shadow da moldura externa do editor e do shell Milkdown, deixando a superficie visual mais integrada ao workspace. O primeiro `h1` dentro do ProseMirror recebeu escala de titulo de documento, enquanto a toolbar/tabs permanecem como chrome compacto.
+
+**Resultado do install:** `npm install` em `apps/reponotes-vnext` executado com sucesso; dependencias atualizadas, 268 pacotes auditados, 0 vulnerabilidades.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror continua presente: chunk principal de aproximadamente `1,690.29 kB` minificado (`534.26 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; HTTP 200 confirmado.
+
+**Validacao visual/manual:** No navegador embutido, o DOM confirmou que `.document-editor-header` nao existe mais, nao ha badges/owner dentro de `.visual-editor`, `.milkdown-shell .ProseMirror` montou com `contenteditable="true"`, o unico `h1` central e `Application Documentation Pack` como bloco do documento, existem 3 abas, o botao de Info continua presente e as bordas de `.visual-editor` e `.milkdown-shell` ficaram em `0px`. Os textos de spike/debug continuam ausentes.
+
+**Status do working tree:** A rodada deixou alteracoes intencionais apenas em `apps/reponotes-vnext` e docs. Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
+
+**Pendencias:** Definir a experiencia real do Info panel para metadata editavel no vNext, validar frontmatter fora do corpo visual, medir lazy loading/code splitting do editor visual e decidir como persistir Markdown gerado via autosave sem expor debug na UI.
+
+**Riscos tecnicos:** Baixo para layout. O risco principal segue sendo arquitetural: Crepe ainda adiciona bundle grande e a spike continua em memoria, sem filesystem/Tauri/autosave real.
+
+**Proximo passo sugerido:** Fazer a proxima rodada vNext focada em frontmatter/autosave em memoria ou em code splitting/lazy loading do editor visual antes de promover Milkdown/Crepe como decisao final.

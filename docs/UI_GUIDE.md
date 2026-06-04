@@ -18,9 +18,9 @@ Core vNext rules:
 - No separate Preview mode in the initial vNext MVP.
 - No Split mode as the main initial MVP flow.
 - No primary Save button; autosave with debounce is the default.
-- The note title appears primarily in the tab.
-- Do not duplicate the note title as a large heading above the editor.
-- Tags live in the Info panel.
+- The note title appears in the tab for navigation and as the first editable block inside the document.
+- Do not duplicate the note title in an external editor header above the visual document.
+- Tags, owner, status, and other metadata live in the Info panel, not above the editor surface.
 - The Info panel is closed by default.
 - The left sidebar is for navigation only.
 - A left rail with icons provides compact access to workspace areas.
@@ -68,7 +68,7 @@ Core vNext rules:
 - Permanent delete controls must remain visually secondary and should gain explicit confirmation UX in a future round.
 - The only persistent top area inside the main content is the compact document context bar above the editor.
 - The document context bar shows real open note tabs, Editor/Preview/Split mode, split presets when applicable, and note-scoped actions.
-- The note title belongs to the active tab as the primary note identity. Do not duplicate it as a large editable heading above the editor.
+- The note title belongs to the active tab as navigation identity and to the first editable block inside the document as document content. Do not duplicate it in a separate editor header.
 - The full note path is secondary information and should live in the tab tooltip, the right-side Info panel, and the status bar. Avoid showing a large breadcrumb in the central editor header.
 - Note tabs are functional, not decorative: selecting a note opens a tab or activates the existing tab; duplicate tabs for the same note are not created.
 - Note tabs should remain compact, around `30px` high, with trimmed titles and a restrained close button. Long titles must not push editor mode controls or save actions out of view.
@@ -183,7 +183,8 @@ Core vNext rules:
 - Status bar: compact, around 38px to 42px, currently `38px`.
 - Editor column gets priority for all extra horizontal space.
 - Editor chrome should stay compact: document context bar around `34px`, no separate title row, and formatting toolbar around `34px` to `40px`.
-- Editor outer padding should stay tight, roughly `10px` to `12px`, so the writing area feels like the main workspace rather than a small card.
+- The vNext Visual Markdown editor should feel integrated into the workspace, not like a nested window/card. Avoid heavy borders, duplicated headers, or metadata badges above the document.
+- Editor outer padding should stay tight, roughly `10px` to `12px` around chrome, while the document body can use readable page padding inside the editable surface.
 
 ## Theme
 

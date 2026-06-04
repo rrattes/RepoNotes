@@ -39,6 +39,7 @@ http://127.0.0.1:5174/
 - Repository navigation sidebar with mock tree and visible trash summary.
 - Compact note tabs with active-tab state.
 - Visual Markdown editor surface backed by Milkdown/Crepe.
+- Integrated editor surface: the note title lives as the first editable document block instead of a duplicated external editor header.
 - Compact editor toolbar.
 - Info panel closed by default with local open/close state.
 - Status bar with mocked autosave state.
@@ -47,7 +48,7 @@ http://127.0.0.1:5174/
 
 The current editor surface uses `@milkdown/crepe` as a controlled Visual Markdown editing spike. It mounts a real ProseMirror/Milkdown editor with initial Markdown content in memory.
 
-The main UI is intentionally product-like: the visible center area shows the current document title and the visual editor, not spike/debug labels. Generated Markdown remains available internally through editor state and Crepe APIs for future autosave/export work, but it is not shown in the primary user experience.
+The main UI is intentionally product-like: tabs identify the open note for navigation, while the visible document title is the first editable block inside the Milkdown document. The center area does not repeat tags, owner, status, or a second title above the editor; metadata belongs in the Info panel. Generated Markdown remains available internally through editor state and Crepe APIs for future autosave/export work, but it is not shown in the primary user experience.
 
 This validates that:
 

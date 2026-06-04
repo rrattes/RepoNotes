@@ -69,17 +69,6 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
       aria-label="visual markdown editor"
       data-generated-markdown-length={markdown.length}
     >
-      <header className="document-editor-header">
-        <div>
-          <div className="document-badges">
-            <span>{note.type}</span>
-            <span>{note.status}</span>
-            <span>owner: {note.owner}</span>
-          </div>
-          <h1>{note.title}</h1>
-        </div>
-      </header>
-
       <section className="milkdown-shell" aria-label="Milkdown visual editor">
         <div ref={editorRootRef} />
       </section>
