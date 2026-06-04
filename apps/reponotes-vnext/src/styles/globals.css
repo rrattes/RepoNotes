@@ -471,7 +471,7 @@ kbd {
   max-width: 980px;
   min-height: 100%;
   margin: 0 auto;
-  padding: 34px min(56px, 5vw) 72px;
+  padding: 18px min(56px, 5vw) 72px;
   outline: none;
   color: var(--text);
   caret-color: var(--accent);

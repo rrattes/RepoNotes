@@ -1649,3 +1649,26 @@
 **Riscos:** Full web exige backend e seguranca mais serios. Controle de acesso amador e proibido. Expor dados privados publicamente esta fora do escopo do MVP. Criptografia client-side/zero-knowledge complica busca, exportacao e health score. Mobile exigira layout proprio com drawers/bottom sheets, nao compressao do layout desktop. Escopo pode crescer se backend, auth e editor visual avancarem sem fases pequenas.
 
 **Proximo passo sugerido:** Definir o contrato inicial `RepositoryService` / `StorageService` e uma proposta minima de backend API + SQLite para MVP local/private web, ainda sem expor publicamente.
+
+## 2026-06-04 15:40:47 -03:00
+
+**Objetivo da rodada:** Reduzir a margem superior do documento no Visual Markdown Editor para equilibrar melhor com a margem esquerda e aproximar o titulo da toolbar.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/TASK_LOG.md`
+
+**Resumo do ajuste visual:** O `padding-top` do `.milkdown-shell .ProseMirror` foi reduzido de `34px` para `18px`, mantendo o recuo lateral, o titulo como primeiro bloco editavel da nota e a superficie integrada sem header externo, borda, card ou janela interna.
+
+**Resultado do install:** `npm install` em `apps/reponotes-vnext` executado com sucesso; dependencias atualizadas, 268 pacotes auditados, 0 vulnerabilidades.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror continua presente: chunk principal de aproximadamente `1,690.29 kB` minificado (`534.26 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; HTTP 200 confirmado.
+
+**Validacao visual:** No navegador embutido, o DOM confirmou `.milkdown-shell .ProseMirror` com `contenteditable="true"`, `padding-top: 18px`, `padding-left: 56px`, titulo `Application Documentation Pack` como bloco do documento, sem `.document-editor-header`, sem badges no centro e com bordas de `.visual-editor`/`.milkdown-shell` em `0px`.
+
+**Observacoes:** Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
+
+**Proximo passo sugerido:** Validar a mesma composicao em alturas menores e, se necessario, ajustar responsivamente o padding interno do ProseMirror sem reintroduzir molduras.
