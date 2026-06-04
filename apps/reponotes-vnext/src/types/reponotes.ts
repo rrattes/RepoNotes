@@ -31,6 +31,7 @@ export type MockNote = {
   id: string;
   title: string;
   path: string;
+  initialMarkdown: string;
   type: string;
   status: string;
   owner: string;

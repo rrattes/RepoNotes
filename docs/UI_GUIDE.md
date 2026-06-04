@@ -13,6 +13,8 @@ Core vNext rules:
 - Visual Markdown Editor-first: the main editor is the product surface.
 - The user can type Markdown and see visual formatting while editing.
 - Clean Markdown remains the saved/exportable source format.
+- The current vNext visual editor is a controlled Milkdown/Crepe spike with Markdown kept in memory and a temporary generated-Markdown debug panel.
+- Do not treat the editor spike as final until Markdown round-trip, frontmatter boundaries, bundle size, and Tauri startup impact are validated.
 - No separate Preview mode in the initial vNext MVP.
 - No Split mode as the main initial MVP flow.
 - No primary Save button; autosave with debounce is the default.

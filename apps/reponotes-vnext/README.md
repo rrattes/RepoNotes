@@ -11,6 +11,7 @@ This app does not reuse or promote the old visual spike directly. It is a new pr
 - TypeScript
 - Modern CSS
 - Mocked in-memory repository data
+- Milkdown/Crepe visual Markdown editor spike
 
 Tauri is intentionally not initialized in this round.
 
@@ -41,12 +42,31 @@ http://127.0.0.1:5174/
 - Info panel closed by default with local open/close state.
 - Status bar with mocked autosave state.
 
+## Visual Markdown Editor Spike
+
+The current editor surface uses `@milkdown/crepe` as a controlled spike for Visual Markdown editing. It mounts a real ProseMirror/Milkdown editor with initial Markdown content in memory and shows a compact `Markdown gerado` debug panel below the editor so the generated Markdown can be inspected during manual validation.
+
+This spike validates that:
+
+- A visual editor can load clean Markdown.
+- Headings, blockquotes, tables, checklists, and fenced code blocks can be displayed as editable visual content.
+- Markdown can be read back from the editor in memory.
+
+Current limitations:
+
+- No filesystem integration.
+- No autosave.
+- No frontmatter boundary handling.
+- No Tauri shell.
+- No protected notes.
+- The production build passes, but Crepe currently adds a large JavaScript chunk. This must be measured before promoting the spike to product architecture.
+
 ## Mocked
 
 - Repository data.
 - Tree navigation.
 - Tabs and selected note content.
-- Visual Markdown editor content.
+- Visual Markdown editor persistence.
 - Autosave status.
 - Window controls.
 - Info panel metadata.
@@ -54,7 +74,7 @@ http://127.0.0.1:5174/
 
 ## Not Implemented Yet
 
-- Real Visual Markdown editor.
+- Final Visual Markdown editor architecture.
 - Tauri shell.
 - Filesystem access.
 - Persistence.
@@ -66,6 +86,6 @@ http://127.0.0.1:5174/
 
 ## Next Steps
 
-1. Interactive Visual Markdown Editor spike.
+1. Validate Milkdown/Crepe Markdown round-trip quality with frontmatter and larger technical notes.
 2. Tauri shell.
 3. Filesystem MVP.

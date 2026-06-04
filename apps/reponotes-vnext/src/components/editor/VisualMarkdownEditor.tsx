@@ -1,3 +1,7 @@
+import { useEffect, useRef, useState } from "react";
+import { Crepe } from "@milkdown/crepe";
+import "@milkdown/crepe/theme/frame-dark.css";
+
 import type { MockNote } from "../../types/reponotes";
 
 type VisualMarkdownEditorProps = {
@@ -5,75 +9,92 @@ type VisualMarkdownEditorProps = {
 };
 
 export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps) {
+  const editorRootRef = useRef<HTMLDivElement | null>(null);
+  const crepeRef = useRef<Crepe | null>(null);
+  const [markdown, setMarkdown] = useState(note.initialMarkdown);
+
+  useEffect(() => {
+    setMarkdown(note.initialMarkdown);
+  }, [note.id, note.initialMarkdown]);
+
+  useEffect(() => {
+    const root = editorRootRef.current;
+
+    if (!root) {
+      return;
+    }
+
+    root.innerHTML = "";
+
+    const crepe = new Crepe({
+      root,
+      defaultValue: note.initialMarkdown,
+      features: {
+        [Crepe.Feature.AI]: false,
+        [Crepe.Feature.ImageBlock]: false,
+        [Crepe.Feature.Latex]: false,
+        [Crepe.Feature.TopBar]: false
+      },
+      featureConfigs: {
+        [Crepe.Feature.Placeholder]: {
+          text: "Digite Markdown aqui..."
+        }
+      }
+    });
+
+    crepe.on((listener) => {
+      listener.markdownUpdated((_, nextMarkdown) => {
+        setMarkdown(nextMarkdown);
+      });
+    });
+
+    crepeRef.current = crepe;
+    crepe.create().then(() => {
+      setMarkdown(crepe.getMarkdown());
+    }).catch((error: unknown) => {
+      console.error("Failed to create Milkdown editor", error);
+    });
+
+    return () => {
+      crepeRef.current = null;
+      crepe.destroy().catch((error: unknown) => {
+        console.error("Failed to destroy Milkdown editor", error);
+      });
+    };
+  }, [note.id, note.initialMarkdown]);
+
+  const hasGeneratedMarkdown = markdown.trim().length > 0;
+
   return (
-    <article className="visual-editor" aria-label="visual markdown editor mock">
-      <header className="document-header">
-        <div className="document-badges">
-          <span>{note.type}</span>
-          <span>{note.status}</span>
-          <span>owner: {note.owner}</span>
+    <article className="visual-editor visual-editor-spike" aria-label="visual markdown editor spike">
+      <header className="spike-header">
+        <div>
+          <div className="document-badges">
+            <span>{note.type}</span>
+            <span>{note.status}</span>
+            <span>owner: {note.owner}</span>
+          </div>
+          <h1>Visual Markdown Editor Spike</h1>
+          <p>
+            Milkdown/Crepe editor visual em memoria. O Markdown gerado abaixo e a fonte limpa que seria salva em
+            rodadas futuras.
+          </p>
         </div>
-        <h1>{note.title}</h1>
+        <div className={`spike-verdict ${hasGeneratedMarkdown ? "ok" : "warning"}`}>
+          <span>{hasGeneratedMarkdown ? "Markdown round-trip ativo" : "Aguardando Markdown"}</span>
+        </div>
       </header>
 
-      <section className="callout">
-        <strong>Operational documentation pack</strong>
-        <p>
-          Este pacote organiza a documentacao tecnica operacional de uma aplicacao, incluindo visao geral,
-          arquitetura, operacao, monitoramento, RACI e runbooks.
-        </p>
+      <section className="milkdown-shell" aria-label="Milkdown visual editor">
+        <div ref={editorRootRef} />
       </section>
 
-      <section className="document-section">
-        <h2>1. Visao Geral</h2>
-        <p>
-          O objetivo deste documento e manter uma fonte local, exportavel e revisavel sobre a aplicacao, seu
-          ambiente, seus donos e os processos criticos de operacao.
-        </p>
-      </section>
-
-      <section className="document-section">
-        <h2>2. Estrutura do Pack</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Documento</th>
-              <th>Objetivo</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {note.table.map((row) => (
-              <tr key={`${row.document}-${row.status}`}>
-                <td>{row.document}</td>
-                <td>{row.objective}</td>
-                <td>
-                  <span className={`status-chip ${row.status.toLowerCase()}`}>{row.status}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section className="document-section two-column">
-        <div>
-          <h2>3. Convencoes e Padroes</h2>
-          <p>
-            Use nomes consistentes, links internos para runbooks e metadados suficientes para governanca,
-            revisao e exportacao.
-          </p>
-          <pre><code>repo/applications/librenms/00-overview.md</code></pre>
-        </div>
-        <div>
-          <h2>4. Checklist de Prontidao</h2>
-          <ul className="readiness-list">
-            <li className="checked">Owner definido</li>
-            <li className="checked">Monitoramento documentado</li>
-            <li>Runbook critico criado</li>
-            <li>RACI revisada</li>
-          </ul>
-        </div>
+      <section className="markdown-debug-panel" aria-label="generated markdown debug panel">
+        <header>
+          <span>Markdown gerado</span>
+          <strong>{markdown.length} chars</strong>
+        </header>
+        <pre>{markdown}</pre>
       </section>
     </article>
   );

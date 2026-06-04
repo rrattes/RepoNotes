@@ -1,5 +1,33 @@
 import type { MockNote, NoteTab, RailItemId, RepositoryNode } from "../types/reponotes";
 
+export const visualMarkdownSpikeInitialMarkdown = `# Application Documentation Pack
+
+> Este pacote organiza a documentacao tecnica operacional de uma aplicacao, incluindo visao geral, arquitetura, operacao, monitoramento, RACI e runbooks.
+
+## 1. Visao Geral
+
+O objetivo deste documento e manter uma fonte local-first e exportavel para a documentacao da aplicacao.
+
+## 2. Estrutura do Pack
+
+| Documento | Objetivo | Status |
+|---|---|---|
+| 00-Overview | Visao geral da aplicacao | Ready |
+| 05-Monitoring | Sinais, alertas e dashboards | Draft |
+| 10-RACI | Responsabilidades operacionais | Missing |
+
+## 3. Checklist de Prontidao
+
+- [x] Owner definido
+- [x] Monitoramento documentado
+- [ ] Runbook critico criado
+- [ ] RACI revisada
+
+\`\`\`powershell
+dotnet test
+\`\`\`
+`;
+
 export const railItems: Array<{ id: RailItemId; label: string; icon: string }> = [
   { id: "files", label: "Files", icon: "F" },
   { id: "search", label: "Search", icon: "/" },
@@ -92,6 +120,7 @@ export const notesById: Record<string, MockNote> = {
     id: "overview",
     title: "Application Documentation Pack",
     path: noteTabs[0].path,
+    initialMarkdown: visualMarkdownSpikeInitialMarkdown,
     type: "application-pack",
     status: "Active",
     owner: "Platform Operations",
@@ -111,6 +140,20 @@ export const notesById: Record<string, MockNote> = {
     id: "pack",
     title: "Application Documentation Pack",
     path: noteTabs[1].path,
+    initialMarkdown: `# Application Documentation Pack Template
+
+## Purpose
+
+Use this folder-pack template to create operational application documentation with clean Markdown output.
+
+## Required Inputs
+
+- IBX / environment
+- Application name
+- Owner
+- Criticality
+- Status
+`,
     type: "application-pack",
     status: "Draft",
     owner: "Documentation Guild",
@@ -130,6 +173,13 @@ export const notesById: Record<string, MockNote> = {
     id: "raci",
     title: "RACI",
     path: noteTabs[2].path,
+    initialMarkdown: `# RACI
+
+| Activity | Responsible | Accountable | Consulted | Informed |
+|---|---|---|---|---|
+| Monitoring ownership | Platform Operations | Application Owner | SRE Lead | Service Desk |
+| Incident escalation | NOC | Application Owner | Security | Stakeholders |
+`,
     type: "raci",
     status: "Review",
     owner: "Platform Operations",

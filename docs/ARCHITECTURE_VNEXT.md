@@ -40,6 +40,26 @@ RepoNotes vNext should be a clean React/Vite/TypeScript application first, then 
 - Frontmatter should not become rich visual document content; it belongs in parsing/storage and the Info panel.
 - Any editor that produces messy Markdown should be rejected.
 
+### Visual Editor Spike: Milkdown/Crepe
+
+An initial vNext spike uses `@milkdown/crepe` inside the React/Vite shell to evaluate a visual Markdown-first editor without adding Tauri or filesystem access.
+
+Early findings:
+
+- Crepe integrates cleanly in the React shell as an isolated component mounted into a DOM root.
+- The spike can load Markdown from mock data and expose generated Markdown back to React state through Milkdown's markdown update listener.
+- Visual editing is promising for headings, blockquotes, lists/checklists, tables, links, inline formatting, and fenced code blocks.
+- The spike keeps Markdown in memory only; it does not prove autosave, file persistence, frontmatter preservation, protected notes, or multi-note synchronization.
+- The first production build passed, but Crepe pulled in a large JavaScript chunk due to editor/code features. Bundle size and code splitting must be evaluated before adopting it as the final editor stack.
+
+Next evaluation criteria:
+
+- Round-trip frontmatter without exposing YAML as rich body content.
+- Paste/edit behavior for operational Markdown documents.
+- Generated Markdown cleanliness for tables, checklists, links, and code blocks.
+- Bundle size and startup impact in a future Tauri shell.
+- Theming consistency with the approved RepoNotes dark UI.
+
 ## Autosave Strategy
 
 - vNext uses autosave with debounce instead of a primary Save button.

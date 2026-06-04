@@ -44,6 +44,8 @@ RepoNotes vNext will be rebuilt as a clean React/Vite/TypeScript application, wi
 - Confirm Markdown round-trip quality.
 - Validate headings, bold, italic, lists, checklist, quote, code, links, and frontmatter boundaries.
 - Reject approaches that generate messy Markdown or make manual Markdown editing unreliable.
+- Status: started with an isolated Milkdown/Crepe spike in `apps/reponotes-vnext/`.
+- Next validation: frontmatter boundaries, larger operational notes, Markdown cleanliness, and bundle/startup impact.
 
 ### Phase 3 — Tauri Desktop Shell
 

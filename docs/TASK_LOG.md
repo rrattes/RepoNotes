@@ -1506,3 +1506,37 @@
 **Riscos:** A UI ainda e mockada e pode esconder complexidade real de editor, autosave, filesystem e protected notes. O vNext nao deve copiar a spike antiga nem reimplementar todas as features do Avalonia de uma vez.
 
 **Proximo passo recomendado:** Iniciar a `Interactive Visual Markdown Editor spike` dentro do vNext, comparando candidatos de editor visual e qualidade de Markdown gerado antes de adicionar Tauri ou filesystem real.
+
+## 2026-06-04 11:03:04 -03:00
+
+**Objetivo da rodada:** Criar uma spike controlada de Visual Markdown Editor dentro do RepoNotes vNext, avaliando edicao visual/WYSIWYG-lite sem perder a estrategia Markdown-first.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/package.json`
+- `apps/reponotes-vnext/package-lock.json`
+- `apps/reponotes-vnext/README.md`
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/data/mockRepository.ts`
+- `apps/reponotes-vnext/src/types/reponotes.ts`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/ARCHITECTURE_VNEXT.md`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A superficie mockada do editor vNext foi substituida por uma spike real usando `@milkdown/crepe`. O editor carrega Markdown inicial em memoria, renderiza conteudo como documento visual editavel e atualiza um painel discreto `Markdown gerado` com o Markdown produzido pelo editor. O conteudo inicial cobre heading, blockquote, tabela, checklist e code fence. A documentacao agora registra que Milkdown/Crepe e uma hipotese tecnica promissora, mas ainda nao uma decisao final de arquitetura.
+
+**Resultado do restore/install:** `npm install` em `apps/reponotes-vnext` executado com sucesso; 267 pacotes auditados, 0 vulnerabilidades.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Vite/TypeScript passaram. O build emitiu aviso de chunk grande: um chunk minificado de aproximadamente `1,685.81 kB` (`532.65 kB` gzip), causado pela pilha Crepe/CodeMirror; isso deve ser avaliado antes de promover a spike.
+
+**Validacao local/dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; `Invoke-WebRequest` retornou HTTP 200. O navegador embutido confirmou `Visual Markdown Editor Spike`, DOM `.ProseMirror` do Milkdown, painel `Markdown gerado`, estado `Markdown round-trip ativo`, tabela, checklist e heading. Tambem foi feita edicao manual automatizada no editor visual; o texto inserido apareceu no documento e no painel de Markdown gerado.
+
+**Status do working tree:** A rodada deixou alteracoes intencionais apenas em `apps/reponotes-vnext` e docs. Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
+
+**Pendencias:** Validar frontmatter como fronteira fora do corpo visual, testar documentos tecnicos maiores, medir round-trip de tabelas/checklists/links/code blocks, avaliar code splitting ou configuracao Milkdown mais enxuta, medir startup/bundle em futura shell Tauri e definir se Crepe e editor final ou apenas referencia de spike.
+
+**Riscos tecnicos:** Bundle inicial pesado pode afetar startup desktop. O editor ainda esta em memoria e nao prova autosave, filesystem, tabs reais, protected notes, lixeira, exportacao ou metadata panel. A integracao direta com Crepe e simples, mas precisa de um contrato mais claro para estado por nota/aba antes de virar arquitetura.
+
+**Proximo passo sugerido:** Fazer uma segunda spike curta focada em Markdown round-trip: frontmatter preservado fora do editor visual, edicoes em tabelas/checklists/links/code blocks e medicao de bundle/startup com lazy loading.
