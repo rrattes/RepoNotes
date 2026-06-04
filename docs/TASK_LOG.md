@@ -1762,3 +1762,27 @@
 **Pendencias:** A gutter e visual por blocos/linhas principais, nao uma numeracao real linha-a-linha sincronizada com o layout do ProseMirror. Tambem nao ha sincronizacao de scroll fina entre gutter e conteudo longo.
 
 **Proximo passo sugerido:** Avaliar se a gutter deve evoluir para marcadores por bloco real derivados do documento, ou permanecer como detalhe visual ate o editor/estrutura de documento final estarem definidos.
+
+## 2026-06-04 16:06:10 -03:00
+
+**Objetivo da rodada:** Extrair split/recombine de frontmatter para util reutilizavel, validar os casos basicos de fronteira Markdown/frontmatter e registrar gutter real como backlog futuro.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/components/editor/markdownFrontmatter.ts`
+- `apps/reponotes-vnext/README.md`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A logica inline de frontmatter saiu do `VisualMarkdownEditor` e foi movida para `markdownFrontmatter.ts`, com funcoes pequenas para split, recombine, body-only editor Markdown e recomposicao futura para autosave. O README registra os quatro casos esperados: Markdown com frontmatter + body, Markdown sem frontmatter, frontmatter preservado ao recompor e body enviado ao editor iniciando no H1. Como o escopo de leitura desta rodada nao incluiu `package.json`, nenhum runner novo foi adicionado; a pendencia de teste unitario dedicado ficou documentada sem introduzir framework pesado.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror permanece: chunk principal de aproximadamente `1,690.94 kB` minificado (`534.45 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; a validacao no navegador embutido acessou a URL com sucesso.
+
+**Validacao:** O navegador embutido confirmou Milkdown montado com `contenteditable="true"`, `data-has-frontmatter="true"`, `data-frontmatter-boundary="body-only-editor"`, `data-generated-markdown-starts-with-frontmatter="true"`, corpo visual iniciando em `Application Documentation Pack`, sem YAML `title:` ou delimitadores `---`, e sem painel debug `Markdown gerado`.
+
+**Pendencias:** Adicionar runner de testes frontend e cobrir `markdownFrontmatter.ts` com unit tests reais assim que a estrategia de teste do vNext for escolhida. A gutter real/sincronizada por blocos/linhas do ProseMirror foi registrada no roadmap como backlog futuro.
+
+**Proximo passo sugerido:** Definir o contrato de autosave em memoria e o limite inicial de `StorageService`/`RepositoryService` para receber Markdown limpo recomposto sem acoplar a UI ao backend.

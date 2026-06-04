@@ -46,6 +46,7 @@ RepoNotes vNext is now a full web product direction built with React, Vite, and 
 - Confirm the editor can support operational documentation workflows without exposing raw debug UI.
 - Validate headings, bold, italic, lists, checklist, quote, code, links, tables, and larger technical notes.
 - Reject approaches that generate messy Markdown or make manual Markdown editing unreliable.
+- Backlog: replace the current visual gutter with a real synchronized gutter based on ProseMirror blocks/lines if the editor architecture supports it cleanly.
 - Status: started with an isolated Milkdown/Crepe spike in `apps/reponotes-vnext/`.
 
 ### Phase 3 - Markdown Round-trip And Frontmatter Boundary

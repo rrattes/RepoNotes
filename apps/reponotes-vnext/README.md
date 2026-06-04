@@ -59,6 +59,15 @@ This validates that:
 - Frontmatter can stay outside the visual document body.
 - Markdown can be read back from the editor in memory.
 
+The frontmatter split/recombine behavior now lives in a small reusable utility for future autosave/storage integration. The expected utility cases are:
+
+- Markdown with frontmatter plus body splits into preserved YAML and body-only editor Markdown.
+- Markdown without frontmatter remains unchanged as body Markdown.
+- Recombining preserved frontmatter and edited body returns clean Markdown for autosave/export.
+- Body Markdown sent to the visual editor starts at the first document block, usually the H1.
+
+A dedicated vNext test runner is still pending; no Vitest/Jest setup was added in this spike round to avoid introducing framework weight before the frontend testing strategy is chosen.
+
 Current limitations:
 
 - No filesystem integration.
@@ -66,6 +75,7 @@ Current limitations:
 - No Tauri shell.
 - No protected notes.
 - No visible Markdown debug panel by default.
+- No dedicated frontend test runner yet for editor utility unit tests.
 - The production build passes, but Crepe currently adds a large JavaScript chunk. This must be measured before promoting the spike to product architecture.
 
 ## Mocked

@@ -3,41 +3,11 @@ import { Crepe } from "@milkdown/crepe";
 import "@milkdown/crepe/theme/frame-dark.css";
 
 import type { MockNote } from "../../types/reponotes";
+import { combineMarkdownFrontmatter, splitMarkdownFrontmatter } from "./markdownFrontmatter";
 
 type VisualMarkdownEditorProps = {
   note: MockNote;
 };
-
-type MarkdownParts = {
-  body: string;
-  frontmatter: string;
-};
-
-const frontmatterPattern = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/;
-
-function splitMarkdownFrontmatter(markdown: string): MarkdownParts {
-  const match = markdown.match(frontmatterPattern);
-
-  if (!match) {
-    return {
-      body: markdown,
-      frontmatter: ""
-    };
-  }
-
-  return {
-    body: markdown.slice(match[0].length),
-    frontmatter: match[0].trimEnd()
-  };
-}
-
-function combineMarkdown(frontmatter: string, body: string) {
-  if (!frontmatter) {
-    return body;
-  }
-
-  return `${frontmatter}\n\n${body}`;
-}
 
 const editorGutterNumbers = Array.from({ length: 36 }, (_, index) => index + 1);
 
@@ -47,13 +17,13 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
   const [markdownParts, setMarkdownParts] = useState(() => splitMarkdownFrontmatter(note.initialMarkdown));
   const [markdown, setMarkdown] = useState(() => {
     const initialParts = splitMarkdownFrontmatter(note.initialMarkdown);
-    return combineMarkdown(initialParts.frontmatter, initialParts.body);
+    return combineMarkdownFrontmatter(initialParts.frontmatter, initialParts.body);
   });
 
   useEffect(() => {
     const nextParts = splitMarkdownFrontmatter(note.initialMarkdown);
     setMarkdownParts(nextParts);
-    setMarkdown(combineMarkdown(nextParts.frontmatter, nextParts.body));
+    setMarkdown(combineMarkdownFrontmatter(nextParts.frontmatter, nextParts.body));
   }, [note.id, note.initialMarkdown]);
 
   useEffect(() => {
@@ -83,13 +53,13 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
 
     crepe.on((listener) => {
       listener.markdownUpdated((_, nextMarkdown) => {
-        setMarkdown(combineMarkdown(markdownParts.frontmatter, nextMarkdown));
+        setMarkdown(combineMarkdownFrontmatter(markdownParts.frontmatter, nextMarkdown));
       });
     });
 
     crepeRef.current = crepe;
     crepe.create().then(() => {
-      setMarkdown(combineMarkdown(markdownParts.frontmatter, crepe.getMarkdown()));
+      setMarkdown(combineMarkdownFrontmatter(markdownParts.frontmatter, crepe.getMarkdown()));
     }).catch((error: unknown) => {
       console.error("Failed to create Milkdown editor", error);
     });
