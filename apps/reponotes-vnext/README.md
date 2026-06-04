@@ -11,7 +11,7 @@ This app does not reuse or promote the old visual spike directly. It is a new pr
 - TypeScript
 - Modern CSS
 - Mocked in-memory repository data
-- Milkdown/Crepe visual Markdown editor spike
+- Milkdown/Crepe visual Markdown editor
 
 Tauri is intentionally not initialized in this round.
 
@@ -37,16 +37,18 @@ http://127.0.0.1:5174/
 - Left icon rail.
 - Repository navigation sidebar with mock tree and visible trash summary.
 - Compact note tabs with active-tab state.
-- Visual Markdown Editor mock surface.
+- Visual Markdown editor surface backed by Milkdown/Crepe.
 - Compact editor toolbar.
 - Info panel closed by default with local open/close state.
 - Status bar with mocked autosave state.
 
-## Visual Markdown Editor Spike
+## Visual Markdown Editor
 
-The current editor surface uses `@milkdown/crepe` as a controlled spike for Visual Markdown editing. It mounts a real ProseMirror/Milkdown editor with initial Markdown content in memory and shows a compact `Markdown gerado` debug panel below the editor so the generated Markdown can be inspected during manual validation.
+The current editor surface uses `@milkdown/crepe` as a controlled Visual Markdown editing spike. It mounts a real ProseMirror/Milkdown editor with initial Markdown content in memory.
 
-This spike validates that:
+The main UI is intentionally product-like: the visible center area shows the current document title and the visual editor, not spike/debug labels. Generated Markdown remains available internally through editor state and Crepe APIs for future autosave/export work, but it is not shown in the primary user experience.
+
+This validates that:
 
 - A visual editor can load clean Markdown.
 - Headings, blockquotes, tables, checklists, and fenced code blocks can be displayed as editable visual content.
@@ -59,6 +61,7 @@ Current limitations:
 - No frontmatter boundary handling.
 - No Tauri shell.
 - No protected notes.
+- No visible Markdown debug panel by default.
 - The production build passes, but Crepe currently adds a large JavaScript chunk. This must be measured before promoting the spike to product architecture.
 
 ## Mocked

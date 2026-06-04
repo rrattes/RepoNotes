@@ -63,38 +63,25 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
     };
   }, [note.id, note.initialMarkdown]);
 
-  const hasGeneratedMarkdown = markdown.trim().length > 0;
-
   return (
-    <article className="visual-editor visual-editor-spike" aria-label="visual markdown editor spike">
-      <header className="spike-header">
+    <article
+      className="visual-editor visual-editor-main"
+      aria-label="visual markdown editor"
+      data-generated-markdown-length={markdown.length}
+    >
+      <header className="document-editor-header">
         <div>
           <div className="document-badges">
             <span>{note.type}</span>
             <span>{note.status}</span>
             <span>owner: {note.owner}</span>
           </div>
-          <h1>Visual Markdown Editor Spike</h1>
-          <p>
-            Milkdown/Crepe editor visual em memoria. O Markdown gerado abaixo e a fonte limpa que seria salva em
-            rodadas futuras.
-          </p>
-        </div>
-        <div className={`spike-verdict ${hasGeneratedMarkdown ? "ok" : "warning"}`}>
-          <span>{hasGeneratedMarkdown ? "Markdown round-trip ativo" : "Aguardando Markdown"}</span>
+          <h1>{note.title}</h1>
         </div>
       </header>
 
       <section className="milkdown-shell" aria-label="Milkdown visual editor">
         <div ref={editorRootRef} />
-      </section>
-
-      <section className="markdown-debug-panel" aria-label="generated markdown debug panel">
-        <header>
-          <span>Markdown gerado</span>
-          <strong>{markdown.length} chars</strong>
-        </header>
-        <pre>{markdown}</pre>
       </section>
     </article>
   );

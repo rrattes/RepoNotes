@@ -1540,3 +1540,28 @@
 **Riscos tecnicos:** Bundle inicial pesado pode afetar startup desktop. O editor ainda esta em memoria e nao prova autosave, filesystem, tabs reais, protected notes, lixeira, exportacao ou metadata panel. A integracao direta com Crepe e simples, mas precisa de um contrato mais claro para estado por nota/aba antes de virar arquitetura.
 
 **Proximo passo sugerido:** Fazer uma segunda spike curta focada em Markdown round-trip: frontmatter preservado fora do editor visual, edicoes em tabelas/checklists/links/code blocks e medicao de bundle/startup com lazy loading.
+
+## 2026-06-04 11:14:55 -03:00
+
+**Objetivo da rodada:** Limpar a UI principal do Visual Markdown Editor no vNext, removendo elementos de spike/debug visiveis ao usuario.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `apps/reponotes-vnext/README.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A area central deixou de exibir `Visual Markdown Editor Spike`, texto explicativo sobre Milkdown/Crepe, badge `Markdown round-trip ativo` e painel `Markdown gerado`. O titulo principal agora usa o titulo real da nota mockada, o editor visual ocupa a maior parte da area central e o Markdown gerado continua disponivel tecnicamente em memoria/Crepe, sem aparecer na UI principal. O README registra que a experiencia principal foi limpa para parecer produto e que o debug Markdown nao fica visivel por padrao.
+
+**Resultado do install:** `npm install` em `apps/reponotes-vnext` executado com sucesso; dependencias atualizadas, 267 pacotes auditados, 0 vulnerabilidades.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso de chunk grande do Crepe/CodeMirror continua presente: chunk principal de aproximadamente `1,685.25 kB` minificado (`532.40 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; HTTP 200 confirmado. O navegador embutido confirmou que `Application Documentation Pack` aparece como titulo, `.ProseMirror` do Milkdown monta, e os textos `Visual Markdown Editor Spike`, `Markdown round-trip ativo`, `Markdown gerado` e a explicacao tecnica sobre Milkdown/Crepe nao aparecem mais na UI.
+
+**Pendencias:** Avaliar se o acesso interno ao Markdown gerado deve virar painel dev gated por flag, ferramenta de teste ou API de autosave. Continuam pendentes frontmatter fora do corpo visual, round-trip com documentos maiores e reducao/lazy loading do bundle do editor.
+
+**Riscos tecnicos:** Baixo para UI; a mudanca remove somente diagnosticos visiveis. O risco principal continua sendo de arquitetura: Crepe ainda precisa de validacao de bundle/startup, frontmatter e persistencia antes de ser promovido para editor final.
+
+**Proximo passo sugerido:** Implementar uma validacao de round-trip controlada para frontmatter + tabelas/checklists/links/code blocks e decidir como expor o Markdown gerado para autosave sem poluir a UI.
