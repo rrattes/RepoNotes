@@ -1807,3 +1807,33 @@
 **Validacao manual de foco:** A sequencia titulo, duplo clique no titulo, clique no blockquote/primeiro texto e clique fora do editor manteve as mesmas coordenadas de `.ProseMirror`, H1, blockquote, paragrafo e gutter. O H1 permaneceu em `font-size: 30px`, `line-height: 36px`, margem `0px 0px 22px`, e o documento manteve padding `18px 56px 72px 44px` em todos os estados medidos.
 
 **Proximo passo sugerido:** Validar em mais resolucoes e, se ainda aparecer algum shift manual dificil de reproduzir, inspecionar classes dinamicas especificas emitidas pelo Crepe durante composicao/seleção com uma amostra de documento maior.
+
+## 2026-06-04 16:25:06 -03:00
+
+**Objetivo da rodada:** Diagnosticar o layout shift do editor visual que ainda aparece no navegador real ao alternar entre sem foco, foco no H1 e foco em paragrafo.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** Foi adicionado um modo diagnostico somente em DEV, ativado por `?debugLayout=1`. Quando ativo, o editor mede e mostra em overlay discreta, alem de enviar `console.table`, os dados de `.editor-gutter`, `.milkdown-shell`, `.ProseMirror`, primeiro `h1`, primeiro `p` e primeiro `blockquote`. As medidas incluem `x`, `y`, `width`, `height`, `margin-left`, `margin-top`, `padding-left`, `padding-top`, `scrollLeft`, `scrollTop`, `transform`, `font-size`, `line-height` e `className`. Tambem foram adicionados os toggles `hideGutter=1` e `flatEditor=1`.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,694.16 kB` minificado (`535.26 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` ficou disponivel em `http://127.0.0.1:5174/`; validacao por navegador interno acessou a aplicacao com sucesso.
+
+**Validacao do diagnostico:** Sem query string, a UI normal nao exibiu overlay nem classes de debug. Com `?debugLayout=1`, a overlay apareceu com 6 linhas de medicao. Com `?debugLayout=1&hideGutter=1`, a gutter ficou `display: none`, a grade mudou de `52px 452px` para `0px 504px` e o editor expandiu para ocupar a largura liberada. Com `?debugLayout=1&flatEditor=1`, a classe `debug-flat-editor` foi aplicada sem alterar a geometria medida.
+
+**hideGutter mudou o comportamento?:** Sim, mas apenas de forma esperada para o teste: removeu a gutter e deslocou/expandiu o conteudo pela largura de `52px` liberada. Nao houve evidencia automatizada de shift causado por foco nesse modo.
+
+**flatEditor mudou o comportamento?:** Nao na validacao automatizada. `x`, `y`, largura, altura, margens, paddings, fonte, line-height e transform permaneceram equivalentes ao modo debug normal.
+
+**Propriedades que mudaram:** Entre modo normal e `hideGutter`, mudaram `grid-template-columns`, `display` da gutter, `x` e largura dos elementos do editor pela remocao intencional da coluna. Durante clique por coordenadas em H1 e paragrafo, as medidas de `x`, `y`, `margin`, `padding`, `font-size`, `line-height`, `transform`, `scrollLeft` e `scrollTop` permaneceram estaveis no navegador interno.
+
+**Conclusao provavel:** A validacao automatizada ainda nao reproduz o salto manual observado pelo usuario. A instrumentacao agora permite capturar a causa diretamente no navegador real: se o salto ocorrer, a overlay/console deve indicar se a mudanca vem de `x/y`, margin/padding, scroll interno, transform, tamanho de fonte ou classe dinamica emitida pelo Milkdown/Crepe.
+
+**Pendencias:** Reproduzir manualmente em `http://127.0.0.1:5174/?debugLayout=1`, comparar com `&hideGutter=1` e `&flatEditor=1`, e aplicar uma correcao CSS direcionada somente depois de identificar qual propriedade muda no momento do salto.
+
+**Proximo passo sugerido:** Usar a overlay de diagnostico no navegador onde o problema aparece, anotar a linha/propriedade que muda ao clicar no H1/paragrafo e corrigir a causa especifica em uma rodada curta.
