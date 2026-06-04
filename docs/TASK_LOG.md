@@ -1474,3 +1474,35 @@
 **Riscos:** Tentar migrar tudo de uma vez pode gerar uma reescrita fragil. Promover a spike visual diretamente pode carregar mockups e atalhos ruins para produto. WYSIWYG/Visual Markdown pode gerar Markdown ruim se a biblioteca for mal escolhida. Password Protected Notes complica busca, autosave, exportacao, links internos, lixeira e health score. O filesystem via Tauri precisa de contrato limpo. O escopo pode crescer demais se as fases nao forem respeitadas.
 
 **Proximo passo recomendado:** Criar `apps/reponotes-vnext/` limpo com React/Vite/TypeScript e layout baseado na imagem definitiva, usando mock data e sem filesystem real.
+
+## 2026-06-04 10:47:26 -03:00
+
+**Objetivo da rodada:** Criar a base limpa do RepoNotes vNext em `apps/reponotes-vnext/` usando React, Vite e TypeScript, com layout inicial baseado na direcao visual definitiva, mock data e sem filesystem real.
+
+**Pasta criada:** `apps/reponotes-vnext/`
+
+**Stack usada:** React 19, Vite 7, TypeScript 5 e CSS moderno. Tauri, backend, filesystem, persistencia e biblioteca WYSIWYG real nao foram adicionados nesta rodada.
+
+**Arquivos principais criados:** `package.json`, `vite.config.ts`, `tsconfig.json`, `index.html`, `README.md`, `src/main.tsx`, `src/app/App.tsx`, componentes em `src/components/layout`, `src/components/tabs`, `src/components/editor`, `src/components/common`, mock data em `src/data/mockRepository.ts`, tipos em `src/types/reponotes.ts` e estilos em `src/styles/theme.css`/`src/styles/globals.css`.
+
+**Resumo visual:** A UI inicial possui top bar compacta com `RepoNotes vNext`, command box e controles de janela mockados; rail esquerdo de 48px com icones; sidebar apenas para navegacao com repositorio `infra-docs`, busca, arvore mockada e lixeira visivel; abas compactas com estado ativo; workspace central com toolbar e Visual Markdown Editor mockado; InfoPanel fechado por padrao com botao discreto para abrir; tags dentro do InfoPanel; status bar com `All changes saved locally`, repo/branch, palavras e zoom.
+
+**Comandos executados:**
+
+- `npm install`
+- `npm run build`
+- `npm run dev -- --port 5174`
+- Validacao local de `http://127.0.0.1:5174/`
+- Validacao no navegador embutido da abertura da UI, troca de aba e abertura do InfoPanel
+- `git status --short`
+- `git diff --stat`
+
+**Resultado do build:** `npm run build` executado com sucesso; TypeScript e Vite build passaram.
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; `Invoke-WebRequest` retornou HTTP 200. No navegador embutido, a UI abriu, exibiu brand/repo/editor/status/lixeira, permitiu trocar para a aba `Application Documentation Pack.md` e abrir o InfoPanel com tags/actions.
+
+**Pendencias:** Implementar uma spike real de Visual Markdown Editor interativo, definir biblioteca/estrategia de Markdown round-trip, adicionar Tauri shell, criar contrato de filesystem local e substituir mock data por servicos reais em fases futuras.
+
+**Riscos:** A UI ainda e mockada e pode esconder complexidade real de editor, autosave, filesystem e protected notes. O vNext nao deve copiar a spike antiga nem reimplementar todas as features do Avalonia de uma vez.
+
+**Proximo passo recomendado:** Iniciar a `Interactive Visual Markdown Editor spike` dentro do vNext, comparando candidatos de editor visual e qualidade de Markdown gerado antes de adicionar Tauri ou filesystem real.
