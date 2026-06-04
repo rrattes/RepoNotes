@@ -426,9 +426,34 @@ kbd {
 
 .visual-editor-main {
   display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
   gap: 0;
   padding: 0;
+}
+
+.editor-gutter {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  min-height: 0;
+  padding: 23px 10px 72px 0;
+  border-right: 1px solid rgba(31, 41, 55, 0.68);
+  background:
+    linear-gradient(180deg, rgba(99, 102, 241, 0.028), transparent 220px),
+    rgba(8, 13, 20, 0.42);
+  color: rgba(148, 163, 184, 0.42);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 11px;
+  line-height: 1;
+  pointer-events: none;
+  text-align: right;
+  user-select: none;
+}
+
+.editor-gutter span {
+  display: block;
+  height: 17px;
 }
 
 .milkdown-shell {
@@ -450,8 +475,8 @@ kbd {
 .milkdown-shell .ProseMirror {
   max-width: 980px;
   min-height: 100%;
-  margin: 0 auto;
-  padding: 18px min(56px, 5vw) 72px;
+  margin: 0 auto 0 0;
+  padding: 18px min(56px, 5vw) 72px 44px;
   outline: none;
   color: var(--text);
   caret-color: var(--accent);
@@ -474,10 +499,26 @@ kbd {
   margin-top: 0;
   margin-bottom: 22px;
   color: #ffffff;
-  font-size: clamp(34px, 4.5vw, 56px);
+  font-size: clamp(32px, 2.7vw, 42px);
   font-weight: 740;
   letter-spacing: 0;
-  line-height: 1.05;
+  line-height: 1.1;
+  transform: none;
+}
+
+.milkdown-shell .ProseMirror-focused h1:first-child,
+.milkdown-shell .ProseMirror h1:first-child:focus,
+.milkdown-shell .ProseMirror h1:first-child.ProseMirror-selectednode,
+.milkdown-shell .ProseMirror .ProseMirror-selectednode h1:first-child {
+  margin-top: 0 !important;
+  margin-bottom: 22px !important;
+  font-size: clamp(32px, 2.7vw, 42px) !important;
+  line-height: 1.1 !important;
+  transform: none !important;
+}
+
+.milkdown-shell .ProseMirror-selectednode {
+  transform: none !important;
 }
 
 .milkdown-shell .ProseMirror h2 {
@@ -518,10 +559,6 @@ kbd {
 
 .milkdown-shell .ProseMirror table {
   margin: 12px 0;
-}
-
-.milkdown-shell .ProseMirror-selectednode {
-  outline: 1px solid var(--accent);
 }
 
 .document-header {

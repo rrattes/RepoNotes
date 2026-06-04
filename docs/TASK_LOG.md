@@ -1740,3 +1740,25 @@
 **Observacoes:** Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
 
 **Proximo passo sugerido:** Adicionar testes automatizados pequenos para split/recombine de frontmatter e definir o contrato de autosave que recebera Markdown limpo recomposto sem expor painel debug na UI principal.
+
+## 2026-06-04 16:00:18 -03:00
+
+**Objetivo da rodada:** Adicionar uma gutter/barra discreta de numeracao ao editor visual e estabilizar o tamanho do titulo/H1 durante foco, selecao, edicao e duplo clique.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O `VisualMarkdownEditor` recebeu uma gutter visual nao editavel, fora do corpo do Milkdown/ProseMirror, com numeracao discreta em coluna lateral. O layout do editor passou a usar uma grade com gutter e documento. O CSS do primeiro `h1` foi estabilizado para impedir crescimento visual em estados focado/selecionado, removendo transform e fixando tamanho/line-height consistentes.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror permanece: chunk principal de aproximadamente `1,690.94 kB` minificado (`534.45 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; a validacao no navegador embutido acessou a URL com sucesso.
+
+**Validacao visual:** O navegador embutido confirmou `.editor-gutter` existente, `aria-hidden="true"`, `pointer-events: none`, `user-select: none`, gutter alinhada antes do `.ProseMirror`, editor com `contenteditable="true"` e sem header duplicado. O H1 `Application Documentation Pack` permaneceu com `font-size: 30px`, `line-height: 36px`, `transform: none` e mesma altura antes e depois do duplo clique.
+
+**Pendencias:** A gutter e visual por blocos/linhas principais, nao uma numeracao real linha-a-linha sincronizada com o layout do ProseMirror. Tambem nao ha sincronizacao de scroll fina entre gutter e conteudo longo.
+
+**Proximo passo sugerido:** Avaliar se a gutter deve evoluir para marcadores por bloco real derivados do documento, ou permanecer como detalhe visual ate o editor/estrutura de documento final estarem definidos.

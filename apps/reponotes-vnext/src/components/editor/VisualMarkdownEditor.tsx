@@ -39,6 +39,8 @@ function combineMarkdown(frontmatter: string, body: string) {
   return `${frontmatter}\n\n${body}`;
 }
 
+const editorGutterNumbers = Array.from({ length: 36 }, (_, index) => index + 1);
+
 export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps) {
   const editorRootRef = useRef<HTMLDivElement | null>(null);
   const crepeRef = useRef<Crepe | null>(null);
@@ -109,6 +111,11 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
       data-frontmatter-boundary={markdownParts.frontmatter ? "body-only-editor" : "none"}
       data-generated-markdown-starts-with-frontmatter={markdown.startsWith("---\n") ? "true" : "false"}
     >
+      <aside className="editor-gutter" aria-hidden="true">
+        {editorGutterNumbers.map((number) => (
+          <span key={number}>{number}</span>
+        ))}
+      </aside>
       <section className="milkdown-shell" aria-label="Milkdown visual editor">
         <div ref={editorRootRef} />
       </section>
