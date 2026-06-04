@@ -1627,3 +1627,25 @@
 **Riscos tecnicos:** Baixo para layout. O risco principal segue sendo arquitetural: Crepe ainda adiciona bundle grande e a spike continua em memoria, sem filesystem/Tauri/autosave real.
 
 **Proximo passo sugerido:** Fazer a proxima rodada vNext focada em frontmatter/autosave em memoria ou em code splitting/lazy loading do editor visual antes de promover Milkdown/Crepe como decisao final.
+
+## 2026-06-04 15:36:03 -03:00
+
+**Objetivo da rodada:** Registrar a mudanca estrategica do RepoNotes vNext para full web como direcao principal.
+
+**Decisao registrada:** RepoNotes vNext deixa de priorizar Tauri/desktop e passa a ser um produto web-first. O frontend continua React/Vite/TypeScript. Tauri fica como opcao futura/alternativa, nao como fase principal. O produto passa a exigir backend web, banco e contratos de servico para repositorio/storage. SQLite pode atender o MVP pessoal/local; PostgreSQL fica como caminho futuro para instalacoes servidor/multiusuario. Ghost nao sera backend principal e pode ser considerado apenas como destino futuro de publicacao/exportacao.
+
+**Arquivos alterados:**
+
+- `docs/PRODUCT.md`
+- `docs/ROADMAP.md`
+- `docs/ARCHITECTURE_VNEXT.md`
+- `docs/UI_GUIDE.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** A documentacao agora define vNext como web-first technical documentation workspace. O roadmap foi reorganizado em fases full web, incluindo arquitetura web, validacao do editor visual, backend API, banco local, modelo de seguranca/auth, CRUD, autosave, metadata, Application Documentation Pack, health score, review cycle, RACI, runbooks, handover, broken links, entities, export, protected notes e deployment/backup. A arquitetura registra backend API futuro, SQLite MVP, PostgreSQL futuro, auth/security boundary, audit log futuro, proibicao de exposicao publica no MVP, Ghost fora do core e estrategia de notas protegidas com preferencia por criptografia client-side/zero-knowledge. O UI guide foi ajustado para linguagem de workspace web e removeu controles de janela como elemento essencial do vNext.
+
+**Resultado do build/test:** Not run, documentation-only change.
+
+**Riscos:** Full web exige backend e seguranca mais serios. Controle de acesso amador e proibido. Expor dados privados publicamente esta fora do escopo do MVP. Criptografia client-side/zero-knowledge complica busca, exportacao e health score. Mobile exigira layout proprio com drawers/bottom sheets, nao compressao do layout desktop. Escopo pode crescer se backend, auth e editor visual avancarem sem fases pequenas.
+
+**Proximo passo sugerido:** Definir o contrato inicial `RepositoryService` / `StorageService` e uma proposta minima de backend API + SQLite para MVP local/private web, ainda sem expor publicamente.

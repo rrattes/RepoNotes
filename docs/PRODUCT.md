@@ -2,7 +2,7 @@
 
 ## Purpose
 
-RepoNotes is a Windows desktop, local-first documentation application for technical operations. RepoNotes vNext will be rebuilt with React, Vite, and TypeScript, with Tauri planned after the frontend shell and editor strategy are validated.
+RepoNotes is a local-first documentation application for technical operations. RepoNotes vNext is now planned as a full web product first, built with React, Vite, and TypeScript, with a backend API and local/server database architecture added after the visual editor strategy is validated.
 
 The existing Avalonia application remains the functional reference and legacy MVP. It is not the base for vNext product UI work.
 
@@ -12,20 +12,23 @@ The goal is not to compete commercially as a generic note-taking app against Obs
 
 - Developers, SREs, infrastructure teams, technical operators, and application owners maintaining operational documentation.
 - Teams documenting applications, environments, runbooks, RACI, handovers, incidents, operational procedures, and governance material.
-- Users who prefer local files, predictable desktop workflows, and exportable Markdown over cloud-first tools.
+- Users who prefer predictable local or private web workflows, browser access, and exportable Markdown over cloud-first generic note tools.
 
 ## Product Principles
 
 - Local-first by default.
+- Web-first vNext direction: browser access is the primary product path.
 - Repository-oriented organization.
 - Visual Markdown Editor-first in vNext, while keeping clean Markdown as the primary saved/exportable format.
 - Markdown remains portable and editable outside RepoNotes.
 - Lightweight technical entities enrich documentation with practical inventory context.
 - Optional user-managed encryption protects local content with a password created by the user, independent of Windows or the PC account.
+- Password protected notes should prioritize client-side / zero-knowledge encryption when possible.
 - Autosave with debounce replaces a primary Save button in the vNext MVP.
-- Desktop productivity over marketing polish.
+- Technical documentation productivity over marketing polish.
 - Small, verifiable increments.
-- No login, cloud, AI, sync, or database unless explicitly requested.
+- Do not use Ghost as the core backend. Ghost may be considered later only as a publication/export destination.
+- Do not expose private data publicly without serious server-side security architecture.
 
 ## vNext Product Direction
 
@@ -42,7 +45,26 @@ RepoNotes vNext is a local-first operational documentation editor, not a generic
 
 The vNext MVP starts with a definitive dark premium UI, a clean React/Vite/TypeScript shell, and a Visual Markdown Editor-first workflow. The user should be able to type Markdown and see the visual effect while editing. A separate Preview mode and Split mode are not primary MVP concepts for vNext.
 
+The strategic direction has changed from desktop/Tauri-first to full web-first. Tauri is no longer the main path; it remains a possible future wrapper or alternative packaging option. The web direction is intended to make RepoNotes easier to use from a browser, including corporate computers where installing desktop software may be difficult, and to keep a path open for future mobile access.
+
+RepoNotes remains personal/local-first in philosophy, but vNext now requires its own web architecture: backend API, storage abstraction, database, security model, and deployment/backup strategy. A personal/local MVP may start on localhost or a private network with SQLite and without complex authentication. If the app is exposed beyond localhost/private network, strong authentication, server-side authorization, TLS, and audit logging become mandatory.
+
 The approved visual direction prioritizes maximum writing area, compact tabs, a left navigation sidebar with icon rail, an Info panel closed by default, tags inside the Info panel, autosave status, and no non-functional buttons.
+
+## Full Web Direction And Security Boundaries
+
+- Frontend remains React + Vite + TypeScript.
+- Backend web API is required for the product path.
+- SQLite is acceptable for a personal/local MVP.
+- PostgreSQL is the likely future database for server or multi-user installations.
+- `RepositoryService` and `StorageService` abstractions should prevent the UI from coupling directly to a backend or database implementation.
+- Ghost must not be used as the primary backend or content store.
+- Ghost may be considered later only as a publication/export target.
+- MVP must not be exposed on the public internet.
+- Localhost/private-network use may start without complex authentication, as long as private data is not publicly reachable.
+- Public or broader network exposure requires strong authentication, server-side authorization, TLS, and audit logging.
+- Amateur access control is prohibited.
+- Password Protected Notes remain in the plan and should prefer client-side / zero-knowledge encryption where practical.
 
 ## Core Differentiators
 
@@ -121,23 +143,23 @@ Search, preview, indexing, and export must respect the locked/unlocked state of 
 
 ## MVP Scope
 
-- Avalonia UI desktop shell.
-- MVVM structure.
-- Mocked repository tree and notes.
-- Three-column layout: sidebar, editor, preview/info panel.
-- Product requirement for lightweight technical entities, to be implemented incrementally after core local-note workflows are stable.
-- Product requirement for optional user-managed encryption, to be designed after core local-note workflows are stable.
-- Dark premium productivity interface.
-- Buildable .NET solution with tests.
+- React/Vite/TypeScript web workspace.
+- Visual Markdown Editor-first writing flow.
+- Backend API MVP with a clean repository/storage contract.
+- SQLite-backed personal/local database MVP.
+- Browser-first dark premium productivity interface.
+- Left rail, repository sidebar, visual editor, closed-by-default Info panel, visible trash, metadata/tags, and autosave status.
+- Product requirement for lightweight technical entities, to be implemented incrementally after core note workflows are stable.
+- Product requirement for optional user-managed encryption, to be designed after the core note workflow, storage model, and security model are stable.
 
 ## Out Of Scope For Now
 
-- Authentication.
 - Cloud storage.
 - Synchronization.
 - AI features.
-- Database persistence.
 - Marketplace/plugin architecture.
+- Public internet deployment for the MVP.
+- Amateur or purely client-side access control for private data.
 - Full DCIM/IPAM replacement features such as rack management, cabling, patch panels, VLAN lifecycle, complete IPAM, and circuit management.
 - Windows-account-only encryption as the primary model for notes or repositories.
 - Corporate key management, password recovery, password vaults, secure sharing between users, or cloud encryption.

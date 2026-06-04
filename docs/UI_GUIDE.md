@@ -2,19 +2,20 @@
 
 ## Visual Direction
 
-RepoNotes should feel like a premium dark desktop productivity app, closer to Obsidian or VS Code in density and workflow focus than to a marketing website or generic form UI.
+RepoNotes should feel like a premium dark technical documentation workspace, closer to Obsidian or VS Code in density and workflow focus than to a marketing website or generic form UI.
 
 ## vNext Definitive UI Direction
 
-RepoNotes vNext uses the approved dark premium reference image as the definitive visual direction. The vNext UI should be rebuilt in React/Vite/TypeScript first, with Tauri added later, and should not be copied from the old Avalonia layout or the first visual spike without reconsidering each element.
+RepoNotes vNext uses the approved dark premium reference image as the definitive visual direction. The vNext UI is web-first and should be built in React/Vite/TypeScript. Tauri is no longer the main product path; it remains a possible future wrapper or alternative packaging option.
 
 Core vNext rules:
 
 - Visual Markdown Editor-first: the main editor is the product surface.
+- RepoNotes vNext is a web-first technical documentation workspace.
 - The user can type Markdown and see visual formatting while editing.
 - Clean Markdown remains the saved/exportable source format.
 - The current vNext visual editor is a controlled Milkdown/Crepe spike with Markdown kept in memory and no visible generated-Markdown debug panel by default.
-- Do not treat the editor spike as final until Markdown round-trip, frontmatter boundaries, bundle size, and Tauri startup impact are validated.
+- Do not treat the editor spike as final until Markdown round-trip, frontmatter boundaries, bundle size, and browser startup impact are validated.
 - No separate Preview mode in the initial vNext MVP.
 - No Split mode as the main initial MVP flow.
 - No primary Save button; autosave with debounce is the default.
@@ -26,30 +27,28 @@ Core vNext rules:
 - A left rail with icons provides compact access to workspace areas.
 - Trash remains visible and clear, but not dominant.
 - The writing area gets maximum horizontal and vertical space.
+- Do not simulate native desktop window controls in the web workspace.
 - Every visible button must perform a real action. If it does not work yet, remove it instead of showing a placeholder.
 - The old Avalonia app is a functional reference/legacy MVP; it is not the vNext UI source.
 - The old React visual spike is a reference artifact only; it is not the vNext product base.
 
 ## Layout
 
-- Main window uses a three-row grid:
-  - Integrated custom window bar.
+- The web workspace uses a compact app shell:
   - Main content.
-  - Status bar.
+  - Optional status/footer area when useful.
 - Main content uses a three-column grid:
   - Compact sidebar.
   - Flexible editor-first center column.
-  - Compact preview/info panel.
+  - Compact Info/context panel.
 - The vNext Activity Bar / Left Rail is a fixed `52px` strip on the far left, visually separated from the repository sidebar.
 - The left repository sidebar and the right info/context panel can be collapsed and expanded to improve usable writing space on smaller screens.
 - Collapsed side panels keep a narrow rail with an explicit re-open control so the state is never irreversible.
-- RepoNotes uses client-side custom window chrome in Avalonia. The native Windows title bar must not appear as a duplicated separate bar.
-- The custom window controls are real controls wired to the `Window`: minimize sets `WindowState.Minimized`, maximize/restore toggles `WindowState`, and close calls `Close()`.
-- The window remains resizable and includes a compact draggable area in the integrated bar.
+- Future mobile layouts should use drawers, bottom sheets, and mode-specific panels. Do not squeeze the full desktop/workspace grid into a phone viewport.
 
 ## Top Area
 
-- The app has a compact integrated window bar for client-side chrome only; it is not a heavy global app top bar.
+- The app should not use a heavy global top bar. Keep top chrome minimal and workspace-oriented.
 - The Activity Bar / Left Rail contains the small RepoNotes logo at the top, primary workspace icons below it, and utility icons near the bottom.
 - The initial rail icons are Repository, Search, Links/Graph, Tags, Tasks, Templates, Entities, Trash, Settings, and Profile.
 - Repository is active by default. Repository, Search, Trash, and Settings may change the local active rail state in the React shell.
@@ -67,7 +66,7 @@ Core vNext rules:
 - Trash actions live in the lower-left sidebar area as a compact picker plus small action buttons for restore, permanent delete, and empty trash.
 - Permanent delete controls must remain visually secondary and should gain explicit confirmation UX in a future round.
 - The only persistent top area inside the main content is the compact document context bar above the editor.
-- The document context bar shows real open note tabs, Editor/Preview/Split mode, split presets when applicable, and note-scoped actions.
+- The document context bar shows real open note tabs and note-scoped actions.
 - The note title belongs to the active tab as navigation identity and to the first editable block inside the document as document content. Do not duplicate it in a separate editor header.
 - The full note path is secondary information and should live in the tab tooltip, the right-side Info panel, and the status bar. Avoid showing a large breadcrumb in the central editor header.
 - Note tabs are functional, not decorative: selecting a note opens a tab or activates the existing tab; duplicate tabs for the same note are not created.
@@ -76,11 +75,10 @@ Core vNext rules:
 - Each tab has a small close action aligned inside the tab. Closing a dirty tab saves first; if saving fails, the tab stays open and the status shows the save error.
 - Open note tabs expose a compact context menu for close, close others, close all, reveal in explorer, and copy path.
 - Switching between tabs must preserve unsaved edits in each tab and must not auto-save just because focus changed.
-- The central document area has a clear `Editor` / `Preview` / `Split` mode toggle. `Editor` shows the plain Markdown TextBox and formatting toolbar; `Preview` shows the rendered Markdown in the main workspace and hides the formatting toolbar; `Split` shows the Markdown editor and rendered preview side by side.
-- The top editor row should use compact tabs on the left, flexible empty space in the middle, and fixed-width actions on the right. `Editor`, `Preview`, `Split`, split presets, and `Salvar` must remain aligned and must not overlap tabs.
+- The vNext central document area uses the Visual Markdown editor directly. Do not add separate Preview, Split, or primary Save controls to the initial vNext MVP.
+- The top editor row should use compact tabs on the left, flexible empty space in the middle, and only real note-scoped actions on the right.
 - Disabled future actions should not pollute the editor top row. Remove inactive `Info`/`Tags` style actions until they have real behavior; formatting commands stay in the editor toolbar.
-- The app must not draw fake window controls. When custom chrome is used, minimize, maximize/restore, close, drag, and resize behavior must be real and validated.
-- The integrated window bar should stay around `34px` high, dark, quiet, and visually secondary to the editor.
+- The web workspace must not draw fake minimize, maximize, close, drag, or resize controls. If a future desktop wrapper adds custom chrome, those controls must be real and validated in that wrapper.
 
 ## Metadata Panel
 
@@ -128,9 +126,10 @@ Core vNext rules:
 - The initial MVP may show detected links as a compact list in the preview/info panel instead of inline rich text inside paragraphs.
 - Clicking a resolved internal link should open the target note when possible; broken links must not auto-create notes in this round.
 
-## Rich Markdown Preview
+## Legacy Avalonia Markdown Preview
 
-- The preview renders Markdown through native Avalonia controls, not WebView.
+- This section applies to the legacy Avalonia MVP and is not the primary vNext editing model.
+- The legacy preview renders Markdown through native Avalonia controls, not WebView.
 - The primary rendered preview belongs in the central document area behind the `Preview` mode, not as the main content of the right sidebar.
 - Split View belongs to the Markdown Power Editor path: it keeps Markdown source editing on the left and native rendered preview on the right.
 - Split View must use the same preview block pipeline as Preview mode; do not duplicate Markdown rendering logic in XAML or ViewModel.
@@ -174,12 +173,14 @@ Core vNext rules:
 - Empty names and Windows-invalid characters should be rejected in the dialog when possible; storage still remains responsible for safe file names and avoiding overwrites.
 - If a prompt is unavailable, the app may fall back to the previous automatic name so file operations remain usable.
 
-## Current Density Targets
+## Legacy Avalonia Density Targets
+
+These targets describe the legacy Avalonia MVP. vNext should reuse the density intent, not the desktop/window-chrome assumptions.
 
 - Sidebar: around 250px to 260px, currently `252px`.
-- Preview panel: around 320px to 340px, currently `326px`.
+- Preview/Info panel: around 320px to 340px, currently `326px`.
 - Collapsed side rail: currently `42px` for each side panel.
-- Integrated window bar: compact, currently `34px`, used only for drag/window controls and very light context.
+- Integrated window bar: legacy Avalonia-only, compact, currently `34px`, used only for drag/window controls and very light context.
 - Status bar: compact, around 38px to 42px, currently `38px`.
 - Editor column gets priority for all extra horizontal space.
 - Editor chrome should stay compact: document context bar around `34px`, no separate title row, and formatting toolbar around `34px` to `40px`.
@@ -208,8 +209,8 @@ Core vNext rules:
 - Avoid default gray Windows-looking buttons.
 - Keep the editor visually dominant.
 - Prefer dense, legible controls over showcase-sized controls.
-- Keep preview useful but visually secondary; it should not compete with the writing surface.
-- Preview should render the current note Markdown through native dark Avalonia blocks rather than static mock text; code and simple tables may use compact monospace panels.
+- In the legacy Avalonia MVP, keep preview useful but visually secondary; it should not compete with the writing surface.
+- Legacy Avalonia preview should render the current note Markdown through native dark blocks rather than static mock text; code and simple tables may use compact monospace panels.
 - Prefer compact toolbar groups with subtle dividers over large standalone buttons.
 - Keep global actions out of a top bar; repository selection/search belong in the sidebar and settings belongs in the lower-left sidebar toolbar.
 - Centralize reusable colors and control styling in `RepoNotes.App/Styles/AppTheme.axaml`.
