@@ -1672,3 +1672,30 @@
 **Observacoes:** Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
 
 **Proximo passo sugerido:** Validar a mesma composicao em alturas menores e, se necessario, ajustar responsivamente o padding interno do ProseMirror sem reintroduzir molduras.
+
+## 2026-06-04 15:47:11 -03:00
+
+**Objetivo da rodada:** Validar Markdown round-trip e fronteira de frontmatter no editor visual, ajustando a TopBar para a direcao full web workspace.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/components/layout/TopBar.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `apps/reponotes-vnext/src/data/mockRepository.ts`
+- `apps/reponotes-vnext/README.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O mock principal passou a incluir frontmatter YAML com `title`, `type`, `status`, `owner` e `tags`. O `VisualMarkdownEditor` agora separa frontmatter do corpo Markdown antes de montar o Milkdown/Crepe, entrega apenas o corpo ao editor visual e recompõe o Markdown gerado em memoria com o frontmatter preservado. A TopBar deixou de desenhar controles fake de minimizar/maximizar/fechar e passou a mostrar elementos de workspace web: `infra-docs`, `Private workspace` e chip discreto de usuario/settings.
+
+**Resultado do install:** `npm install` em `apps/reponotes-vnext` executado com sucesso; dependencias atualizadas, 268 pacotes auditados, 0 vulnerabilidades.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror continua presente: chunk principal de aproximadamente `1,690.91 kB` minificado (`534.41 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; HTTP 200 confirmado.
+
+**Validacao visual/round-trip:** No navegador embutido, o DOM confirmou `.milkdown-shell .ProseMirror` com `contenteditable="true"`, `data-has-frontmatter="true"`, `data-frontmatter-boundary="body-only-editor"` e `data-generated-markdown-starts-with-frontmatter="true"`. O corpo visual contem o heading `Application Documentation Pack`, checklist, link `LibreNMS` e tabela, mas nao contem `title: Application Documentation Pack` nem delimitadores YAML `---`. A TopBar nao possui `.window-controls` e mostra `infra-docs`, `Private workspace` e `RA`.
+
+**Observacoes:** Permanecem itens locais antigos fora do escopo em `sample-repository`: `sample-repository/Projetos/Roadmap.md` deletado, `sample-repository/.reponotes-trash/` nao rastreado e `sample-repository/Nova nota.md` nao rastreado. Eles nao foram alterados nem incluidos no commit.
+
+**Proximo passo sugerido:** Adicionar testes automatizados pequenos para `splitMarkdownFrontmatter`/recomposicao de Markdown e avaliar como expor o Markdown gerado para autosave sem criar painel debug visivel.

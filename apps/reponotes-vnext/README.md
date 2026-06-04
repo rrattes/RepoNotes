@@ -1,6 +1,6 @@
 # RepoNotes vNext
 
-RepoNotes vNext is the clean React/Vite/TypeScript foundation for the next main version of RepoNotes. It is a local-first operational documentation editor direction, planned for a future Tauri desktop shell.
+RepoNotes vNext is the clean React/Vite/TypeScript foundation for the next main version of RepoNotes. It is a web-first operational documentation workspace direction with mock data and no backend yet.
 
 This app does not reuse or promote the old visual spike directly. It is a new product shell with mock data and no real filesystem integration.
 
@@ -14,7 +14,7 @@ This app does not reuse or promote the old visual spike directly. It is a new pr
 - Milkdown/Crepe visual Markdown editor
 - lucide-react icons for the Activity Bar / Left Rail
 
-Tauri is intentionally not initialized in this round.
+Tauri is not part of the main vNext path. It may be revisited later only as an optional wrapper.
 
 ## How To Run
 
@@ -33,8 +33,8 @@ http://127.0.0.1:5174/
 ## Implemented In This Round
 
 - Clean vNext folder structure.
-- Dark premium desktop-style shell.
-- Top bar with RepoNotes vNext identity, command/search box, and mocked window controls.
+- Dark premium web workspace shell.
+- Top bar with RepoNotes vNext identity, command/search box, repository indicator, private workspace status, and user/settings placeholder.
 - Left Activity Bar with real lucide icons, active state, disabled future items, and lower utility actions.
 - Repository navigation sidebar with mock tree and visible trash summary.
 - Compact note tabs with active-tab state.
@@ -50,17 +50,19 @@ The current editor surface uses `@milkdown/crepe` as a controlled Visual Markdow
 
 The main UI is intentionally product-like: tabs identify the open note for navigation, while the visible document title is the first editable block inside the Milkdown document. The center area does not repeat tags, owner, status, or a second title above the editor; metadata belongs in the Info panel. Generated Markdown remains available internally through editor state and Crepe APIs for future autosave/export work, but it is not shown in the primary user experience.
 
+The current spike validates a frontmatter boundary: YAML frontmatter at the top of the source Markdown is preserved in memory and recombined with generated Markdown, but Milkdown receives only the body Markdown so frontmatter does not appear as rich editable document content.
+
 This validates that:
 
 - A visual editor can load clean Markdown.
 - Headings, blockquotes, tables, checklists, and fenced code blocks can be displayed as editable visual content.
+- Frontmatter can stay outside the visual document body.
 - Markdown can be read back from the editor in memory.
 
 Current limitations:
 
 - No filesystem integration.
 - No autosave.
-- No frontmatter boundary handling.
 - No Tauri shell.
 - No protected notes.
 - No visible Markdown debug panel by default.
@@ -74,14 +76,14 @@ Current limitations:
 - Activity Bar sections beyond Repository/Search/Trash/Settings.
 - Visual Markdown editor persistence.
 - Autosave status.
-- Window controls.
+- User/settings placeholder.
 - Info panel metadata.
 - Backlinks and actions.
 
 ## Not Implemented Yet
 
 - Final Visual Markdown editor architecture.
-- Tauri shell.
+- Backend API and storage service.
 - Filesystem access.
 - Persistence.
 - Autosave logic.
@@ -92,6 +94,6 @@ Current limitations:
 
 ## Next Steps
 
-1. Validate Milkdown/Crepe Markdown round-trip quality with frontmatter and larger technical notes.
-2. Tauri shell.
-3. Filesystem MVP.
+1. Validate Milkdown/Crepe Markdown round-trip quality with larger technical notes.
+2. Define `RepositoryService` / `StorageService` contracts.
+3. Backend API + SQLite MVP for localhost/private web usage.

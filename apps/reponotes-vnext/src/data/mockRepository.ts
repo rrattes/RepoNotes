@@ -1,27 +1,35 @@
 import type { MockNote, NoteTab, RailItemId, RepositoryNode } from "../types/reponotes";
 
-export const visualMarkdownSpikeInitialMarkdown = `# Application Documentation Pack
+export const visualMarkdownSpikeInitialMarkdown = `---
+title: Application Documentation Pack
+type: application-pack
+status: draft
+owner: Amer - Monitoring & Tools
+tags:
+  - application
+  - la4
+  - ops
+---
 
-> Este pacote organiza a documentacao tecnica operacional de uma aplicacao, incluindo visao geral, arquitetura, operacao, monitoramento, RACI e runbooks.
+# Application Documentation Pack
 
-## 1. Visao Geral
+> Este pacote organiza a documentação técnica operacional de uma aplicação.
 
-O objetivo deste documento e manter uma fonte local-first e exportavel para a documentacao da aplicacao.
+## Checklist
 
-## 2. Estrutura do Pack
+- [x] Owner definido
+- [ ] RACI revisada
+
+## Links
+
+Veja [[10-RACI]] e [LibreNMS](https://www.librenms.org).
+
+## Tabela
 
 | Documento | Objetivo | Status |
 |---|---|---|
-| 00-Overview | Visao geral da aplicacao | Ready |
-| 05-Monitoring | Sinais, alertas e dashboards | Draft |
-| 10-RACI | Responsabilidades operacionais | Missing |
-
-## 3. Checklist de Prontidao
-
-- [x] Owner definido
-- [x] Monitoramento documentado
-- [ ] Runbook critico criado
-- [ ] RACI revisada
+| 00-Overview | Visão geral | Ready |
+| 10-RACI | Responsabilidades | Missing |
 
 \`\`\`powershell
 dotnet test

@@ -8,13 +8,50 @@ type VisualMarkdownEditorProps = {
   note: MockNote;
 };
 
+type MarkdownParts = {
+  body: string;
+  frontmatter: string;
+};
+
+const frontmatterPattern = /^---\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/;
+
+function splitMarkdownFrontmatter(markdown: string): MarkdownParts {
+  const match = markdown.match(frontmatterPattern);
+
+  if (!match) {
+    return {
+      body: markdown,
+      frontmatter: ""
+    };
+  }
+
+  return {
+    body: markdown.slice(match[0].length),
+    frontmatter: match[0].trimEnd()
+  };
+}
+
+function combineMarkdown(frontmatter: string, body: string) {
+  if (!frontmatter) {
+    return body;
+  }
+
+  return `${frontmatter}\n\n${body}`;
+}
+
 export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps) {
   const editorRootRef = useRef<HTMLDivElement | null>(null);
   const crepeRef = useRef<Crepe | null>(null);
-  const [markdown, setMarkdown] = useState(note.initialMarkdown);
+  const [markdownParts, setMarkdownParts] = useState(() => splitMarkdownFrontmatter(note.initialMarkdown));
+  const [markdown, setMarkdown] = useState(() => {
+    const initialParts = splitMarkdownFrontmatter(note.initialMarkdown);
+    return combineMarkdown(initialParts.frontmatter, initialParts.body);
+  });
 
   useEffect(() => {
-    setMarkdown(note.initialMarkdown);
+    const nextParts = splitMarkdownFrontmatter(note.initialMarkdown);
+    setMarkdownParts(nextParts);
+    setMarkdown(combineMarkdown(nextParts.frontmatter, nextParts.body));
   }, [note.id, note.initialMarkdown]);
 
   useEffect(() => {
@@ -28,7 +65,7 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
 
     const crepe = new Crepe({
       root,
-      defaultValue: note.initialMarkdown,
+      defaultValue: markdownParts.body,
       features: {
         [Crepe.Feature.AI]: false,
         [Crepe.Feature.ImageBlock]: false,
@@ -44,13 +81,13 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
 
     crepe.on((listener) => {
       listener.markdownUpdated((_, nextMarkdown) => {
-        setMarkdown(nextMarkdown);
+        setMarkdown(combineMarkdown(markdownParts.frontmatter, nextMarkdown));
       });
     });
 
     crepeRef.current = crepe;
     crepe.create().then(() => {
-      setMarkdown(crepe.getMarkdown());
+      setMarkdown(combineMarkdown(markdownParts.frontmatter, crepe.getMarkdown()));
     }).catch((error: unknown) => {
       console.error("Failed to create Milkdown editor", error);
     });
@@ -61,13 +98,16 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
         console.error("Failed to destroy Milkdown editor", error);
       });
     };
-  }, [note.id, note.initialMarkdown]);
+  }, [note.id, note.initialMarkdown, markdownParts.body, markdownParts.frontmatter]);
 
   return (
     <article
       className="visual-editor visual-editor-main"
       aria-label="visual markdown editor"
       data-generated-markdown-length={markdown.length}
+      data-has-frontmatter={markdownParts.frontmatter ? "true" : "false"}
+      data-frontmatter-boundary={markdownParts.frontmatter ? "body-only-editor" : "none"}
+      data-generated-markdown-starts-with-frontmatter={markdown.startsWith("---\n") ? "true" : "false"}
     >
       <section className="milkdown-shell" aria-label="Milkdown visual editor">
         <div ref={editorRootRef} />

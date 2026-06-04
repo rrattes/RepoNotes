@@ -9,10 +9,12 @@ export default function TopBar() {
         <span>Abrir comando...</span>
         <kbd>Ctrl K</kbd>
       </div>
-      <div className="window-controls" aria-label="mocked window controls">
-        <span />
-        <span />
-        <span className="close" />
+      <div className="topbar-actions" aria-label="workspace actions">
+        <span className="workspace-pill">infra-docs</span>
+        <span className="security-pill">Private workspace</span>
+        <button type="button" className="user-chip" aria-label="User and settings">
+          RA
+        </button>
       </div>
     </header>
   );
