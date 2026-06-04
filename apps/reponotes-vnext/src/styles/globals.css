@@ -430,6 +430,17 @@ kbd {
   grid-template-rows: minmax(0, 1fr);
   gap: 0;
   padding: 0;
+  --editor-content-max-width: 980px;
+  --editor-padding-top: 18px;
+  --editor-padding-right: 56px;
+  --editor-padding-bottom: 72px;
+  --editor-padding-left: 44px;
+  --editor-body-font-size: 15px;
+  --editor-body-line-height: 25.5px;
+  --editor-title-font-size: 30px;
+  --editor-title-line-height: 36px;
+  --editor-title-margin: 20px 0;
+  --editor-paragraph-margin: 15px 0;
 }
 
 .editor-gutter {
@@ -465,59 +476,92 @@ kbd {
 }
 
 .milkdown-shell [data-milkdown-root] {
+  width: 100%;
   min-height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .milkdown-shell .milkdown {
+  width: 100%;
   min-height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.milkdown-shell .ProseMirror {
-  max-width: 980px;
+.milkdown-shell .ProseMirror,
+.milkdown-shell .ProseMirror:focus,
+.milkdown-shell .ProseMirror.ProseMirror-focused,
+.milkdown-shell .ProseMirror-focused {
+  width: min(100%, var(--editor-content-max-width));
+  max-width: var(--editor-content-max-width);
   min-height: 100%;
   margin: 0 auto 0 0;
-  padding: 18px min(56px, 5vw) 72px 44px;
+  padding: var(--editor-padding-top) var(--editor-padding-right) var(--editor-padding-bottom) var(--editor-padding-left);
+  border: 0;
   outline: none;
+  box-sizing: border-box;
   color: var(--text);
   caret-color: var(--accent);
-  font-size: 15px;
-  line-height: 1.7;
+  font-size: var(--editor-body-font-size);
+  line-height: var(--editor-body-line-height);
+  transform: none;
 }
 
 .milkdown-shell .ProseMirror h1,
 .milkdown-shell .ProseMirror h2,
 .milkdown-shell .ProseMirror h3 {
   color: #f8fafc;
-  line-height: 1.2;
-}
-
-.milkdown-shell .ProseMirror h1 {
-  font-size: 30px;
-}
-
-.milkdown-shell .ProseMirror h1:first-child {
-  margin-top: 0;
-  margin-bottom: 22px;
-  color: #ffffff;
-  font-size: clamp(32px, 2.7vw, 42px);
-  font-weight: 740;
-  letter-spacing: 0;
-  line-height: 1.1;
   transform: none;
 }
 
-.milkdown-shell .ProseMirror-focused h1:first-child,
-.milkdown-shell .ProseMirror h1:first-child:focus,
-.milkdown-shell .ProseMirror h1:first-child.ProseMirror-selectednode,
-.milkdown-shell .ProseMirror .ProseMirror-selectednode h1:first-child {
-  margin-top: 0 !important;
-  margin-bottom: 22px !important;
-  font-size: clamp(32px, 2.7vw, 42px) !important;
-  line-height: 1.1 !important;
+.milkdown-shell .ProseMirror p,
+.milkdown-shell .ProseMirror-focused p,
+.milkdown-shell .ProseMirror p:focus,
+.milkdown-shell .ProseMirror p.ProseMirror-selectednode {
+  margin: var(--editor-paragraph-margin) !important;
+  padding: 0 !important;
+  border-width: 0 !important;
+  box-sizing: border-box;
+  font-size: var(--editor-body-font-size) !important;
+  line-height: var(--editor-body-line-height) !important;
   transform: none !important;
 }
 
-.milkdown-shell .ProseMirror-selectednode {
+.milkdown-shell .ProseMirror h1,
+.milkdown-shell .ProseMirror h1:first-child,
+.milkdown-shell .ProseMirror h1:first-of-type,
+.milkdown-shell .ProseMirror-focused h1,
+.milkdown-shell .ProseMirror h1:focus,
+.milkdown-shell .ProseMirror h1.ProseMirror-selectednode {
+  margin: var(--editor-title-margin) !important;
+  padding: 0 !important;
+  border-width: 0 !important;
+  box-sizing: border-box;
+  color: #ffffff;
+  font-size: var(--editor-title-font-size) !important;
+  font-weight: 740;
+  letter-spacing: 0;
+  line-height: var(--editor-title-line-height) !important;
+  transform: none !important;
+}
+
+.milkdown-shell .ProseMirror h1:first-of-type {
+  margin-top: 0 !important;
+  margin-bottom: 22px !important;
+}
+
+.milkdown-shell .ProseMirror-selectednode,
+.milkdown-shell .ProseMirror-focused .ProseMirror-selectednode {
+  margin-left: inherit;
+  margin-right: inherit;
+  padding-left: inherit;
+  padding-right: inherit;
+  border-width: 0 !important;
+  outline: 1px solid rgba(99, 102, 241, 0.55);
+  outline-offset: 2px;
   transform: none !important;
 }
 

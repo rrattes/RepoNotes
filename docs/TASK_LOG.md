@@ -1786,3 +1786,24 @@
 **Pendencias:** Adicionar runner de testes frontend e cobrir `markdownFrontmatter.ts` com unit tests reais assim que a estrategia de teste do vNext for escolhida. A gutter real/sincronizada por blocos/linhas do ProseMirror foi registrada no roadmap como backlog futuro.
 
 **Proximo passo sugerido:** Definir o contrato de autosave em memoria e o limite inicial de `StorageService`/`RepositoryService` para receber Markdown limpo recomposto sem acoplar a UI ao backend.
+
+## 2026-06-04 16:11:16 -03:00
+
+**Objetivo da rodada:** Corrigir layout shift/mudanca de margem do editor visual quando o foco alterna entre titulo, texto e estado sem foco.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/TASK_LOG.md`
+
+**Causa provavel encontrada:** O tema do Crepe/Milkdown ainda influenciava a geometria de blocos internos, e o seletor local `h1:first-child` era fragil diante da estrutura gerada pelo ProseMirror. Com isso, margens/tamanhos computados do H1 e blocos podiam variar entre estados de foco/seleção ou ficar sujeitos a estilos do tema.
+
+**Resumo da correcao CSS:** Foram definidas variaveis fixas para largura maxima, padding do documento, fonte/line-height do corpo e geometria do titulo. O box model de `[data-milkdown-root]`, `.milkdown`, `.ProseMirror`, `.ProseMirror-focused`, paragrafo, H1 e `.ProseMirror-selectednode` foi travado para impedir mudancas de margin, padding, border-width, transform, font-size e line-height durante foco/seleção. O H1 agora usa regras estaveis para `h1`, `h1:first-child`, `h1:first-of-type` e estados focados/selecionados.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O aviso conhecido de chunk grande do Crepe/CodeMirror permanece: chunk principal de aproximadamente `1,690.94 kB` minificado (`534.45 kB` gzip).
+
+**Resultado do dev server:** `npm run dev -- --port 5174` iniciou Vite em `http://127.0.0.1:5174/`; a validacao no navegador embutido acessou a URL com sucesso.
+
+**Validacao manual de foco:** A sequencia titulo, duplo clique no titulo, clique no blockquote/primeiro texto e clique fora do editor manteve as mesmas coordenadas de `.ProseMirror`, H1, blockquote, paragrafo e gutter. O H1 permaneceu em `font-size: 30px`, `line-height: 36px`, margem `0px 0px 22px`, e o documento manteve padding `18px 56px 72px 44px` em todos os estados medidos.
+
+**Proximo passo sugerido:** Validar em mais resolucoes e, se ainda aparecer algum shift manual dificil de reproduzir, inspecionar classes dinamicas especificas emitidas pelo Crepe durante composicao/seleção com uma amostra de documento maior.
