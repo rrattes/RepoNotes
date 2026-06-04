@@ -1450,3 +1450,27 @@
 **Recomendacao preliminar:** React/Vite facilita iteracao visual, densidade e responsividade mais rapidamente que XAML para prototipagem. Ainda nao justifica migracao; a melhor leitura e usar a spike como laboratorio visual e so avaliar Tauri apos uma spike tecnica de empacotamento e acesso local a arquivos.
 
 **Proximo passo sugerido:** Validar a spike manualmente em 1600x900 e 1366x768 em navegador visivel, depois decidir se vale uma segunda spike Tauri minima com janela nativa e bridge read-only para repositorio local.
+
+## 2026-06-04 10:32:57 -03:00
+
+**Objetivo da rodada:** Registrar o plano completo do RepoNotes vNext, incluindo direcao React/Vite/TypeScript, Visual Markdown Editor-first, features funcionais de diferenciacao e Password Protected Notes.
+
+**Decisao de plano vNext:** RepoNotes vNext sera reconstruido como um app React/Vite/TypeScript limpo, com Tauri posteriormente. O Avalonia fica como referencia funcional/legado. A spike visual antiga fica como referencia, nao como base de produto. O vNext sera Visual Markdown Editor-first, com Markdown limpo como formato salvo/exportavel, autosave com debounce, sem Preview separado, sem Split como modo principal inicial e sem botao Save principal.
+
+**Features adicionadas ao plano:** Application Documentation Pack, Documentation Health Score, Review Cycle / Expiration, RACI Builder, Runbook Builder, Handover Pack, Broken Links and Orphan Documentation, Lightweight Technical Entities, Confluence-ready Export e Password Protected Notes.
+
+**Arquivos alterados:**
+
+- `docs/PRODUCT.md`
+- `docs/ROADMAP.md`
+- `docs/UI_GUIDE.md`
+- `docs/ARCHITECTURE_VNEXT.md`
+- `docs/TASK_LOG.md`
+
+**Resumo das mudancas:** O produto foi reposicionado como editor local-first de documentacao tecnica operacional, focado em aplicacoes, ambientes, runbooks, RACI, handover, governanca e exportacao, nao como concorrente generico do Obsidian. O roadmap foi reorganizado em 19 fases vNext, de direcao visual ate empacotamento Windows. O guia de UI agora registra a direcao definitiva: visual dark premium aprovado, editor visual-first, Info fechado por padrao, tags no Info, rail de icones, lixeira visivel, autosave e maximo espaco de escrita. A arquitetura vNext documenta frontend React/Vite, Tauri futuro, Markdown como formato principal, estrategia de editor visual, autosave, filesystem local, lixeira, frontmatter e notas protegidas por senha.
+
+**Resultado do build/test:** Not run, documentation-only change.
+
+**Riscos:** Tentar migrar tudo de uma vez pode gerar uma reescrita fragil. Promover a spike visual diretamente pode carregar mockups e atalhos ruins para produto. WYSIWYG/Visual Markdown pode gerar Markdown ruim se a biblioteca for mal escolhida. Password Protected Notes complica busca, autosave, exportacao, links internos, lixeira e health score. O filesystem via Tauri precisa de contrato limpo. O escopo pode crescer demais se as fases nao forem respeitadas.
+
+**Proximo passo recomendado:** Criar `apps/reponotes-vnext/` limpo com React/Vite/TypeScript e layout baseado na imagem definitiva, usando mock data e sem filesystem real.

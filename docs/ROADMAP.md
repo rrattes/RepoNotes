@@ -2,100 +2,154 @@
 
 ## Current State
 
-RepoNotes has a buildable Avalonia UI MVP with MVVM view models, a dark productivity-oriented interface, a basic test project, and initial local Markdown repository loading/saving.
+RepoNotes has a functional Avalonia MVP with local Markdown files, tabs, search, tags, frontmatter, trash flows, preview, Markdown editing helpers, and tests. This version remains the functional reference and legacy baseline.
 
-## Near Term
+RepoNotes vNext will be rebuilt as a clean React/Vite/TypeScript application, with Tauri introduced after the frontend shell, editor strategy, and product direction are validated. The old visual spike in `spikes/tauri-react-visual/` is a reference artifact only, not the product base.
 
-- Keep documentation and task logs updated in the repository.
-- Improve Markdown editing ergonomics without adding complex persistence.
-- Replace static visual preview with a simple Markdown rendering path when requested.
-- Add focused UI tests or view model tests for selection/editing behavior.
-- Continue visual polish carefully; custom integrated window chrome is started/completed with real window controls.
-- Continue evolving document navigation; functional note tabs are started/completed for opening, switching, saving, and closing notes.
-- Continue the Markdown Power Editor path before WYSIWYG work; Split View is started/completed as the first step.
-- Improve workspace layout for smaller screens; collapsible left/right side panels are started/completed.
-- Improve technical-user ergonomics; context menus for explorer, tabs, and trash are started/completed.
-- Plan Visual Markdown Mode / WYSIWYG-lite only after rich preview, toolbar, tabs, and editor stability are validated.
+## vNext Product Direction
 
-## Next Product Milestones
+- Visual Markdown Editor-first.
+- Markdown remains the primary clean saved/exportable format.
+- Users can type Markdown and see visual formatting while editing.
+- No separate Preview mode in the initial vNext MVP.
+- No Split mode as the primary MVP flow.
+- Autosave with debounce.
+- No primary Save button.
+- Note name appears primarily in the tab.
+- Tags and metadata live in the Info panel.
+- Info panel is closed by default.
+- Left sidebar is for navigation only.
+- Left rail uses icons for global/workspace areas.
+- Dark premium UI based on the approved reference image.
+- Every visible button must perform a real action or be removed.
 
-1. File-backed notes
-   - Basic read/write Markdown files from a local sample repository is started.
-   - YAML frontmatter support is started for title, type, tags, status, created, and updated metadata.
-   - Initial compact UI for editing frontmatter metadata is started for `type`, `tags`, and `status`.
-   - Save feedback now distinguishes saved, changed, saving, and save error states.
-   - Functional note tabs now preserve unsaved edits per tab. Switching notes/tabs does not auto-save; closing a dirty tab, renaming, or deleting saves first and blocks the action if saving fails.
-   - Preserve folder structure in the loaded tree.
-   - Keep changes explicit and recoverable.
+## vNext Phases
 
-2. Repository navigation
-   - Load real folders and Markdown files from the configured local repository.
-   - Let the user open or switch to a local repository folder and persist the last opened repository in local settings.
-   - Basic file operations started with automatic creation, rename, and trash-based delete for Markdown notes and folders.
-   - Simple name prompts are started for creating and renaming notes/folders.
-   - Trash restore, permanent delete, and empty-trash flows are started with `.reponotes-trash` kept out of the main tree/search.
-   - Initial wiki-style internal links are started with `[[Nome da Nota]]`, title/file-name resolution, broken-link detection, and click-to-open from the preview/info panel.
-   - Opening a note from tree navigation or internal links opens a real tab or activates the existing tab without creating duplicates.
-   - Explorer, tab, and trash context menus are started/completed for common open, create, rename, close, restore, and delete workflows.
-   - Add refresh and confirmation UX for destructive trash actions.
-   - Keep mock data available for design/dev mode if useful.
+### Phase 0 — Definitive UI and Product Direction
 
-3. Technical note templates
-   - Initial code-backed templates are started for free notes, runbooks, technical handovers, incidents, scripts, prompts, meetings, checklists, applications, and servers.
-   - New note creation now uses the free-note template internally while preserving the existing simple UI.
-   - A compact sidebar UI for choosing templates is started; `Nova nota` remains the fast free-note action and `Novo por template` creates from the selected template.
-   - Future rounds may improve template selection ergonomics without adding custom template editing yet.
-   - Keep templates local, simple, and Markdown/frontmatter based; do not add marketplace, plugins, cloud, or sync.
+- Record the approved product direction and definitive UI rules.
+- Confirm that RepoNotes is an operational documentation product, not a generic Obsidian competitor.
+- Preserve Avalonia as a functional reference while planning a clean vNext implementation.
 
-4. Lightweight Technical Entities
-   - Add an incremental local entity layer for Application, Server, Network Device, Site, Environment, IP / Endpoint, Owner / Team, and Vendor / Product.
-   - Relate notes, runbooks, scripts, handovers, incidents, and project docs to one or more entities.
-   - Add future navigation and export grouped by application, site, owner, or environment.
-   - Keep scope lightweight; do not turn RepoNotes into a full NetBox replacement.
-   - Consider future NetBox import/integration after MVP, not during MVP.
+### Phase 1 — Clean React/Vite Shell
 
-5. User-Managed Encryption
-   - Add optional password-based encryption controlled by the user, independent of Windows login, PC password, domain account, or administrator permissions.
-   - Support future encryption scopes for folder, subfolder, or entire repository.
-   - Define storage format before UI implementation.
-   - Define unlock behavior and locked-state handling before advanced UI.
-   - Define how search, preview, indexing, and export behave for locked content.
-   - Define UX for lost password, making clear that encrypted content is unrecoverable if the password is lost.
-   - Evaluate backup and portability impact so encrypted content can remain local-first and repository-portable when possible.
-   - Do not use DPAPI or Windows Credential Manager as the primary model for encrypted notes/repositories.
+- Create `apps/reponotes-vnext/` as a clean React/Vite/TypeScript app.
+- Rebuild the approved dark premium layout with mock data.
+- Keep the shell free of real filesystem, storage, encryption, or Tauri code.
+- Prioritize maximum writing area, compact tabs, left icon rail, navigation sidebar, and a closed-by-default Info panel.
 
-6. Search
-   - Local in-memory text search over Markdown notes by title, file name, path, and content is started.
-   - Sidebar tag filtering from real frontmatter tags is started, including tag counts, active filter state, clear action, and combination with text search.
-   - Search feedback now includes debounce, result count, empty state, clear action, `Ctrl+K` focus, and subtle matched-note highlighting.
-   - Fast filtering in the sidebar and search box.
-   - Future encrypted/locked content must not be indexed or searched while locked.
+### Phase 2 — Visual Markdown Editor Spike
 
-7. Markdown Power Editor
-   - Render headings, paragraphs, lists, simple checklists, links, code blocks, blockquotes, and simple pipe tables from the current note Markdown.
-   - Rich inline preview is started/completed for bold, italic, bold+italic, inline code, and visual links using native Avalonia inline runs.
-   - Preview markers are cleaned up for headings, quotes, code fences, bullets, and checklists so the preview reads as rendered Markdown while the editor remains plain Markdown.
-   - Central Editor/Preview/Split mode toggle is started/completed so users can switch the main workspace between raw Markdown editing, rendered Markdown preview, and side-by-side editing/preview.
-   - Split View shows the Markdown source editor on the left and the native visual preview on the right, using the same `MarkdownPreviewService` output as Preview mode.
-   - Split View resizing is stabilized with compact layout presets (`50/50`, `60/40`, `70/30`) instead of unreliable free drag.
-   - Workspace side panels are collapsible so the central editor/preview area can gain space on smaller screens.
-   - Markdown formatting keyboard shortcuts are started/completed for bold, italic, headings, lists, checklist, code, quote, and contextual link/search behavior.
-   - A compact Command Palette is started/completed for editor modes, Markdown formatting, basic insertions, save, and safe note/folder actions.
-   - Future Split View improvements may include scroll synchronization between editor and preview and a revalidated free-drag splitter.
-   - Keep preview visually consistent with the dark UI guide.
+- Evaluate editor libraries and implementation approaches for Visual Markdown editing.
+- Confirm Markdown round-trip quality.
+- Validate headings, bold, italic, lists, checklist, quote, code, links, and frontmatter boundaries.
+- Reject approaches that generate messy Markdown or make manual Markdown editing unreliable.
 
-8. Visual Markdown Mode / WYSIWYG-lite
-   - Future milestone after the Markdown Power Editor path, including rich preview, toolbar Markdown, functional tabs, Split View, and editor save-state stability.
-   - Markdown remains the source of truth saved to local `.md` files.
-   - Markdown Mode must remain available; Visual Mode must not replace manual Markdown editing.
-   - Evaluate WebView2/editor-web as the preferred path for real WYSIWYG quality through an isolated technical spike before adding packages or runtime dependencies.
-   - If WebView2 proves too heavy for packaging or architecture, continue with native Avalonia or hybrid WYSIWYG-lite improvements.
-   - Initial scope should cover H1/H2/H3, bold, italic, bold italic, lists, checklist, quote, inline code, code block, and visual links.
-   - Frontmatter remains managed by parsing/storage and the Info panel, not edited as rich visual content.
+### Phase 3 — Tauri Desktop Shell
+
+- Wrap the clean React/Vite shell in Tauri.
+- Validate Windows window chrome, startup time, memory footprint, packaging, keyboard shortcuts, and local filesystem permission model.
+- Keep Tauri commands behind a clean contract.
+
+### Phase 4 — Local Filesystem MVP
+
+- Add local repository open/select flow.
+- Load folders and `.md` files from disk.
+- Preserve Markdown as plain files.
+- Add autosave with debounce and clear dirty/saved/error states.
+- Keep operations local-first and predictable.
+
+### Phase 5 — Core Notes Repository Features
+
+- Create, rename, move to trash, restore, and permanently delete notes/folders.
+- Keep `.reponotes` and `.reponotes-trash` out of navigation/search.
+- Add tabs, keyboard shortcuts, command palette, and context menus only when actions are real.
+
+### Phase 6 — Metadata, Tags and Info Panel
+
+- Read/write frontmatter for title, type, status, tags, created, updated, owner, review dates, and technical context.
+- Put tags in the Info panel, not as primary sidebar content.
+- Keep Info panel closed by default.
+
+### Phase 7 — Application Documentation Pack
+
+- Generate folder-pack documentation for applications by IBX/environment.
+- Include structured files for overview, technical details, architecture, operations, access/security, monitoring, backup/DR, dependencies, runbooks, incidents, RACI, and change history.
+- Ensure generated content is practical and exportable.
+
+### Phase 8 — Documentation Health Score
+
+- Score documentation completeness and freshness.
+- Detect missing required sections, missing metadata, missing owner, missing RACI, missing review date, and stale content.
+- Keep scoring transparent and actionable.
+
+### Phase 9 — Review Cycle
+
+- Add review/expiration fields and workflows.
+- Surface notes and application packs needing review.
+- Make overdue documentation visible without adding cloud reminders.
+
+### Phase 10 — RACI Builder
+
+- Provide structured RACI creation and editing.
+- Support application, environment, runbook, and process ownership views.
+- Store output in Markdown/frontmatter-friendly format.
+
+### Phase 11 — Runbook Builder
+
+- Provide structured runbook sections: purpose, prerequisites, steps, rollback, validation, escalation, owner, and review cycle.
+- Keep runbooks Markdown-first and exportable.
+
+### Phase 12 — Handover Pack
+
+- Generate handover bundles for projects, systems, applications, incidents, and operational transitions.
+- Include ownership, current state, risks, access/security notes, open actions, dependencies, and runbooks.
+
+### Phase 13 — Broken Links and Orphan Documentation
+
+- Detect broken wiki-style links and file references.
+- Detect orphan notes not connected to folders, applications, owners, tags, or entities.
+- Feed link/orphan status into Documentation Health Score.
+
+### Phase 14 — Lightweight Technical Entities
+
+- Add a local lightweight entity layer for applications, servers, network devices, sites, environments, endpoints, owner teams, vendors, and products.
+- Enrich documentation context without replacing NetBox/DCIM/IPAM.
+- Keep entity data portable and local.
+
+### Phase 15 — Confluence-ready Export
+
+- Export clean Markdown and Confluence-ready copy/paste content.
+- Include useful metadata when appropriate.
+- Do not implement Atlassian login, OAuth, or direct publishing in this phase.
+
+### Phase 16 — Password Protected Notes Design
+
+- Design password protected notes before implementation.
+- Define encryption format, unlock flow, autosave behavior, search exclusion, export requirements, links behavior, trash behavior, and health-score behavior.
+- Password must be independent of Windows, domain account, administrator permissions, DPAPI, and Windows Credential Manager.
+- If the password is lost, protected content is unrecoverable.
+
+Password Protected Notes must not be implemented before this design phase because it affects search, autosave, export, internal links, trash, metadata, and Documentation Health Score.
+
+### Phase 17 — Password Protected Notes Implementation
+
+- Implement per-note password protection first.
+- Keep protected content out of search/indexing while locked.
+- Require unlock before visual editing and export.
+- Avoid storing plaintext password or plaintext protected content in persistent caches.
+
+### Phase 18 — Windows Packaging
+
+- Build and validate Windows packaging.
+- Test installation, updates, local filesystem permissions, startup time, and data portability.
+- Confirm no cloud/login assumptions enter the product.
 
 ## Guardrails
 
-- Do not replace Avalonia UI.
-- Preserve MVVM.
+- Do not migrate all features at once.
+- Do not promote the old spike directly into product code.
+- Keep vNext clean under `apps/reponotes-vnext/`.
+- Keep Markdown as the primary format.
 - Avoid login, cloud, sync, AI, or database work unless specifically requested.
-- Prefer small commits with clear validation.
+- Prefer small, verifiable phases and commits.

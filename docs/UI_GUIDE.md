@@ -4,6 +4,30 @@
 
 RepoNotes should feel like a premium dark desktop productivity app, closer to Obsidian or VS Code in density and workflow focus than to a marketing website or generic form UI.
 
+## vNext Definitive UI Direction
+
+RepoNotes vNext uses the approved dark premium reference image as the definitive visual direction. The vNext UI should be rebuilt in React/Vite/TypeScript first, with Tauri added later, and should not be copied from the old Avalonia layout or the first visual spike without reconsidering each element.
+
+Core vNext rules:
+
+- Visual Markdown Editor-first: the main editor is the product surface.
+- The user can type Markdown and see visual formatting while editing.
+- Clean Markdown remains the saved/exportable source format.
+- No separate Preview mode in the initial vNext MVP.
+- No Split mode as the main initial MVP flow.
+- No primary Save button; autosave with debounce is the default.
+- The note title appears primarily in the tab.
+- Do not duplicate the note title as a large heading above the editor.
+- Tags live in the Info panel.
+- The Info panel is closed by default.
+- The left sidebar is for navigation only.
+- A left rail with icons provides compact access to workspace areas.
+- Trash remains visible and clear, but not dominant.
+- The writing area gets maximum horizontal and vertical space.
+- Every visible button must perform a real action. If it does not work yet, remove it instead of showing a placeholder.
+- The old Avalonia app is a functional reference/legacy MVP; it is not the vNext UI source.
+- The old React visual spike is a reference artifact only; it is not the vNext product base.
+
 ## Layout
 
 - Main window uses a three-row grid:
