@@ -1992,3 +1992,32 @@
 **Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,699.48 kB` minificado (`536.89 kB` gzip).
 
 **Proximo passo sugerido:** Implementar notes CRUD minimo sobre a API SQLite, com criacao/listagem/atualizacao de metadados antes de ligar HTTP por padrao para todos os fluxos.
+
+## 2026-06-04 22:30:10 -03:00
+
+**Objetivo da rodada:** Implementar Notes CRUD minimo sobre a API SQLite, mantendo soft delete, restore e services mock/HTTP compilando.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/server/src/index.ts`
+- `apps/reponotes-vnext/server/src/routes/notes.ts`
+- `apps/reponotes-vnext/server/src/types.ts`
+- `apps/reponotes-vnext/src/services/apiClient.ts`
+- `apps/reponotes-vnext/src/services/HttpRepositoryService.ts`
+- `apps/reponotes-vnext/src/services/HttpStorageService.ts`
+- `apps/reponotes-vnext/src/services/MockStorageService.ts`
+- `apps/reponotes-vnext/src/services/StorageService.ts`
+- `apps/reponotes-vnext/src/services/serviceRegistry.ts`
+- `docs/TASK_LOG.md`
+
+**Endpoints CRUD criados:** `POST /api/notes`, `PATCH /api/notes/:id/metadata`, `DELETE /api/notes/:id` e `POST /api/notes/:id/restore`, alem dos endpoints existentes de listagem, leitura e salvamento de conteudo.
+
+**Comportamento soft delete/restore:** `DELETE` preenche `deleted_at`, atualiza `updated_at` e registra `audit_events`. Notas deletadas deixam de aparecer em `GET /api/notes` e `GET /api/notes/:id` retorna 404. `POST /api/notes/:id/restore` limpa `deleted_at`, atualiza `updated_at` e registra auditoria. Validacao local confirmou criacao, patch de metadata, soft delete, 404 apos delete, exclusao da listagem, restore e 4 eventos de auditoria para a nota de teste.
+
+**Services atualizados:** `StorageService` ganhou `createNote`; `HttpStorageService` chama os endpoints CRUD; `MockStorageService` implementa criacao em memoria e os metodos existentes continuam mantendo fallback seguro.
+
+**Resultado do build backend:** `npm run build` em `apps/reponotes-vnext/server` executado com sucesso.
+
+**Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,701.01 kB` minificado (`537.24 kB` gzip).
+
+**Proximo passo sugerido:** Criar UI minima para criar nota e mover para lixeira, reaproveitando os services ja conectados ao SQLite/fallback.

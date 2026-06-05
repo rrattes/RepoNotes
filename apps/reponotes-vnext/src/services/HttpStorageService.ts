@@ -1,6 +1,7 @@
 import type { NoteMetadata } from "../types/reponotes";
-import { putJson } from "./apiClient";
-import type { SaveNoteContentResult, StorageService } from "./StorageService";
+import { deleteJson, patchJson, postJson, putJson } from "./apiClient";
+import { toMockNote } from "./HttpRepositoryService";
+import type { CreateNoteInput, SaveNoteContentResult, StorageService } from "./StorageService";
 
 type SaveNoteContentResponse = {
   noteId: string;
@@ -9,6 +10,11 @@ type SaveNoteContentResponse = {
 };
 
 class HttpStorageService implements StorageService {
+  async createNote(input: CreateNoteInput) {
+    const note = await postJson<CreateNoteInput, Parameters<typeof toMockNote>[0]>("/api/notes", input);
+    return toMockNote(note);
+  }
+
   async saveNoteContent(noteId: string, markdown: string): Promise<SaveNoteContentResult> {
     const result = await putJson<{ markdown: string }, SaveNoteContentResponse>(
       `/api/notes/${encodeURIComponent(noteId)}/content`,
@@ -22,16 +28,23 @@ class HttpStorageService implements StorageService {
     };
   }
 
-  async saveNoteMetadata(_noteId: string, _metadata: NoteMetadata): Promise<void> {
-    throw new Error("HTTP metadata save is not implemented yet");
+  async saveNoteMetadata(noteId: string, metadata: NoteMetadata): Promise<void> {
+    await patchJson<NoteMetadata, Parameters<typeof toMockNote>[0]>(
+      `/api/notes/${encodeURIComponent(noteId)}/metadata`,
+      metadata
+    );
   }
 
-  async moveNoteToTrash(_noteId: string): Promise<void> {
-    throw new Error("HTTP move to trash is not implemented yet");
+  async moveNoteToTrash(noteId: string): Promise<void> {
+    await deleteJson<{ deletedAt: string; noteId: string; status: "deleted" }>(
+      `/api/notes/${encodeURIComponent(noteId)}`
+    );
   }
 
-  async restoreNote(_noteId: string): Promise<void> {
-    throw new Error("HTTP restore is not implemented yet");
+  async restoreNote(noteId: string): Promise<void> {
+    await postJson<undefined, Parameters<typeof toMockNote>[0]>(
+      `/api/notes/${encodeURIComponent(noteId)}/restore`
+    );
   }
 }
 

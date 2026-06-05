@@ -25,7 +25,7 @@ export async function buildServer() {
     }
 
     reply.header("Access-Control-Allow-Headers", "Content-Type, Accept");
-    reply.header("Access-Control-Allow-Methods", "GET, PUT, OPTIONS");
+    reply.header("Access-Control-Allow-Methods", "DELETE, GET, PATCH, POST, PUT, OPTIONS");
 
     if (request.method === "OPTIONS") {
       return reply.code(204).send();

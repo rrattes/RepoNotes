@@ -57,3 +57,23 @@ export function putJson<TBody, TResponse>(path: string, body: TBody): Promise<TR
     method: "PUT"
   });
 }
+
+export function postJson<TBody, TResponse>(path: string, body?: TBody): Promise<TResponse> {
+  return requestJson<TResponse>(path, {
+    body: JSON.stringify(body ?? {}),
+    method: "POST"
+  });
+}
+
+export function patchJson<TBody, TResponse>(path: string, body: TBody): Promise<TResponse> {
+  return requestJson<TResponse>(path, {
+    body: JSON.stringify(body),
+    method: "PATCH"
+  });
+}
+
+export function deleteJson<TResponse>(path: string): Promise<TResponse> {
+  return requestJson<TResponse>(path, {
+    method: "DELETE"
+  });
+}

@@ -129,6 +129,21 @@ class FallbackRepositoryService implements RepositoryService {
 }
 
 class FallbackStorageService implements StorageService {
+  async createNote(input: Parameters<StorageService["createNote"]>[0]) {
+    if (!USE_HTTP_SERVICES || isApiUnavailable) {
+      return mockStorageService.createNote(input);
+    }
+
+    try {
+      const result = await httpStorageService.createNote(input);
+      markApiConnected();
+      return result;
+    } catch (error: unknown) {
+      markApiOfflineFallback(error);
+      return mockStorageService.createNote(input);
+    }
+  }
+
   async saveNoteContent(noteId: string, markdown: string) {
     if (!USE_HTTP_SERVICES || isApiUnavailable) {
       return mockStorageService.saveNoteContent(noteId, markdown);
@@ -145,15 +160,48 @@ class FallbackStorageService implements StorageService {
   }
 
   async saveNoteMetadata(noteId: string, metadata: Parameters<StorageService["saveNoteMetadata"]>[1]) {
-    return mockStorageService.saveNoteMetadata(noteId, metadata);
+    if (!USE_HTTP_SERVICES || isApiUnavailable) {
+      return mockStorageService.saveNoteMetadata(noteId, metadata);
+    }
+
+    try {
+      const result = await httpStorageService.saveNoteMetadata(noteId, metadata);
+      markApiConnected();
+      return result;
+    } catch (error: unknown) {
+      markApiOfflineFallback(error);
+      return mockStorageService.saveNoteMetadata(noteId, metadata);
+    }
   }
 
   async moveNoteToTrash(noteId: string) {
-    return mockStorageService.moveNoteToTrash(noteId);
+    if (!USE_HTTP_SERVICES || isApiUnavailable) {
+      return mockStorageService.moveNoteToTrash(noteId);
+    }
+
+    try {
+      const result = await httpStorageService.moveNoteToTrash(noteId);
+      markApiConnected();
+      return result;
+    } catch (error: unknown) {
+      markApiOfflineFallback(error);
+      return mockStorageService.moveNoteToTrash(noteId);
+    }
   }
 
   async restoreNote(noteId: string) {
-    return mockStorageService.restoreNote(noteId);
+    if (!USE_HTTP_SERVICES || isApiUnavailable) {
+      return mockStorageService.restoreNote(noteId);
+    }
+
+    try {
+      const result = await httpStorageService.restoreNote(noteId);
+      markApiConnected();
+      return result;
+    } catch (error: unknown) {
+      markApiOfflineFallback(error);
+      return mockStorageService.restoreNote(noteId);
+    }
   }
 }
 

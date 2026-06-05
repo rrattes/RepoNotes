@@ -1,4 +1,4 @@
-import type { MockNote, NoteMetadata } from "../types/reponotes";
+import type { DocumentRow, MockNote, NoteMetadata } from "../types/reponotes";
 import { ApiClientError, getJson } from "./apiClient";
 import type { RepositoryService, RepositorySnapshot } from "./RepositoryService";
 
@@ -9,7 +9,7 @@ type ApiNote = {
   path: string;
 };
 
-function toMockNote(note: ApiNote): MockNote {
+export function toMockNote(note: ApiNote): MockNote {
   return {
     id: note.id,
     title: note.metadata.title ?? note.id,
@@ -24,7 +24,7 @@ function toMockNote(note: ApiNote): MockNote {
     updated: note.metadata.updated ?? "",
     tags: note.metadata.tags ?? [],
     backlinks: [],
-    table: []
+    table: [] as DocumentRow[]
   };
 }
 
