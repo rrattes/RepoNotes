@@ -1,8 +1,21 @@
-export default function StatusBar() {
+import type { AutosaveStatus } from "../../types/reponotes";
+
+const autosaveStatusText: Record<AutosaveStatus, string> = {
+  changed: "Unsaved changes",
+  error: "Save error",
+  saved: "All changes saved locally",
+  saving: "Saving..."
+};
+
+type StatusBarProps = {
+  autosaveStatus: AutosaveStatus;
+};
+
+export default function StatusBar({ autosaveStatus }: StatusBarProps) {
   return (
     <footer className="status-bar">
       <span className="saved-indicator" />
-      <span>All changes saved locally</span>
+      <span>{autosaveStatusText[autosaveStatus]}</span>
       <span>infra-docs / main</span>
       <span className="status-spacer" />
       <span>842 words</span>

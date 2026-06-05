@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from "react";
 import { Crepe } from "@milkdown/crepe";
 import "@milkdown/crepe/theme/frame-dark.css";
 
-import type { MockNote } from "../../types/reponotes";
+import { mockStorageService } from "../../services/MockStorageService";
+import type { AutosaveStatus, MockNote } from "../../types/reponotes";
 import { combineMarkdownFrontmatter, splitMarkdownFrontmatter } from "./markdownFrontmatter";
 
 type VisualMarkdownEditorProps = {
   note: MockNote;
+  onAutosaveStatusChange: (status: AutosaveStatus) => void;
 };
 
 type EditorDebugOptions = {
@@ -103,12 +105,13 @@ function getLayoutDebugMeasurements(): LayoutDebugMeasurement[] {
   ];
 }
 
-export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps) {
+export default function VisualMarkdownEditor({ note, onAutosaveStatusChange }: VisualMarkdownEditorProps) {
   const editorRootRef = useRef<HTMLDivElement | null>(null);
   const crepeRef = useRef<Crepe | null>(null);
   const [debugOptions] = useState(getEditorDebugOptions);
   const [layoutMeasurements, setLayoutMeasurements] = useState<LayoutDebugMeasurement[]>([]);
   const [markdownParts, setMarkdownParts] = useState(() => splitMarkdownFrontmatter(note.initialMarkdown));
+  const [savedMarkdown, setSavedMarkdown] = useState(() => note.initialMarkdown);
   const [markdown, setMarkdown] = useState(() => {
     const initialParts = splitMarkdownFrontmatter(note.initialMarkdown);
     return combineMarkdownFrontmatter(initialParts.frontmatter, initialParts.body);
@@ -117,8 +120,11 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
   useEffect(() => {
     const nextParts = splitMarkdownFrontmatter(note.initialMarkdown);
     setMarkdownParts(nextParts);
-    setMarkdown(combineMarkdownFrontmatter(nextParts.frontmatter, nextParts.body));
-  }, [note.id, note.initialMarkdown]);
+    const recomposedMarkdown = combineMarkdownFrontmatter(nextParts.frontmatter, nextParts.body);
+    setMarkdown(recomposedMarkdown);
+    setSavedMarkdown(recomposedMarkdown);
+    onAutosaveStatusChange("saved");
+  }, [note.id, note.initialMarkdown, onAutosaveStatusChange]);
 
   useEffect(() => {
     const root = editorRootRef.current;
@@ -165,6 +171,33 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
       });
     };
   }, [note.id, note.initialMarkdown, markdownParts.body, markdownParts.frontmatter]);
+
+  useEffect(() => {
+    if (markdown === savedMarkdown) {
+      onAutosaveStatusChange("saved");
+      return;
+    }
+
+    onAutosaveStatusChange("changed");
+
+    const debounceTimer = window.setTimeout(() => {
+      onAutosaveStatusChange("saving");
+
+      mockStorageService.saveNoteContent(note.id, markdown)
+        .then((result) => {
+          setSavedMarkdown(result.markdown);
+          onAutosaveStatusChange("saved");
+        })
+        .catch((error: unknown) => {
+          console.error("Failed to autosave Markdown", error);
+          onAutosaveStatusChange("error");
+        });
+    }, 650);
+
+    return () => {
+      window.clearTimeout(debounceTimer);
+    };
+  }, [markdown, note.id, onAutosaveStatusChange, savedMarkdown]);
 
   useEffect(() => {
     if (!debugOptions.debugLayout) {

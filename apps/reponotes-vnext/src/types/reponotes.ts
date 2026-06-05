@@ -29,6 +29,17 @@ export type DocumentRow = {
   status: "Ready" | "Draft" | "Missing";
 };
 
+export type AutosaveStatus = "saved" | "changed" | "saving" | "error";
+
+export type NoteMetadata = {
+  owner?: string;
+  status?: string;
+  tags?: string[];
+  title?: string;
+  type?: string;
+  updated?: string;
+};
+
 export type MockNote = {
   id: string;
   title: string;

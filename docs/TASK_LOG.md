@@ -1856,3 +1856,29 @@
 **Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,693.85 kB` minificado (`535.17 kB` gzip).
 
 **Proximo passo sugerido:** Implementar autosave em memoria com contrato inicial de `StorageService`/`RepositoryService`.
+
+## 2026-06-04 21:06:02 -03:00
+
+**Objetivo da rodada:** Criar contratos iniciais `RepositoryService` e `StorageService` para o RepoNotes vNext, ainda usando mock/in-memory, e conectar o autosave do editor ao storage mockado.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/app/App.tsx`
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/components/layout/AppShell.tsx`
+- `apps/reponotes-vnext/src/components/layout/EditorWorkspace.tsx`
+- `apps/reponotes-vnext/src/components/layout/StatusBar.tsx`
+- `apps/reponotes-vnext/src/services/RepositoryService.ts`
+- `apps/reponotes-vnext/src/services/StorageService.ts`
+- `apps/reponotes-vnext/src/services/MockRepositoryService.ts`
+- `apps/reponotes-vnext/src/services/MockStorageService.ts`
+- `apps/reponotes-vnext/src/types/reponotes.ts`
+- `docs/TASK_LOG.md`
+
+**Contratos criados:** `RepositoryService` cobre leitura/navegacao (`getRepository`, `listNotes`, `getNoteById`, `getActiveNote`, `listTrashItems`) e `StorageService` cobre escrita/persistencia futura (`saveNoteContent`, `saveNoteMetadata`, `moveNoteToTrash`, `restoreNote`). As implementacoes atuais sao mock/in-memory, sem backend, banco, filesystem, fetch HTTP ou autenticacao.
+
+**Resumo:** O `App` passou a resolver a nota ativa pelo `MockRepositoryService`. O `VisualMarkdownEditor` recompõe `frontmatter + body`, marca alteracoes como `changed`, aplica debounce, simula `saving` e salva o Markdown recomposto no `MockStorageService`. A `StatusBar` agora exibe `All changes saved locally`, `Unsaved changes`, `Saving...` ou `Save error` conforme o estado local.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.63 kB` minificado (`535.76 kB` gzip).
+
+**Proximo passo sugerido:** Criar backend API skeleton Fastify sem integrar ainda.

@@ -1,4 +1,4 @@
-import type { MockNote } from "../../types/reponotes";
+import type { AutosaveStatus, MockNote } from "../../types/reponotes";
 import EditorToolbar from "../editor/EditorToolbar";
 import VisualMarkdownEditor from "../editor/VisualMarkdownEditor";
 import NoteTabs from "../tabs/NoteTabs";
@@ -7,6 +7,7 @@ type EditorWorkspaceProps = {
   activeNote: MockNote;
   activeNoteId: string;
   isInfoPanelOpen: boolean;
+  onAutosaveStatusChange: (status: AutosaveStatus) => void;
   onSelectNote: (noteId: string) => void;
   onToggleInfoPanel: () => void;
 };
@@ -15,6 +16,7 @@ export default function EditorWorkspace({
   activeNote,
   activeNoteId,
   isInfoPanelOpen,
+  onAutosaveStatusChange,
   onSelectNote,
   onToggleInfoPanel
 }: EditorWorkspaceProps) {
@@ -30,7 +32,7 @@ export default function EditorWorkspace({
         </button>
       </div>
       <EditorToolbar />
-      <VisualMarkdownEditor note={activeNote} />
+      <VisualMarkdownEditor note={activeNote} onAutosaveStatusChange={onAutosaveStatusChange} />
     </section>
   );
 }

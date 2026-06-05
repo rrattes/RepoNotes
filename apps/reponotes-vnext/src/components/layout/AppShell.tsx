@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { MockNote } from "../../types/reponotes";
+import type { AutosaveStatus, MockNote } from "../../types/reponotes";
 import type { RailItemId } from "../../types/reponotes";
 import EditorWorkspace from "./EditorWorkspace";
 import InfoPanel from "./InfoPanel";
@@ -12,7 +12,9 @@ import TopBar from "./TopBar";
 type AppShellProps = {
   activeNote: MockNote;
   activeNoteId: string;
+  autosaveStatus: AutosaveStatus;
   isInfoPanelOpen: boolean;
+  onAutosaveStatusChange: (status: AutosaveStatus) => void;
   onSelectNote: (noteId: string) => void;
   onToggleInfoPanel: () => void;
 };
@@ -20,7 +22,9 @@ type AppShellProps = {
 export default function AppShell({
   activeNote,
   activeNoteId,
+  autosaveStatus,
   isInfoPanelOpen,
+  onAutosaveStatusChange,
   onSelectNote,
   onToggleInfoPanel
 }: AppShellProps) {
@@ -36,12 +40,13 @@ export default function AppShell({
           activeNote={activeNote}
           activeNoteId={activeNoteId}
           isInfoPanelOpen={isInfoPanelOpen}
+          onAutosaveStatusChange={onAutosaveStatusChange}
           onSelectNote={onSelectNote}
           onToggleInfoPanel={onToggleInfoPanel}
         />
         <InfoPanel isOpen={isInfoPanelOpen} note={activeNote} onToggle={onToggleInfoPanel} />
       </section>
-      <StatusBar />
+      <StatusBar autosaveStatus={autosaveStatus} />
     </main>
   );
 }
