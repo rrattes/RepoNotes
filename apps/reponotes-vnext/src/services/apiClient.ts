@@ -11,16 +11,33 @@ export class ApiClientError extends Error {
   }
 }
 
+export class ApiClientConnectionError extends Error {
+  constructor(
+    message: string,
+    public readonly cause: unknown
+  ) {
+    super(message);
+    this.name = "ApiClientConnectionError";
+  }
+}
+
 async function requestJson<TResponse>(path: string, init?: RequestInit): Promise<TResponse> {
   const baseUrl = DEFAULT_BASE_URL.replace(/\/$/, "");
-  const response = await fetch(`${baseUrl}${path}`, {
-    ...init,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...init?.headers
-    }
-  });
+
+  let response: Response;
+
+  try {
+    response = await fetch(`${baseUrl}${path}`, {
+      ...init,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        ...init?.headers
+      }
+    });
+  } catch (error: unknown) {
+    throw new ApiClientConnectionError(`Unable to reach RepoNotes API at ${baseUrl}`, error);
+  }
 
   if (!response.ok) {
     const body = await response.text();

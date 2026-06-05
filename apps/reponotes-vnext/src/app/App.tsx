@@ -1,14 +1,24 @@
 import { useEffect, useState } from "react";
 import AppShell from "../components/layout/AppShell";
 import { noteTabs, notesById } from "../data/mockRepository";
-import { repositoryService } from "../services/serviceRegistry";
+import {
+  getServiceConnectionStatus,
+  repositoryService,
+  subscribeServiceConnectionStatus,
+  type ServiceConnectionStatus
+} from "../services/serviceRegistry";
 import type { AutosaveStatus, MockNote } from "../types/reponotes";
 
 export default function App() {
   const [activeNoteId, setActiveNoteId] = useState(noteTabs[0].id);
   const [activeNote, setActiveNote] = useState<MockNote>(notesById[activeNoteId] ?? notesById.overview);
   const [autosaveStatus, setAutosaveStatus] = useState<AutosaveStatus>("saved");
+  const [serviceConnectionStatus, setServiceConnectionStatus] = useState<ServiceConnectionStatus>(
+    getServiceConnectionStatus
+  );
   const [isInfoPanelOpen, setIsInfoPanelOpen] = useState(false);
+
+  useEffect(() => subscribeServiceConnectionStatus(setServiceConnectionStatus), []);
 
   useEffect(() => {
     let isCurrent = true;
@@ -33,6 +43,7 @@ export default function App() {
       onAutosaveStatusChange={setAutosaveStatus}
       onSelectNote={setActiveNoteId}
       onToggleInfoPanel={() => setIsInfoPanelOpen((current) => !current)}
+      serviceConnectionStatus={serviceConnectionStatus}
     />
   );
 }

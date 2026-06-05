@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { AutosaveStatus, MockNote } from "../../types/reponotes";
 import type { RailItemId } from "../../types/reponotes";
+import type { ServiceConnectionStatus } from "../../services/serviceRegistry";
 import EditorWorkspace from "./EditorWorkspace";
 import InfoPanel from "./InfoPanel";
 import LeftRail from "./LeftRail";
@@ -17,6 +18,7 @@ type AppShellProps = {
   onAutosaveStatusChange: (status: AutosaveStatus) => void;
   onSelectNote: (noteId: string) => void;
   onToggleInfoPanel: () => void;
+  serviceConnectionStatus: ServiceConnectionStatus;
 };
 
 export default function AppShell({
@@ -26,7 +28,8 @@ export default function AppShell({
   isInfoPanelOpen,
   onAutosaveStatusChange,
   onSelectNote,
-  onToggleInfoPanel
+  onToggleInfoPanel,
+  serviceConnectionStatus
 }: AppShellProps) {
   const [activeRailItem, setActiveRailItem] = useState<RailItemId>("files");
 
@@ -46,7 +49,7 @@ export default function AppShell({
         />
         <InfoPanel isOpen={isInfoPanelOpen} note={activeNote} onToggle={onToggleInfoPanel} />
       </section>
-      <StatusBar autosaveStatus={autosaveStatus} />
+      <StatusBar autosaveStatus={autosaveStatus} serviceConnectionStatus={serviceConnectionStatus} />
     </main>
   );
 }

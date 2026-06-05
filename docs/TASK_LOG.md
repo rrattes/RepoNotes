@@ -1966,3 +1966,29 @@
 **Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.64 kB` minificado (`535.78 kB` gzip).
 
 **Proximo passo sugerido:** Conectar frontend HTTP services ao backend SQLite durante uma validacao controlada, mantendo fallback/estado de erro antes de ligar HTTP por padrao.
+
+## 2026-06-04 22:21:13 -03:00
+
+**Objetivo da rodada:** Conectar os services HTTP do frontend ao backend SQLite em modo controlado, com fallback seguro para mock quando a API estiver indisponivel.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/server/src/index.ts`
+- `apps/reponotes-vnext/src/app/App.tsx`
+- `apps/reponotes-vnext/src/components/layout/AppShell.tsx`
+- `apps/reponotes-vnext/src/components/layout/StatusBar.tsx`
+- `apps/reponotes-vnext/src/services/apiClient.ts`
+- `apps/reponotes-vnext/src/services/serviceRegistry.ts`
+- `docs/TASK_LOG.md`
+
+**Comportamento mock:** Sem `VITE_REPONOTES_USE_HTTP=true`, o frontend continua usando `MockRepositoryService` e `MockStorageService`. Validado no navegador em `http://127.0.0.1:5174/`, com StatusBar exibindo `Local mock`.
+
+**Comportamento HTTP:** Com `VITE_REPONOTES_USE_HTTP=true` e backend Fastify/SQLite rodando em `127.0.0.1:3001`, o frontend carregou via API e a StatusBar exibiu `API connected`. O backend recebeu CORS local restrito a `http://127.0.0.1:5174` e `http://localhost:5174` para permitir o workspace Vite sem expor host publico.
+
+**Fallback:** Com `VITE_REPONOTES_USE_HTTP=true` e o backend parado, o app nao quebrou, caiu para mock e a StatusBar exibiu `API offline, using local mock`. O `apiClient` agora diferencia erro HTTP de erro de conexao.
+
+**Resultado do build backend:** `npm run build` em `apps/reponotes-vnext/server` executado com sucesso.
+
+**Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,699.48 kB` minificado (`536.89 kB` gzip).
+
+**Proximo passo sugerido:** Implementar notes CRUD minimo sobre a API SQLite, com criacao/listagem/atualizacao de metadados antes de ligar HTTP por padrao para todos os fluxos.
