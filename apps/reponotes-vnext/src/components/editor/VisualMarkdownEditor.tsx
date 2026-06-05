@@ -12,7 +12,6 @@ type VisualMarkdownEditorProps = {
 type EditorDebugOptions = {
   debugLayout: boolean;
   flatEditor: boolean;
-  hideGutter: boolean;
 };
 
 type LayoutDebugMeasurement = {
@@ -33,16 +32,13 @@ type LayoutDebugMeasurement = {
   y: number;
 };
 
-const editorGutterNumbers = Array.from({ length: 36 }, (_, index) => index + 1);
-
 function getEditorDebugOptions(): EditorDebugOptions {
   const isDev = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
 
   if (!isDev || typeof window === "undefined") {
     return {
       debugLayout: false,
-      flatEditor: false,
-      hideGutter: false
+      flatEditor: false
     };
   }
 
@@ -50,8 +46,7 @@ function getEditorDebugOptions(): EditorDebugOptions {
 
   return {
     debugLayout: params.get("debugLayout") === "1",
-    flatEditor: params.get("flatEditor") === "1",
-    hideGutter: params.get("hideGutter") === "1"
+    flatEditor: params.get("flatEditor") === "1"
   };
 }
 
@@ -100,7 +95,6 @@ function measureElement(element: Element | null, label: string): LayoutDebugMeas
 
 function getLayoutDebugMeasurements(): LayoutDebugMeasurement[] {
   return [
-    measureElement(document.querySelector(".editor-gutter"), "editor-gutter"),
     measureElement(document.querySelector(".milkdown-shell"), "milkdown-shell"),
     measureElement(document.querySelector(".milkdown-shell .ProseMirror"), "ProseMirror"),
     measureElement(document.querySelector(".milkdown-shell .ProseMirror h1"), "first-h1"),
@@ -211,7 +205,6 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
   const editorClassName = [
     "visual-editor visual-editor-main",
     debugOptions.debugLayout ? "debug-layout" : "",
-    debugOptions.hideGutter ? "debug-hide-gutter" : "",
     debugOptions.flatEditor ? "debug-flat-editor" : ""
   ].filter(Boolean).join(" ");
 
@@ -224,20 +217,13 @@ export default function VisualMarkdownEditor({ note }: VisualMarkdownEditorProps
       data-frontmatter-boundary={markdownParts.frontmatter ? "body-only-editor" : "none"}
       data-generated-markdown-starts-with-frontmatter={markdown.startsWith("---\n") ? "true" : "false"}
     >
-      <aside className="editor-gutter" aria-hidden="true">
-        {editorGutterNumbers.map((number) => (
-          <span key={number}>{number}</span>
-        ))}
-      </aside>
       <section className="milkdown-shell" aria-label="Milkdown visual editor">
         <div ref={editorRootRef} />
       </section>
       {debugOptions.debugLayout ? (
         <aside className="layout-debug-overlay" aria-label="Editor layout debug">
           <strong>Layout debug</strong>
-          <span>
-            hideGutter={debugOptions.hideGutter ? "1" : "0"} flatEditor={debugOptions.flatEditor ? "1" : "0"}
-          </span>
+          <span>flatEditor={debugOptions.flatEditor ? "1" : "0"}</span>
           <table>
             <thead>
               <tr>

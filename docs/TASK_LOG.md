@@ -1837,3 +1837,22 @@
 **Pendencias:** Reproduzir manualmente em `http://127.0.0.1:5174/?debugLayout=1`, comparar com `&hideGutter=1` e `&flatEditor=1`, e aplicar uma correcao CSS direcionada somente depois de identificar qual propriedade muda no momento do salto.
 
 **Proximo passo sugerido:** Usar a overlay de diagnostico no navegador onde o problema aparece, anotar a linha/propriedade que muda ao clicar no H1/paragrafo e corrigir a causa especifica em uma rodada curta.
+
+## 2026-06-04 21:01:06 -03:00
+
+**Objetivo da rodada:** Remover a gutter fake de numeracao do editor visual e registrar numeracao real como backlog futuro.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/ROADMAP.md`
+- `docs/TASK_LOG.md`
+
+**Decisao:** A gutter visual/fake foi removida para evitar uma percepcao de funcionalidade inexistente e reduzir interferencias visuais no editor. A numeracao real fica como backlog: `Real editor gutter / line numbering synchronized with ProseMirror blocks/scroll`.
+
+**Resumo:** O editor voltou a usar uma superficie unica do Milkdown/Crepe, sem coluna de numeracao simulada e sem CSS/grid criado apenas para a gutter. O titulo continua sendo o primeiro bloco editavel e o frontmatter permanece fora do corpo visual.
+
+**Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,693.85 kB` minificado (`535.17 kB` gzip).
+
+**Proximo passo sugerido:** Implementar autosave em memoria com contrato inicial de `StorageService`/`RepositoryService`.
