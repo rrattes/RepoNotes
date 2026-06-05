@@ -1882,3 +1882,28 @@
 **Resultado do build:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.63 kB` minificado (`535.76 kB` gzip).
 
 **Proximo passo sugerido:** Criar backend API skeleton Fastify sem integrar ainda.
+
+## 2026-06-04 21:10:08 -03:00
+
+**Objetivo da rodada:** Criar backend API skeleton Fastify para o RepoNotes vNext, sem integrar SQLite, auth ou frontend.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/server/package.json`
+- `apps/reponotes-vnext/server/package-lock.json`
+- `apps/reponotes-vnext/server/tsconfig.json`
+- `apps/reponotes-vnext/server/src/index.ts`
+- `apps/reponotes-vnext/server/src/routes/health.ts`
+- `apps/reponotes-vnext/server/src/routes/notes.ts`
+- `apps/reponotes-vnext/server/src/types.ts`
+- `docs/TASK_LOG.md`
+
+**Endpoints criados:** `GET /health`, `GET /api/notes`, `GET /api/notes/:id` e `PUT /api/notes/:id/content`. Todos usam dados mock/in-memory e o servidor escuta em `127.0.0.1:3001` por padrao.
+
+**Resultado do build backend:** `npm install` e `npm run build` em `apps/reponotes-vnext/server` executados com sucesso.
+
+**Health check:** `GET http://127.0.0.1:3001/health` retornou `{"service":"reponotes-api","status":"ok"}`. Os endpoints mockados de notas tambem responderam JSON localmente, incluindo `PUT /api/notes/overview/content`.
+
+**Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O frontend continua independente do backend. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.63 kB` minificado (`535.76 kB` gzip).
+
+**Proximo passo sugerido:** Definir SQLite schema/migrations ou criar um API client mock no frontend sem substituir os servicos atuais ainda.
