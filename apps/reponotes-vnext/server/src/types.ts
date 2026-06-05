@@ -14,6 +14,19 @@ export type ApiNote = {
   metadata: ApiNoteMetadata;
 };
 
+export type NoteRow = {
+  body_markdown: string;
+  created_at: string;
+  deleted_at: string | null;
+  frontmatter: string | null;
+  id: string;
+  owner: string | null;
+  status: string | null;
+  title: string;
+  type: string | null;
+  updated_at: string;
+};
+
 export type SaveNoteContentBody = {
   markdown: string;
 };

@@ -1,70 +1,101 @@
 import type { FastifyInstance } from "fastify";
-import type { ApiNote, SaveNoteContentBody } from "../types.js";
+import { randomUUID } from "node:crypto";
+import { getDatabase } from "../db/connection.js";
+import type { ApiNote, NoteRow, SaveNoteContentBody } from "../types.js";
 
-const notes = new Map<string, ApiNote>([
-  [
-    "overview",
-    {
-      id: "overview",
-      markdown: `---
-title: Application Documentation Pack
-type: application-pack
-status: draft
-owner: Amer - Monitoring & Tools
-tags:
-  - application
-  - la4
-  - ops
----
+type TagRow = {
+  name: string;
+};
 
-# Application Documentation Pack
+function combineMarkdown(frontmatter: string | null, body: string) {
+  if (!frontmatter?.trim()) {
+    return body;
+  }
 
-> Este pacote organiza a documentacao tecnica operacional de uma aplicacao.
+  return `---\n${frontmatter.trim()}\n---\n\n${body}`;
+}
 
-## Checklist
+function splitMarkdown(markdown: string) {
+  if (!markdown.startsWith("---\n")) {
+    return {
+      body: markdown,
+      frontmatter: null
+    };
+  }
 
-- [x] Owner definido
-- [ ] RACI revisada
-`,
-      metadata: {
-        owner: "Amer - Monitoring & Tools",
-        status: "draft",
-        tags: ["application", "la4", "ops"],
-        title: "Application Documentation Pack",
-        type: "application-pack",
-        updated: "2026-06-04"
-      },
-      path: "01 - Applications/IBX/LA4/Applications/LibreNMS/00-Overview.md"
-    }
-  ],
-  [
-    "raci",
-    {
-      id: "raci",
-      markdown: `# RACI
+  const closingIndex = markdown.indexOf("\n---", 4);
 
-| Activity | Responsible | Accountable | Consulted | Informed |
-|---|---|---|---|---|
-| Monitoring ownership | Platform Operations | Application Owner | SRE Lead | Service Desk |
-`,
-      metadata: {
-        owner: "Platform Operations",
-        status: "review",
-        tags: ["raci", "ops"],
-        title: "RACI",
-        type: "raci",
-        updated: "2026-06-04"
-      },
-      path: "01 - Applications/IBX/LA4/Applications/LibreNMS/10-RACI.md"
-    }
-  ]
-]);
+  if (closingIndex === -1) {
+    return {
+      body: markdown,
+      frontmatter: null
+    };
+  }
+
+  const frontmatter = markdown.slice(4, closingIndex).trim();
+  const bodyStart = closingIndex + "\n---".length;
+  const body = markdown.slice(bodyStart).replace(/^\r?\n\r?\n?/, "");
+
+  return {
+    body,
+    frontmatter
+  };
+}
+
+function notePath(row: NoteRow) {
+  return `notes/${row.title.replace(/[<>:"/\\|?*]+/g, "-")}.md`;
+}
+
+function toApiNote(row: NoteRow): ApiNote {
+  const db = getDatabase();
+  const tags = db.prepare(`
+    SELECT tags.name
+    FROM tags
+    INNER JOIN note_tags ON note_tags.tag_id = tags.id
+    WHERE note_tags.note_id = ?
+    ORDER BY tags.name
+  `).all(row.id) as TagRow[];
+
+  return {
+    id: row.id,
+    markdown: combineMarkdown(row.frontmatter, row.body_markdown),
+    metadata: {
+      owner: row.owner ?? undefined,
+      status: row.status ?? undefined,
+      tags: tags.map((tag) => tag.name),
+      title: row.title,
+      type: row.type ?? undefined,
+      updated: row.updated_at
+    },
+    path: notePath(row)
+  };
+}
+
+function getNoteRow(id: string) {
+  const db = getDatabase();
+
+  return db.prepare(`
+    SELECT *
+    FROM notes
+    WHERE id = ? AND deleted_at IS NULL
+  `).get(id) as NoteRow | undefined;
+}
 
 export async function registerNoteRoutes(server: FastifyInstance) {
-  server.get("/api/notes", async () => Array.from(notes.values()));
+  server.get("/api/notes", async () => {
+    const db = getDatabase();
+    const rows = db.prepare(`
+      SELECT *
+      FROM notes
+      WHERE deleted_at IS NULL
+      ORDER BY updated_at DESC
+    `).all() as NoteRow[];
+
+    return rows.map(toApiNote);
+  });
 
   server.get<{ Params: { id: string } }>("/api/notes/:id", async (request, reply) => {
-    const note = notes.get(request.params.id);
+    const note = getNoteRow(request.params.id);
 
     if (!note) {
       return reply.code(404).send({
@@ -73,13 +104,14 @@ export async function registerNoteRoutes(server: FastifyInstance) {
       });
     }
 
-    return note;
+    return toApiNote(note);
   });
 
   server.put<{ Body: SaveNoteContentBody; Params: { id: string } }>(
     "/api/notes/:id/content",
     async (request, reply) => {
-      const note = notes.get(request.params.id);
+      const db = getDatabase();
+      const note = getNoteRow(request.params.id);
 
       if (!note) {
         return reply.code(404).send({
@@ -95,20 +127,36 @@ export async function registerNoteRoutes(server: FastifyInstance) {
         });
       }
 
-      const updatedNote: ApiNote = {
-        ...note,
-        markdown: request.body.markdown,
-        metadata: {
-          ...note.metadata,
-          updated: new Date().toISOString()
-        }
-      };
+      const updatedAt = new Date().toISOString();
+      const markdownParts = splitMarkdown(request.body.markdown);
 
-      notes.set(note.id, updatedNote);
+      const updateNote = db.transaction(() => {
+        db.prepare(`
+          UPDATE notes
+          SET body_markdown = ?,
+              frontmatter = ?,
+              updated_at = ?
+          WHERE id = ?
+        `).run(markdownParts.body, markdownParts.frontmatter, updatedAt, note.id);
+
+        db.prepare(`
+          INSERT INTO audit_events (id, event_type, entity_type, entity_id, created_at, details_json)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run(
+          randomUUID(),
+          "note.content_saved",
+          "note",
+          note.id,
+          updatedAt,
+          JSON.stringify({ source: "api" })
+        );
+      });
+
+      updateNote();
 
       return {
         noteId: note.id,
-        savedAt: updatedNote.metadata.updated,
+        savedAt: updatedAt,
         status: "saved"
       };
     }

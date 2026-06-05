@@ -1934,3 +1934,35 @@
 **Pendencias:** `USE_HTTP_SERVICES` permanece `false` antes do commit. O backend ainda e mock/in-memory, sem SQLite, auth, fallback visual ou tratamento completo de erros na UI.
 
 **Proximo passo sugerido:** Criar SQLite schema/migrations para notas e metadados, ou evoluir o API client para fallback/estado de conexao antes de ligar HTTP por padrao.
+
+## 2026-06-04 21:24:19 -03:00
+
+**Objetivo da rodada:** Adicionar schema/migrations iniciais SQLite ao backend Fastify do RepoNotes vNext, sem auth, PostgreSQL ou integracao visual nova.
+
+**Dependencia SQLite adicionada:** `better-sqlite3` com `@types/better-sqlite3`.
+
+**Arquivos alterados:**
+
+- `.gitignore`
+- `apps/reponotes-vnext/server/package.json`
+- `apps/reponotes-vnext/server/package-lock.json`
+- `apps/reponotes-vnext/server/src/db/connection.ts`
+- `apps/reponotes-vnext/server/src/db/migrations.ts`
+- `apps/reponotes-vnext/server/src/db/schema.sql`
+- `apps/reponotes-vnext/server/src/db/seed.ts`
+- `apps/reponotes-vnext/server/src/index.ts`
+- `apps/reponotes-vnext/server/src/routes/notes.ts`
+- `apps/reponotes-vnext/server/src/types.ts`
+- `docs/TASK_LOG.md`
+
+**Tabelas criadas:** `schema_versions`, `notes`, `tags`, `note_tags` e `audit_events`. O banco padrao em desenvolvimento fica em `apps/reponotes-vnext/server/data/reponotes-dev.db`, com override por `REPNOTES_DB_PATH`; a pasta `server/data/` foi ignorada no Git.
+
+**Endpoints atualizados:** `GET /api/notes`, `GET /api/notes/:id` e `PUT /api/notes/:id/content` agora usam SQLite. O seed inicial insere `Application Documentation Pack` quando o banco esta vazio, mantendo frontmatter separado do body. `PUT` atualiza `body_markdown`, `frontmatter`, `updated_at` e registra evento simples em `audit_events`.
+
+**Resultado do build backend:** `npm run build` em `apps/reponotes-vnext/server` executado com sucesso.
+
+**Health check:** `GET http://127.0.0.1:3001/health` retornou `{"service":"reponotes-api","status":"ok"}`. `GET /api/notes` retornou a nota seed do SQLite. `PUT /api/notes/overview/content` retornou status `saved` e atualizou o banco local de desenvolvimento.
+
+**Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.64 kB` minificado (`535.78 kB` gzip).
+
+**Proximo passo sugerido:** Conectar frontend HTTP services ao backend SQLite durante uma validacao controlada, mantendo fallback/estado de erro antes de ligar HTTP por padrao.

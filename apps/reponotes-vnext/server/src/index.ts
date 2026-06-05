@@ -1,8 +1,13 @@
 import Fastify from "fastify";
+import { runMigrations } from "./db/migrations.js";
+import { seedDatabase } from "./db/seed.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerNoteRoutes } from "./routes/notes.js";
 
 export async function buildServer() {
+  runMigrations();
+  seedDatabase();
+
   const server = Fastify({
     logger: true
   });
