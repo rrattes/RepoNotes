@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import AppShell from "../components/layout/AppShell";
 import { noteTabs, notesById } from "../data/mockRepository";
-import { mockRepositoryService } from "../services/MockRepositoryService";
+import { repositoryService } from "../services/serviceRegistry";
 import type { AutosaveStatus, MockNote } from "../types/reponotes";
 
 export default function App() {
@@ -13,7 +13,7 @@ export default function App() {
   useEffect(() => {
     let isCurrent = true;
 
-    mockRepositoryService.getNoteById(activeNoteId).then((note) => {
+    repositoryService.getNoteById(activeNoteId).then((note) => {
       if (isCurrent) {
         setActiveNote(note ?? notesById.overview);
       }

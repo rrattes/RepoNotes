@@ -13,6 +13,7 @@ This app does not reuse or promote the old visual spike directly. It is a new pr
 - Mocked in-memory repository data
 - Milkdown/Crepe visual Markdown editor
 - lucide-react icons for the Activity Bar / Left Rail
+- Optional HTTP service clients for the local mock Fastify API
 
 Tauri is not part of the main vNext path. It may be revisited later only as an optional wrapper.
 
@@ -29,6 +30,24 @@ Open:
 ```text
 http://127.0.0.1:5174/
 ```
+
+## Optional Local API Skeleton
+
+The frontend still uses mock/in-memory services by default so the workspace opens without any backend process. A local Fastify API skeleton exists in `server/` for the next storage phase:
+
+```powershell
+cd apps/reponotes-vnext/server
+npm install
+npm run dev
+```
+
+Health check:
+
+```text
+http://127.0.0.1:3001/health
+```
+
+To test the frontend against the mock API later, switch `USE_HTTP_SERVICES` to `true` in `src/services/serviceRegistry.ts` while the backend is running. Keep it `false` by default until the API layer has fallback/error UX and real persistence.
 
 ## Implemented In This Round
 
@@ -85,7 +104,7 @@ Current limitations:
 - Tabs and selected note content.
 - Activity Bar sections beyond Repository/Search/Trash/Settings.
 - Visual Markdown editor persistence.
-- Autosave status.
+- Autosave status and storage calls, using mock services by default.
 - User/settings placeholder.
 - Info panel metadata.
 - Backlinks and actions.
@@ -93,10 +112,9 @@ Current limitations:
 ## Not Implemented Yet
 
 - Final Visual Markdown editor architecture.
-- Backend API and storage service.
+- Backend persistence beyond the mock Fastify API skeleton.
 - Filesystem access.
-- Persistence.
-- Autosave logic.
+- Durable persistence.
 - Real command palette.
 - Search execution.
 - Real note creation, rename, delete, restore, or export.

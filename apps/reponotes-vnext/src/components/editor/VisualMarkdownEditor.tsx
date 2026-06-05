@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Crepe } from "@milkdown/crepe";
 import "@milkdown/crepe/theme/frame-dark.css";
 
-import { mockStorageService } from "../../services/MockStorageService";
+import { storageService } from "../../services/serviceRegistry";
 import type { AutosaveStatus, MockNote } from "../../types/reponotes";
 import { combineMarkdownFrontmatter, splitMarkdownFrontmatter } from "./markdownFrontmatter";
 
@@ -183,7 +183,7 @@ export default function VisualMarkdownEditor({ note, onAutosaveStatusChange }: V
     const debounceTimer = window.setTimeout(() => {
       onAutosaveStatusChange("saving");
 
-      mockStorageService.saveNoteContent(note.id, markdown)
+      storageService.saveNoteContent(note.id, markdown)
         .then((result) => {
           setSavedMarkdown(result.markdown);
           onAutosaveStatusChange("saved");

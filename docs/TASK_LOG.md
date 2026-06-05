@@ -1907,3 +1907,30 @@
 **Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. O frontend continua independente do backend. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.63 kB` minificado (`535.76 kB` gzip).
 
 **Proximo passo sugerido:** Definir SQLite schema/migrations ou criar um API client mock no frontend sem substituir os servicos atuais ainda.
+
+## 2026-06-04 21:14:22 -03:00
+
+**Objetivo da rodada:** Adicionar API client no frontend e implementar `HttpRepositoryService`/`HttpStorageService` usando o backend Fastify mockado, mantendo mock/in-memory como padrao.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/README.md`
+- `apps/reponotes-vnext/src/app/App.tsx`
+- `apps/reponotes-vnext/src/components/editor/VisualMarkdownEditor.tsx`
+- `apps/reponotes-vnext/src/services/apiClient.ts`
+- `apps/reponotes-vnext/src/services/HttpRepositoryService.ts`
+- `apps/reponotes-vnext/src/services/HttpStorageService.ts`
+- `apps/reponotes-vnext/src/services/serviceRegistry.ts`
+- `docs/TASK_LOG.md`
+
+**Services criados:** `apiClient` usa `fetch` nativo com base URL padrao `http://127.0.0.1:3001`, `getJson`, `putJson` e erro HTTP minimo. `HttpRepositoryService` chama `GET /api/notes` e `GET /api/notes/:id`. `HttpStorageService` chama `PUT /api/notes/:id/content` para salvar Markdown recomposto.
+
+**Resumo:** O frontend passou a resolver `repositoryService` e `storageService` por um registry simples com `USE_HTTP_SERVICES=false` por padrao. Assim a UI continua funcionando sem backend, mas pode ser apontada para a API mock local durante testes. O autosave continua usando mock por padrao e, quando o flag for ativado com o backend rodando, chamara o `PUT` mockado.
+
+**Resultado do build backend:** `npm run build` em `apps/reponotes-vnext/server` executado com sucesso.
+
+**Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,695.64 kB` minificado (`535.78 kB` gzip).
+
+**Pendencias:** `USE_HTTP_SERVICES` permanece `false` antes do commit. O backend ainda e mock/in-memory, sem SQLite, auth, fallback visual ou tratamento completo de erros na UI.
+
+**Proximo passo sugerido:** Criar SQLite schema/migrations para notas e metadados, ou evoluir o API client para fallback/estado de conexao antes de ligar HTTP por padrao.
