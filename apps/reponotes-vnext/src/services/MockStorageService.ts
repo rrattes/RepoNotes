@@ -17,7 +17,15 @@ class MockStorageService implements StorageService {
   async createNote(input: CreateNoteInput): Promise<MockNote> {
     await this.simulateLatency();
 
-    const id = input.id ?? input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const baseId =
+      input.id ?? (input.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "untitled-note");
+    let id = baseId;
+    let suffix = 2;
+
+    while (notesById[id]) {
+      id = `${baseId}-${suffix}`;
+      suffix += 1;
+    }
     const now = new Date().toISOString();
     const initialMarkdown = input.frontmatter
       ? `---\n${input.frontmatter.trim()}\n---\n\n${input.bodyMarkdown ?? `# ${input.title}\n`}`

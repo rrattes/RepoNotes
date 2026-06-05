@@ -1,10 +1,10 @@
-import { repositoryTree } from "../../data/mockRepository";
-import type { RailItemId, RepositoryNode } from "../../types/reponotes";
-import type { CSSProperties } from "react";
+import type { MockNote, RailItemId } from "../../types/reponotes";
 
 type RepositorySidebarProps = {
   activeNoteId: string;
   activeRailItem: RailItemId;
+  notes: MockNote[];
+  onCreateNote: () => void;
   onSelectNote: (noteId: string) => void;
 };
 
@@ -47,7 +47,7 @@ const sidebarContext: Record<RailItemId, { label: string; title: string; descrip
   trash: {
     label: "Trash",
     title: "Trash",
-    description: "2 items"
+    description: "Hidden for now"
   },
   settings: {
     label: "Settings",
@@ -61,7 +61,13 @@ const sidebarContext: Record<RailItemId, { label: string; title: string; descrip
   }
 };
 
-export default function RepositorySidebar({ activeNoteId, activeRailItem, onSelectNote }: RepositorySidebarProps) {
+export default function RepositorySidebar({
+  activeNoteId,
+  activeRailItem,
+  notes,
+  onCreateNote,
+  onSelectNote
+}: RepositorySidebarProps) {
   const context = sidebarContext[activeRailItem];
 
   return (
@@ -74,59 +80,38 @@ export default function RepositorySidebar({ activeNoteId, activeRailItem, onSele
         <span className="local-pill">{context.description}</span>
       </section>
 
+      <button className="sidebar-action-button" onClick={onCreateNote} type="button">
+        New note
+      </button>
+
       <label className="file-search">
         <span className="sr-only">Buscar arquivo</span>
         <input placeholder="Buscar arquivo..." />
       </label>
 
-      <nav className="repository-tree" aria-label="repository tree">
-        {repositoryTree.map((node) => (
-          <TreeNode key={node.id} activeNoteId={activeNoteId} node={node} onSelectNote={onSelectNote} />
-        ))}
+      <nav className="repository-tree" aria-label="repository notes">
+        {notes.length === 0 ? (
+          <p className="sidebar-empty">No notes yet.</p>
+        ) : (
+          notes.map((note) => (
+            <button
+              className={`tree-node note ${note.id === activeNoteId ? "active" : ""}`}
+              key={note.id}
+              onClick={() => onSelectNote(note.id)}
+              title={note.path}
+              type="button"
+            >
+              <span className="tree-glyph">MD</span>
+              <span>{note.title}</span>
+            </button>
+          ))
+        )}
       </nav>
 
       <section className="trash-summary">
         <span>Trash</span>
-        <strong>2 items</strong>
+        <strong>Hidden</strong>
       </section>
     </aside>
-  );
-}
-
-function TreeNode({
-  node,
-  depth = 0,
-  activeNoteId,
-  onSelectNote
-}: {
-  node: RepositoryNode;
-  depth?: number;
-  activeNoteId: string;
-  onSelectNote: (noteId: string) => void;
-}) {
-  const isActive = node.id === activeNoteId;
-  const isNote = node.type === "note";
-
-  return (
-    <div>
-      <button
-        className={`tree-node ${node.type} ${isActive ? "active" : ""}`}
-        onClick={() => isNote && onSelectNote(node.id)}
-        style={{ "--depth": depth } as CSSProperties}
-        type="button"
-      >
-        <span className="tree-glyph">{isNote ? "MD" : "▾"}</span>
-        <span>{node.name}</span>
-      </button>
-      {node.children?.map((child) => (
-        <TreeNode
-          key={child.id}
-          activeNoteId={activeNoteId}
-          depth={depth + 1}
-          node={child}
-          onSelectNote={onSelectNote}
-        />
-      ))}
-    </div>
   );
 }

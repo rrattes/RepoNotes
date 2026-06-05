@@ -231,7 +231,7 @@ kbd {
 
 .repository-sidebar {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   gap: 10px;
   min-height: 0;
   padding: 12px;
@@ -269,6 +269,15 @@ kbd {
   font-size: 11px;
 }
 
+.sidebar-action-button {
+  height: 32px;
+  border-color: rgba(99, 102, 241, 0.34);
+  background: rgba(99, 102, 241, 0.15);
+  color: #f8fafc;
+  font-size: 12px;
+  font-weight: 650;
+}
+
 .file-search input {
   height: 34px;
   padding: 0 10px;
@@ -278,6 +287,12 @@ kbd {
 .repository-tree {
   min-height: 0;
   overflow: hidden;
+}
+
+.sidebar-empty {
+  margin: 6px 2px;
+  color: var(--text-dim);
+  font-size: 12px;
 }
 
 .tree-node {
@@ -346,7 +361,7 @@ kbd {
 
 .tabs-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 32px auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: end;
   gap: 7px;
   padding: 4px 10px 0;
@@ -387,12 +402,22 @@ kbd {
   color: #fff;
 }
 
-.new-tab-button,
-.info-toggle {
+.info-toggle,
+.note-trash-button {
   height: 28px;
   padding: 0 10px;
   margin-bottom: 3px;
   font-size: 12px;
+}
+
+.note-trash-button {
+  border-color: rgba(239, 68, 68, 0.24);
+  color: #fca5a5;
+}
+
+.note-trash-button:disabled {
+  cursor: default;
+  opacity: 0.42;
 }
 
 .editor-toolbar {
@@ -409,6 +434,27 @@ kbd {
   padding: 0 8px;
   color: var(--text-soft);
   font-size: 11px;
+}
+
+.empty-editor-state {
+  grid-row: 2 / -1;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  min-height: 0;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.empty-editor-state strong {
+  color: #f8fafc;
+  font-size: 18px;
+}
+
+.empty-editor-state span,
+.muted-copy {
+  color: var(--text-dim);
+  font-size: 12px;
 }
 
 .visual-editor {

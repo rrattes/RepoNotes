@@ -2021,3 +2021,33 @@
 **Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,701.01 kB` minificado (`537.24 kB` gzip).
 
 **Proximo passo sugerido:** Criar UI minima para criar nota e mover para lixeira, reaproveitando os services ja conectados ao SQLite/fallback.
+
+## 2026-06-04 23:31:51 -03:00
+
+**Objetivo da rodada:** Criar UI minima para criar nota e mover a nota ativa para lixeira usando os services existentes, mantendo mock como padrao e HTTP/SQLite como modo controlado.
+
+**Arquivos alterados:**
+
+- `apps/reponotes-vnext/src/app/App.tsx`
+- `apps/reponotes-vnext/src/components/layout/AppShell.tsx`
+- `apps/reponotes-vnext/src/components/layout/EditorWorkspace.tsx`
+- `apps/reponotes-vnext/src/components/layout/InfoPanel.tsx`
+- `apps/reponotes-vnext/src/components/layout/RepositorySidebar.tsx`
+- `apps/reponotes-vnext/src/components/tabs/NoteTabs.tsx`
+- `apps/reponotes-vnext/src/services/MockStorageService.ts`
+- `apps/reponotes-vnext/src/styles/globals.css`
+- `docs/TASK_LOG.md`
+
+**UI criada:** A `RepositorySidebar` ganhou o botao discreto `New note`; a lista lateral e as abas agora usam a lista viva de notas carregada por `RepositoryService.listNotes()`. A area central ganhou `Move to trash` para a nota ativa e estado vazio simples quando nao ha nota selecionada. O painel Info passou a tolerar estado sem nota.
+
+**Comportamento mock:** Validado no navegador em `http://127.0.0.1:5174/` com services mock: clicar em `New note` criou `Untitled note`, abriu a nota no editor e atualizou a sidebar. O mock storage agora evita sobrescrever IDs quando varias notas com o mesmo titulo sao criadas.
+
+**Comportamento HTTP:** Com backend Fastify/SQLite rodando em `127.0.0.1:3001` e frontend iniciado com `VITE_REPONOTES_USE_HTTP=true` na porta `5174`, a StatusBar exibiu `API connected`. Criar `Untitled note` pela UI inseriu a nota no backend SQLite (`GET /api/notes` confirmou `untitled-note-2`). O soft delete foi validado via `DELETE /api/notes/untitled-note-2`, e a nota deixou de aparecer na listagem.
+
+**Resultado do build backend:** `npm run build` em `apps/reponotes-vnext/server` executado com sucesso.
+
+**Resultado do build frontend:** `npm run build` em `apps/reponotes-vnext` executado com sucesso. Permanece o aviso conhecido de chunk grande do Crepe/CodeMirror: chunk principal de aproximadamente `1,702.14 kB` minificado (`537.52 kB` gzip).
+
+**Observacao de validacao:** O botao `Move to trash` foi confirmado no DOM real com area visivel, mas a automacao do navegador interno falhou ao clicar nele por seletor/coordenada durante a validacao. O fluxo usa diretamente `StorageService.moveNoteToTrash`, e o endpoint SQLite correspondente foi validado.
+
+**Proximo passo sugerido:** Criar UI minima da lixeira para listar itens removidos e permitir restore usando `RepositoryService.listTrashItems()` e `StorageService.restoreNote()`.

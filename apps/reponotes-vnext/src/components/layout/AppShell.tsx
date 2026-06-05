@@ -11,11 +11,14 @@ import StatusBar from "./StatusBar";
 import TopBar from "./TopBar";
 
 type AppShellProps = {
-  activeNote: MockNote;
+  activeNote: MockNote | null;
   activeNoteId: string;
   autosaveStatus: AutosaveStatus;
   isInfoPanelOpen: boolean;
+  notes: MockNote[];
   onAutosaveStatusChange: (status: AutosaveStatus) => void;
+  onCreateNote: () => void;
+  onMoveActiveNoteToTrash: () => void;
   onSelectNote: (noteId: string) => void;
   onToggleInfoPanel: () => void;
   serviceConnectionStatus: ServiceConnectionStatus;
@@ -26,7 +29,10 @@ export default function AppShell({
   activeNoteId,
   autosaveStatus,
   isInfoPanelOpen,
+  notes,
   onAutosaveStatusChange,
+  onCreateNote,
+  onMoveActiveNoteToTrash,
   onSelectNote,
   onToggleInfoPanel,
   serviceConnectionStatus
@@ -38,12 +44,20 @@ export default function AppShell({
       <TopBar />
       <section className="workspace-grid">
         <LeftRail activeRailItem={activeRailItem} onSelectRailItem={setActiveRailItem} />
-        <RepositorySidebar activeNoteId={activeNoteId} activeRailItem={activeRailItem} onSelectNote={onSelectNote} />
+        <RepositorySidebar
+          activeNoteId={activeNoteId}
+          activeRailItem={activeRailItem}
+          notes={notes}
+          onCreateNote={onCreateNote}
+          onSelectNote={onSelectNote}
+        />
         <EditorWorkspace
           activeNote={activeNote}
           activeNoteId={activeNoteId}
           isInfoPanelOpen={isInfoPanelOpen}
+          notes={notes}
           onAutosaveStatusChange={onAutosaveStatusChange}
+          onMoveActiveNoteToTrash={onMoveActiveNoteToTrash}
           onSelectNote={onSelectNote}
           onToggleInfoPanel={onToggleInfoPanel}
         />

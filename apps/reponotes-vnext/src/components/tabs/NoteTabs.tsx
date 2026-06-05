@@ -1,14 +1,15 @@
-import { noteTabs } from "../../data/mockRepository";
+import type { MockNote } from "../../types/reponotes";
 
 type NoteTabsProps = {
   activeNoteId: string;
+  notes: MockNote[];
   onSelectNote: (noteId: string) => void;
 };
 
-export default function NoteTabs({ activeNoteId, onSelectNote }: NoteTabsProps) {
+export default function NoteTabs({ activeNoteId, notes, onSelectNote }: NoteTabsProps) {
   return (
     <div className="note-tabs" role="tablist" aria-label="open notes">
-      {noteTabs.map((tab) => (
+      {notes.map((tab) => (
         <button
           key={tab.id}
           className={`note-tab ${tab.id === activeNoteId ? "active" : ""}`}
